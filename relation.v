@@ -235,6 +235,12 @@ Qed.
 Definition function (F: set) := 
   (relation F) /\ (forall a b1 b2, ⟨a, b1⟩ ∈ F /\ ⟨a, b2⟩ ∈ F -> b1 = b2).
 
+Definition fun_maps (F: set) (A: set) (B: set) :=
+  (function F) /\ (dom(F) = A) /\ (ran(F) ⊆ B).
+
+Definition onto (F: set) (A: set) (B: set) :=
+  (function F) /\ (dom(F) = A) /\ (ran(F) = B).
+
 Lemma fun_val_thm: forall F x, exists y, function F -> x ∈ dom(F) -> 
   (⟨x, y⟩ ∈ F /\ (forall y2, ⟨x, y2⟩ ∈ F -> y = y2)).
 Proof.
@@ -737,6 +743,128 @@ Proof.
     - apply (inverse_elim _ _ _ P3).
 Qed.
 
+Definition id (A: set) :=
+  (subset_ctor 
+    (fun s => exists x, s = ⟨x, x⟩)
+    (cp A A)).
+
+Lemma id_intro: forall A x, x ∈ A -> ⟨x, x⟩ ∈ id A.
+Proof.
+  intros A x P1.
+  destruct (extract_set_property (ax_subset 
+    (fun s => exists x, s = ⟨x, x⟩)
+    (cp A A)) (⟨x, x⟩)) as [_ P2].
+  apply P2.
+  split.
+  + apply (cp_intro _ _ _ _ P1 P1).
+  + exists x.
+    reflexivity.
+Qed.
+
+Lemma id_elim: forall A s, s ∈ id A -> exists x, x ∈ A /\ s = ⟨x, x⟩.
+Proof. 
+  intros A s P1.
+  destruct (extract_set_property (ax_subset 
+    (fun s => exists x, s = ⟨x, x⟩)
+    (cp A A)) s) as [P2 _].
+  destruct (P2 P1) as [P3 [x P4]].
+  destruct (cp_elim _ _ _ P3) as [a [b [P5 [_ P6]]]].
+  exists x.
+  split.
+  + rewrite P4 in P6. 
+    destruct (opair_equal_elim _ _ _ _ P6) as [P7 _].
+    rewrite P7.
+    apply P5.
+  + apply P4.
+Qed.
+    
+Lemma id_is_function: forall A, function (id A).
+Proof.
+  intros A.
+  split.
+  + intros r P1.
+    destruct (id_elim _ _ P1) as [x [_ P2]].
+    exists x.
+    exists x.
+    apply P2.
+  + intros a b1 b2 [P1 P2].
+    destruct (id_elim _ _ P1) as [x [_ P3]].
+    destruct (id_elim _ _ P2) as [y [_ P4]].
+    destruct (opair_equal_elim _ _ _ _ P3) as [P5 P6].
+    rewrite P6.
+    rewrite <- P5.
+    destruct (opair_equal_elim _ _ _ _ P4) as [P7 P8].
+    rewrite P7.
+    rewrite <- P8.
+    reflexivity.
+Qed.
+
+Lemma id_domain: forall A, A = dom(id A).
+Proof.
+  intros A.
+  apply ax_exten.
+  split.
+  + intros P1. 
+    apply domain_intro.
+    exists x.
+    apply (id_intro _ _ P1).
+  + intros P1.
+    destruct (domain_elim _ _ P1) as [y P2].
+    destruct (id_elim _ _ P2) as [z [P3 P4]].
+    destruct (opair_equal_elim _ _ _ _ P4) as [P5 _].
+    rewrite P5.
+    apply P3.
+Qed.
+
+Lemma id_range: forall A, A = ran(id A).
+Proof.
+  intros A.
+  apply ax_exten.
+  split.
+  + intros P1.
+    apply range_intro.
+    exists x.
+    apply (id_intro _ _ P1).
+  + intros P1.
+    destruct (range_elim _ _ P1) as [y P2].
+    destruct (id_elim _ _ P2) as [z [P3 P4]].
+    destruct (opair_equal_elim _ _ _ _ P4) as [_ P5].
+    rewrite P5.
+    apply P3.
+Qed.
+
+Lemma id_basic: forall A x, x ∈ A -> x = fun_val (id A) x.
+Proof.
+  intros A x P1.
+  apply fun_val_intro.
+  + apply (id_is_function A).
+  + rewrite (id_domain A) in P1.
+    apply P1.
+  + apply (id_intro _ _ P1).
+Qed.
+
+Lemma id_inverse: forall A, id A = inverse (id A).
+Proof.
+  intros A.
+  apply ax_exten.
+  intros x.
+  split.
+  + intros P1.
+    destruct (id_elim _ _ P1) as [y [_ P2]].
+    rewrite P2.
+    apply inverse_intro.
+    rewrite <- P2.
+    apply P1.
+  + intro P1.
+    destruct (inverse_is_relation (id A) x P1) as [a [b P2]].
+    rewrite P2 in P1.
+    destruct (id_elim _ _ (inverse_elim _ _ _ P1)) as [z [P3 P4]].
+    rewrite P2.
+    destruct (opair_equal_elim _ _ _ _ P4) as [P5 P6].
+    rewrite P5.
+    rewrite P6.
+    apply (id_intro _ _ P3).
+Qed.
 
 
 (* TODO classify different difition *)
