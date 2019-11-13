@@ -55,6 +55,27 @@ Proof.
   + intro P2. apply P2.
 Qed.
 
+Lemma not_equal_exist: forall A B, A <> B -> 
+  exists x, (x ∈ A /\ x ∉  B) \/ (x ∈ B /\ x ∉  A).
+Proof.
+  intros A B.
+  apply contraposition2.
+  intros P1.
+  apply ax_exten.
+  intros x.
+  split.
+  + intros P2. 
+    destruct (not_or_and _ _ (not_exists_forall_not _ _ P1 x)) as [P3 P4].
+    destruct (not_and_or _ _ P3) as [P5|P5].
+    - contradiction.
+    - apply (NN_elim _ P5). 
+  + intros P2.
+    destruct (not_or_and _ _ (not_exists_forall_not _ _ P1 x)) as [P3 P4].
+    destruct (not_and_or _ _ P4) as [P5|P5].
+    - contradiction.
+    - apply (NN_elim _ P5). 
+Qed.
+      
 Lemma subset_reduce: forall P: set -> Prop, forall A, 
   (forall x, (P x) -> x ∈ A) -> (exists B, forall y, y ∈ B <-> (P y)).
 Proof.
@@ -466,3 +487,70 @@ Proof.
 Qed.
 (*----------------------------------------------------------------------------*)
 
+(* Complement *)
+Definition complement (A: set) (B: set) :=
+  (subset_ctor (fun s => s ∉  B) A). 
+
+Lemma complement_intro: forall A B x, x ∈ A /\ x ∉  B -> x ∈ complement A B.
+Proof.
+  intros A B x [P1 P2].
+  destruct (extract_set_property (ax_subset (fun s => s ∉  B) A) x) as [_ P3].
+  apply P3.
+  apply (conj P1 P2).
+Qed.
+
+Lemma complement_elim: forall A B x, x ∈ complement A B -> x ∈ A /\ x ∉  B.
+Proof.
+  intros A B x P1.
+  destruct (extract_set_property (ax_subset (fun s => s ∉  B) A) x) as [P2 _].
+  apply (P2 P1).
+Qed.
+
+Lemma complement_inter2: forall A B, A ∩ (complement B A) = ∅.
+Proof.
+  intros A B.
+  apply ax_exten.
+  intros x.
+  split.
+  + intros P1.
+    destruct (in_inter2_in _ _ _ P1) as [P2 P3].
+    destruct (complement_elim _ _ _ P3) as [_ P4].
+    contradiction.
+  + intros P1.
+    pose (not_in_empty x).
+    contradiction.
+Qed.
+
+Lemma complement_union2: forall A B, A ∪ (complement B A) = A ∪ B.
+Proof.
+  intros A B.
+  apply ax_exten.
+  intros x.
+  split.
+  + intros P1.
+    destruct (in_union2_in _ _ _ P1) as [P2|P2].
+    - apply (in_in_union2_1 _ _ _ P2).
+    - destruct (complement_elim _ _ _ P2) as [P3 _].
+      apply (in_in_union2_2 _ _ _ P3).
+  + intros P1.
+    destruct (in_union2_in _ _ _ P1) as [P2|P2].
+    - apply (in_in_union2_1 _ _ _ P2).
+    - destruct (LEM (x ∈ A)) as [P3|P3].
+      * apply (in_in_union2_1 _ _ _ P3).
+      * apply in_in_union2_2.
+        apply complement_intro.
+        apply (conj P2 P3).
+Qed.
+
+Lemma complement_proper_subset: forall A B, A ⊆ B -> A <> B -> exists x, x ∈ complement B A.
+Proof. 
+  intros A B P1 P2.
+  destruct (not_equal_exist _ _ P2) as [x [[P3 P4]|P3]].
+  exists x.
+  + absurd (x ∈ B). 
+    - apply P4.
+    - apply (P1 _ P3).
+  + exists x.
+    apply (complement_intro _ _ _ P3).
+Qed.
+    
