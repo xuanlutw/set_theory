@@ -866,8 +866,354 @@ Proof.
     apply (id_intro _ _ P3).
 Qed.
 
+Definition const (A: set) (c: set) :=
+  cp A ({c}).
+Lemma const_intro: forall A c x, x ∈ A -> ⟨x, c⟩ ∈ const A c.
+Proof.
+  intros A c x P1.
+  apply cp_intro.
+  + apply P1.
+  + apply in_singleton.
+Qed.
+
+Lemma const_elim: forall A c s, s ∈ const A c -> 
+  exists x, x ∈ A /\ s = ⟨x, c⟩.
+Proof.
+  intros A c s P1.
+  destruct (cp_elim _ _ _ P1) as [a [b [P2 [P3 P4]]]].
+  exists a.
+  split.
+  + apply P2.
+  + rewrite (in_singleton_equal _ _ P3).
+    apply P4.
+Qed.
+
+Lemma const_is_function: forall A c, function (const A c).
+Proof.
+  intros A c.
+  split.
+  + intros x P1.
+    destruct (const_elim _ _ _ P1) as [a [P2 P3]].
+    exists a.
+    exists c.
+    apply P3.
+  + intros a b1 b2 [P1 P2].
+    destruct (const_elim _ _ _ P1) as [a1 [_ P3]].
+    destruct (const_elim _ _ _ P2) as [a2 [_ P4]].
+    destruct (opair_equal_elim _ _ _ _ P3) as [_ P5].
+    rewrite P5.
+    destruct (opair_equal_elim _ _ _ _ P4) as [_ P6].
+    symmetry.
+    apply P6.
+Qed.
+
+Lemma const_domain: forall A c, A = dom(const A c).
+Proof.
+  intros A c.
+  apply ax_exten.
+  intros x.
+  split.
+  + intros P1.
+    apply domain_intro.
+    exists c.
+    apply (const_intro _ _ _ P1).
+  + intros P1.
+    destruct (domain_elim _ _ P1) as [a P2].
+    destruct (const_elim _ _ _ P2) as [b [P3 P4]].
+    destruct (opair_equal_elim _ _ _ _ P4) as [P5 _].
+    rewrite P5.
+    apply P3.
+Qed.
+
+Lemma const_range: forall A c, A <> ∅ -> {c} = ran(const A c).
+  intros A c P1.
+  apply ax_exten.
+  intros x.
+  split.
+  + intros P2.
+    apply range_intro.
+    destruct (not_empty_exist_elmn _ P1) as [a P3].
+    exists a.
+    rewrite (in_singleton_equal _ _ P2).
+    apply (const_intro _ _ _ P3).
+  + intros P2.
+    destruct (range_elim _ _ P2) as [a P3].
+    destruct (const_elim _ _ _ P3) as [b [_ P4]].
+    destruct (opair_equal_elim _ _ _ _ P4) as [_ P5].
+    rewrite P5.
+    apply in_singleton.
+Qed.
+
+Lemma const_basic: forall A c x, x ∈ A -> c = fun_val (const A c) x.
+Proof. 
+  intros A c x P1.
+  apply fun_val_intro.
+  + apply const_is_function.
+  + rewrite <- (const_domain A c).
+    apply P1.
+  + apply (const_intro _ _ _ P1).
+Qed.
+
+Lemma union_relation: forall F G, relation F -> relation G -> relation (F ∪ G).
+Proof.
+  intros F G P1 P2 r P3.
+  destruct (in_union2_in _ _ _ P3) as [P4|P4].
+  + apply (P1 r P4).
+  + apply (P2 r P4).
+Qed.
+
+Lemma piecewise_function: forall F G, function F -> function G ->
+  (dom(F) ∩ dom(G)) = ∅ -> function (F ∪ G).
+Proof.
+  intros F G [P1 P3] [P2 P4] P5.
+  split.
+  + apply (union_relation F G P1 P2).
+  + intros a b1 b2 [P6 P7].
+    destruct (in_union2_in F G (⟨a, b1⟩) P6) as [P8|P8].
+    - destruct (in_union2_in F G (⟨a, b2⟩) P7) as [P9|P9].
+      * apply (P3 a b1 b2 (conj P8 P9)).
+      * absurd (a ∈ (dom(F) ∩ dom(G))).
+        { rewrite P5. 
+          apply (not_in_empty). }
+        { apply (in_in_inter2).
+          + apply domain_intro.
+            exists b1.
+            apply P8.
+          + apply domain_intro.
+            exists b2.
+            apply P9. }
+    - destruct (in_union2_in F G (⟨a, b2⟩) P7) as [P9|P9].
+      * absurd (a ∈ (dom(F) ∩ dom(G))).
+        { rewrite P5. 
+          apply (not_in_empty). }
+        { apply (in_in_inter2).
+          + apply domain_intro.
+            exists b2.
+            apply P9.
+          + apply domain_intro.
+            exists b1.
+            apply P8. }
+      * apply (P4 a b1 b2 (conj P8 P9)).
+Qed.
+
+Lemma union_domain: forall F G, dom(F ∪ G) = dom(F) ∪ dom(G).
+Proof.
+  intros F G.
+  apply ax_exten.
+  intros x.
+  split.
+  + intros P1.
+    destruct (domain_elim _ _ P1) as [f P2].
+    destruct (in_union2_in _ _ _ P2) as [P3|P3].
+    - apply in_in_union2_1.
+      apply domain_intro.
+      exists f.
+      apply P3.
+    - apply in_in_union2_2.
+      apply domain_intro.
+      exists f.
+      apply P3.
+  + intros P1.
+    apply domain_intro.
+    destruct (in_union2_in _ _ _ P1) as [P2|P2].
+    - destruct (domain_elim _ _ P2) as [f P3]. 
+      exists f.
+      apply (in_in_union2_1).
+      apply P3.
+    - destruct (domain_elim _ _ P2) as [f P3]. 
+      exists f.
+      apply (in_in_union2_2).
+      apply P3.
+Qed.
+
+Lemma union_range: forall F G, ran(F ∪ G) = ran(F) ∪ ran(G).
+Proof.
+  intros F G.
+  apply ax_exten.
+  intros x.
+  split.
+  + intros P1.
+    destruct (range_elim _ _ P1) as [f P2].
+    destruct (in_union2_in _ _ _ P2) as [P3|P3].
+    - apply in_in_union2_1.
+      apply range_intro.
+      exists f.
+      apply P3.
+    - apply in_in_union2_2.
+      apply range_intro.
+      exists f.
+      apply P3.
+  + intros P1.
+    apply range_intro.
+    destruct (in_union2_in _ _ _ P1) as [P2|P2].
+    - destruct (range_elim _ _ P2) as [f P3]. 
+      exists f.
+      apply (in_in_union2_1).
+      apply P3.
+    - destruct (range_elim _ _ P2) as [f P3]. 
+      exists f.
+      apply (in_in_union2_2).
+      apply P3.
+Qed.
+    
+(* 3J *)
+Lemma left_inverse: forall F A B, A <> ∅ -> fun_maps F A B -> 
+  ((exists G, fun_maps G B A /\ (id A = composition F G)) <-> one_to_one F).
+Proof.
+  intros F A B P1 [P2 [P3 P4]].
+  split.
+  + intros [G [[[_ P5] _] P6]].
+    split.
+    - apply P2.
+    - intros a1 a2 n [P7 P8].
+      apply (P5 n).
+      split.
+      * assert (a1 ∈ A) as P9.
+        { rewrite <- P3.
+          apply (domain_intro).
+          exists n.
+          apply P7. }
+        pose (id_intro A a1 P9) as P10.
+        rewrite P6 in P10.
+        destruct (composition_elim _ _ _ _ P10) as [m [P11 P12]].
+        destruct P2 as [_ P2].
+        rewrite (P2 _ _ _ (conj P7 P11)).
+        apply P12.
+      * assert (a2 ∈ A) as P9.
+        { rewrite <- P3.
+          apply (domain_intro).
+          exists n.
+          apply P8. }
+        pose (id_intro A a2 P9) as P10.
+        rewrite P6 in P10.
+        destruct (composition_elim _ _ _ _ P10) as [m [P11 P12]].
+        destruct P2 as [_ P2].
+        rewrite (P2 _ _ _ (conj P8 P11)).
+        apply P12.
+  + intros [P5 P6].
+    destruct (not_empty_exist_elmn _ P1) as [a P7].
+    destruct (LEM (ran(F) = B)) as [PB|PB].
+    {
+    exists (inverse F).
+    split. split.
+    - destruct (inverse_function F) as [P8 _].
+      apply (P8 P6).
+    - split.
+      * rewrite (inverse_domain).
+        apply PB.
+      * rewrite (inverse_range).
+        apply (eq_subset_1 _ _ P3).
+    - apply ax_exten.
+      intros x.
+      split.
+      * intros P8.
+        destruct (id_elim _ _ P8) as [s [P9 P10]].
+        rewrite P10.
+        apply composition_intro.
+        exists (fun_val F s).
+        split.
+        { rewrite <- P3 in P9. 
+          apply (fun_val_basic _ _ P5 P9). }
+        { apply inverse_intro.
+          rewrite <- P3 in P9. 
+          apply (fun_val_basic _ _ P5 P9). }
+      * intros P8.
+        destruct (composition_is_relation _ _ x P8) as [b1 [b2 P9]].
+        rewrite P9 in P8.
+        destruct (composition_elim _ _ _ _ P8) as [y [P10 P11]].
+        rewrite P9.
+        rewrite <- (P6 _ _ _ (conj P10 (inverse_elim _ _ _ P11))).
+        apply id_intro.
+        rewrite <- P3.
+        apply domain_intro.
+        exists y.
+        apply P10.
+    }
+    {
+    exists ((inverse F) ∪ (const (complement B (ran(F))) a)).
+    split. split.
+    - apply piecewise_function.
+      * destruct (inverse_function F) as [P8 _].
+        apply (P8 P6).
+      * apply const_is_function.
+      * rewrite (inverse_domain).
+        rewrite <- (const_domain _ a).
+        apply complement_inter2.
+    - split.
+      * rewrite union_domain. 
+        rewrite inverse_domain. 
+        rewrite <- (const_domain _ a). 
+        rewrite complement_union2.
+        apply ax_exten.
+        intros x.
+        split.
+        { intros P8.
+          destruct (in_union2_in _ _ _ P8) as [P9|P9].
+          + apply (P4 x P9).
+          + apply P9. }
+        { intros P8.
+          apply in_in_union2_2.
+          apply P8. }
+      * rewrite union_range. 
+        intros x P8.
+        destruct (in_union2_in _ _ _ P8) as [P9|P9].
+        { rewrite (inverse_range F) in P9.
+          rewrite P3 in P9.
+          apply P9. }
+        { rewrite <- (const_range _ a) in P9.
+          + rewrite <- (in_singleton_equal _ _ P9).
+            apply P7. 
+          + intros P10.
+            absurd (ran(F) = B).
+            - apply PB. 
+            - destruct (complement_proper_subset _ _ P4 PB) as [s P11]. 
+              rewrite P10 in P11.
+              absurd (s ∈ ∅).
+              * apply not_in_empty.
+              * apply P11. }
+    - apply ax_exten.
+      intros x.
+      split.
+      * intros P8.
+        destruct (id_elim _ _ P8) as [s [P9 P10]].
+        rewrite P10.
+        apply composition_intro.
+        exists (fun_val F s).
+        split.
+        { rewrite <- P3 in P9. 
+          apply (fun_val_basic _ _ P2 P9). }
+        { apply in_in_union2_1.
+          apply inverse_intro.
+          rewrite <- P3 in P9. 
+          apply (fun_val_basic _ _ P2 P9). }
+      * intros P8.
+        destruct (composition_is_relation _ _ x P8) as [x1 [x2 P9]].
+        rewrite P9 in P8.
+        destruct (composition_elim _ _ _ _ P8) as [y [P10 P11]].
+        destruct (in_union2_in _ _ _ P11) as [P12|P12].
+        { rewrite P9.
+          rewrite <- (P6 x1 x2 y (conj P10 (inverse_elim _ _ _ P12))).
+          apply id_intro.
+          rewrite <- P3.
+          apply domain_intro.
+          exists y.
+          apply P10. }
+        { absurd (y ∈ ran(F)).
+          { apply (complement_elim B (ran(F)) y). 
+            destruct (const_elim _ _ _ P12) as [s [P13 P14]].
+            destruct (opair_equal_elim _ _ _ _ P14) as [P15 _].
+            rewrite P15.
+            apply P13. }
+          { apply range_intro.
+            exists x1.
+            apply P10. } }
+    }
+Qed.
+
+(* TODO diff *)
+(* TODO constant *)
+(* TODO union of function *)
 
 (* TODO classify different difition *)
 (* TODO intro and elim fun *)
 
-    
