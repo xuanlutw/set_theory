@@ -92,6 +92,23 @@ Proof.
     - apply (P1 x P5).
     - apply P5.
 Qed.
+
+Lemma subset_intro: forall P: set -> Prop, forall A x, x ∈ A -> (P x) -> 
+  x ∈ subset_ctor P A.
+Proof.
+  intros P A x P1 P2.
+  destruct (extract_set_property (ax_subset P A) x) as [_ P3].
+  apply (P3 (conj P1 P2)).
+Qed.
+
+Lemma subset_elim: forall P: set -> Prop, forall A x, x ∈ (subset_ctor P A) ->
+  x ∈ A /\ (P x).
+Proof.
+  intros P A x P1.
+  destruct (extract_set_property (ax_subset P A) x) as [P2 _].
+  apply (P2 P1).
+Qed.
+(* TODO rewrite other subset intro and elim *)
 (*----------------------------------------------------------------------------*)
 
 

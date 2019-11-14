@@ -179,3 +179,8 @@ Ltac elmn_inter2 elmn A B :=
       destruct G2.
 (*----------------------------------------------------------------------------*)
 
+(* Axiom of Infinity *)
+Definition successor (A: set) := A ∪ ({A}).
+Notation "S( x )" := (successor(x)) (at level 60, no associativity).
+Definition inductive (A: set) := ∅ ∈ A /\ forall x, x ∈ A -> S(x) ∈ A.
+Axiom ax_infinity: exists A, inductive A.
