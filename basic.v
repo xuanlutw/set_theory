@@ -169,7 +169,7 @@ Qed.
 
 
 (* Power *)
-Lemma in_powe_subsetr: forall A x, x ∈ 𝒫(A) -> x ⊆ A.
+Lemma in_power_subset: forall A x, x ∈ 𝒫(A) -> x ⊆ A.
 Proof.
   intros A x P1.
   destruct (extract_set_property (ax_power A) x) as [P2 _].

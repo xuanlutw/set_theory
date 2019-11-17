@@ -178,6 +178,13 @@ Proof.
   + apply in_pair_2.
 Qed.
 
+Lemma in_domain_intro: forall R x y, ⟨x, y⟩ ∈ R -> in_domain x R.
+Proof.
+  intros R x y P1.
+  exists y.
+  apply P1.
+Qed.
+
 Lemma domain_intro: forall R x, in_domain x R -> x ∈ dom(R).
 Proof.
   intros R x P1.
@@ -201,6 +208,31 @@ Proof.
     (ax_subset (fun x => (in_domain x R)) (∪(∪(R)))) 
     x) as [P2 _].
   apply P2.
+  apply P1.
+Qed.
+
+Lemma subset_domain: forall F G, F ⊆ G -> domain(F) ⊆ domain(G).
+Proof.
+  intros F G P1 x P2.
+  destruct (domain_elim _ _ P2) as [y P3].
+  apply (domain_intro _ _ (in_domain_intro _ _ _ (P1 _ P3))).
+Qed.
+
+Lemma not_in_domain: forall F x, x ∉  dom(F) -> forall y, ⟨x, y⟩ ∉  F.
+Proof. 
+  intros F x.
+  apply (contraposition2 (forall y, ⟨x, y⟩ ∉  F) (x ∈ dom(F))).
+  intros P1.
+  destruct (not_forall_exists_not _ _ P1) as [y P2].
+  apply domain_intro.
+  exists y.
+  apply (NN_elim _ P2).
+Qed.
+
+Lemma in_range_intro: forall R x y, ⟨x, y⟩ ∈ R -> in_range y R.
+Proof.
+  intros R x y P1.
+  exists x.
   apply P1.
 Qed.
 
@@ -229,6 +261,13 @@ Proof.
   apply P2.
   apply P1.
 Qed.
+  
+Lemma subset_range: forall F G, F ⊆ G -> ran(F) ⊆ ran(G).
+Proof.
+  intros F G P1 y P2.
+  destruct (range_elim _ _ P2) as [x P3].
+  apply (range_intro _ _ (in_range_intro _ _ _ (P1 _ P3))).
+Qed.
 
 (* Skip n-ary *)
 
@@ -240,6 +279,58 @@ Definition fun_maps (F: set) (A: set) (B: set) :=
 
 Definition onto (F: set) (A: set) (B: set) :=
   (function F) /\ (dom(F) = A) /\ (ran(F) = B).
+
+Lemma single_value_is_function: forall x y, function ({⟨x, y⟩}).
+Proof.
+  intros x y.
+  split.
+  + intros s P1.
+    exists x.
+    exists y.
+    symmetry.
+    apply (in_singleton_equal _ _ P1).
+  + intros a0 b1 b2 [P1 P2].
+    destruct (opair_equal_elim _ _ _ _ (in_singleton_equal _ _ P1)) as [_ P3].
+    rewrite <- P3.
+    destruct (opair_equal_elim _ _ _ _ (in_singleton_equal _ _ P2)) as [_ P4].
+    apply P4.
+Qed.
+
+Lemma single_value_domain: forall x y, dom({⟨x, y⟩}) = ({x}).
+Proof. 
+  intros x y.
+  apply ax_exten.
+  intros s.
+  split.
+  + intros P1.
+    destruct (domain_elim _ _ P1) as [t P2].
+    destruct (opair_equal_elim _ _ _ _ (in_singleton_equal _ _ P2)) as [P3 _].
+    rewrite P3.
+    apply in_singleton.
+  + intros P1.
+    apply domain_intro.
+    exists y.
+    rewrite (in_singleton_equal _ _ P1).
+    apply in_singleton.
+Qed.
+
+Lemma single_value_range: forall x y, ran({⟨x, y⟩}) = ({y}).
+Proof. 
+  intros x y.
+  apply ax_exten.
+  intros s.
+  split.
+  + intros P1.
+    destruct (range_elim _ _ P1) as [t P2].
+    destruct (opair_equal_elim _ _ _ _ (in_singleton_equal _ _ P2)) as [_ P3].
+    rewrite <- P3.
+    apply in_singleton.
+  + intros P1.
+    apply range_intro.
+    exists x.
+    rewrite (in_singleton_equal _ _ P1).
+    apply in_singleton.
+Qed.
 
 Lemma fun_val_thm: forall F x, exists y, function F -> x ∈ dom(F) -> 
   (⟨x, y⟩ ∈ F /\ (forall y2, ⟨x, y2⟩ ∈ F -> y = y2)).
@@ -954,7 +1045,7 @@ Proof.
   + apply (const_intro _ _ _ P1).
 Qed.
 
-Lemma union_relation: forall F G, relation F -> relation G -> relation (F ∪ G).
+Lemma union2_relation: forall F G, relation F -> relation G -> relation (F ∪ G).
 Proof.
   intros F G P1 P2 r P3.
   destruct (in_union2_in _ _ _ P3) as [P4|P4].
@@ -962,12 +1053,19 @@ Proof.
   + apply (P2 r P4).
 Qed.
 
+Lemma union_relation: forall F, (forall f, f ∈ F -> relation f) -> relation (∪(F)).
+Proof.
+  intros F P1 r P2.
+  destruct (in_union_in _ _ P2) as [s [P3 P4]].
+  apply (P1 s P3 r P4).
+Qed.
+
 Lemma piecewise_function: forall F G, function F -> function G ->
   (dom(F) ∩ dom(G)) = ∅ -> function (F ∪ G).
 Proof.
   intros F G [P1 P3] [P2 P4] P5.
   split.
-  + apply (union_relation F G P1 P2).
+  + apply (union2_relation F G P1 P2).
   + intros a b1 b2 [P6 P7].
     destruct (in_union2_in F G (⟨a, b1⟩) P6) as [P8|P8].
     - destruct (in_union2_in F G (⟨a, b2⟩) P7) as [P9|P9].
@@ -996,7 +1094,7 @@ Proof.
       * apply (P4 a b1 b2 (conj P8 P9)).
 Qed.
 
-Lemma union_domain: forall F G, dom(F ∪ G) = dom(F) ∪ dom(G).
+Lemma union2_domain: forall F G, dom(F ∪ G) = dom(F) ∪ dom(G).
 Proof.
   intros F G.
   apply ax_exten.
@@ -1026,7 +1124,7 @@ Proof.
       apply P3.
 Qed.
 
-Lemma union_range: forall F G, ran(F ∪ G) = ran(F) ∪ ran(G).
+Lemma union2_range: forall F G, ran(F ∪ G) = ran(F) ∪ ran(G).
 Proof.
   intros F G.
   apply ax_exten.
@@ -1056,6 +1154,53 @@ Proof.
       apply P3.
 Qed.
     
+Lemma union_fun_equal: forall f H x, f ∈ H -> function f -> function (∪(H)) -> 
+  x ∈ dom(f) -> fun_val f x = fun_val (∪(H)) x.
+Proof. 
+  intros f H x P1 P2 P3 P4.
+  destruct (domain_elim _ _ P4) as [y P5].
+  rewrite <- (fun_val_intro _ _ _ P2 P4 P5).
+  apply fun_val_intro.
+  + apply P3.
+  + apply domain_intro.
+    exists y.
+    apply in_in_union.
+    exists f.
+    split.
+    - apply P1.
+    - apply P5.
+  + apply in_in_union.
+    exists f.
+    split.
+    - apply P1.
+    - apply P5.
+Qed.
+
+Lemma union2_fun_equal_1: forall F G x, function F -> function G -> function (F ∪ G) -> 
+  x ∈ dom(F) -> fun_val F x = fun_val (F ∪ G) x.
+Proof. 
+  intros F G x P1 P2 P3 P4.
+  destruct (domain_elim _ _ P4) as [y P5].
+  rewrite <- (fun_val_intro _ _ _ P1 P4 P5).
+  apply fun_val_intro.
+  + apply P3.
+  + apply domain_intro.
+    exists y.
+    apply in_in_union2_1.
+    apply P5.
+  + apply in_in_union2_1.
+    apply P5.
+Qed.
+
+Lemma union2_fun_equal_2: forall F G x, function F -> function G -> function (F ∪ G) -> 
+  x ∈ dom(G) -> fun_val G x = fun_val (F ∪ G) x.
+Proof. 
+  intros F G x P1 P2 P3 P4.
+  rewrite union2_sym.
+  rewrite union2_sym in P3.
+  apply (union2_fun_equal_1 G F x P2 P1 P3 P4).
+Qed.
+
 (* 3J *)
 Lemma left_inverse: forall F A B, A <> ∅ -> fun_maps F A B -> 
   ((exists G, fun_maps G B A /\ (id A = composition F G)) <-> one_to_one F).
@@ -1140,7 +1285,7 @@ Proof.
         rewrite <- (const_domain _ a).
         apply complement_inter2.
     - split.
-      * rewrite union_domain. 
+      * rewrite union2_domain. 
         rewrite inverse_domain. 
         rewrite <- (const_domain _ a). 
         rewrite complement_union2.
@@ -1154,7 +1299,7 @@ Proof.
         { intros P8.
           apply in_in_union2_2.
           apply P8. }
-      * rewrite union_range. 
+      * rewrite union2_range. 
         intros x P8.
         destruct (in_union2_in _ _ _ P8) as [P9|P9].
         { rewrite (inverse_range F) in P9.
@@ -1209,11 +1354,3 @@ Proof.
             apply P10. } }
     }
 Qed.
-
-(* TODO diff *)
-(* TODO constant *)
-(* TODO union of function *)
-
-(* TODO classify different difition *)
-(* TODO intro and elim fun *)
-
