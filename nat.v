@@ -3,7 +3,7 @@ Require Import axiom.
 Require Import basic.
 Require Import relation.
 
-Lemma successor_elim: forall A x, x ∈ S(A) -> x = A \/ x ∈ A.
+Lemma suc_elim: forall A x, x ∈ S(A) -> x = A \/ x ∈ A.
 Proof.
   intros A x P1.
   destruct (in_union2_in _ _ _ P1) as [P2|P2].
@@ -14,14 +14,14 @@ Proof.
     apply (in_singleton_equal _ _ P2).
 Qed.
 
-Lemma successor_intro_1: forall A, A ∈ S(A).
+Lemma suc_intro_1: forall A, A ∈ S(A).
 Proof.
   intros A.
   apply in_in_union2_2.
   apply in_singleton.
 Qed.
 
-Lemma successor_intro_2: forall A x, x ∈ A -> x ∈ S(A).
+Lemma suc_intro_2: forall A x, x ∈ A -> x ∈ S(A).
 Proof.
   intros A.
   apply in_in_union2_1.
@@ -43,11 +43,6 @@ Proof.
 Qed.
 
 Definition ω := extract_set omega_exists.
-Notation "0ₙ" := ∅ (at level 60, no associativity).
-Notation "1ₙ" := (S(∅)).
-Notation "2ₙ" := (S(S(∅))).
-Notation "3ₙ" := (S(S(S(∅)))).
-Notation "4ₙ" := (S(S(S(S(∅))))).
 
 Lemma omega_intro: forall x, nat x -> x ∈ ω.
 Proof.
@@ -91,7 +86,7 @@ Proof.
   apply P2.
 Qed.
 
-Lemma successor_in_omega: forall k, k ∈ ω -> S(k) ∈ ω.
+Lemma suc_in_omega: forall k, k ∈ ω -> S(k) ∈ ω.
 Proof.
   intros k P1.
   apply omega_intro.
@@ -122,13 +117,13 @@ Proof.
     + apply (subset_intro _ _ _ (empty_in_omega) P1).
     + intros x P5.
       destruct (subset_elim _ _ _ P5) as [P6 P7].
-      apply (subset_intro _ _ _ (successor_in_omega _ P6) (P2 _ P6 P7)). }
+      apply (subset_intro _ _ _ (suc_in_omega _ P6) (P2 _ P6 P7)). }
   rewrite <- (induction_principle_ _ P4 P5) in P3.
   destruct (subset_elim _ _ _ P3) as [_ P6].
   apply P6.
 Qed.
     
-Lemma nat_is_successor: forall x, x ∈ ω -> x <> ∅ -> exists y, x = S(y).
+Lemma nat_is_suc: forall x, x ∈ ω -> x <> ∅ -> exists y, x = S(y).
 Proof.
   intros x P1 P2.
   pose (P := fun x => x = ∅ \/ exists y, x = S(y)).
@@ -149,13 +144,13 @@ Proof.
   + apply P5.
 Qed.
 
-Lemma empty_not_successor: forall x, ∅ <> S(x).
+Lemma empty_not_suc: forall x, ∅ <> S(x).
 Proof.
   intros x P1.
   absurd (x ∈ ∅).
   + apply not_in_empty.
   + rewrite P1.
-    apply successor_intro_1.
+    apply suc_intro_1.
 Qed.
     
 (* Skip Peano's System *)
@@ -204,7 +199,7 @@ Proof.
   apply (in_power_subset _ _ (P1 _ P3) x P2).
 Qed.
 
-Lemma union_trans_successor: forall A, trans A -> ∪(S(A)) = A.
+Lemma union_trans_suc: forall A, trans A -> ∪(S(A)) = A.
 Proof.
   intros A P1.
   apply ax_exten.
@@ -212,7 +207,7 @@ Proof.
   split.
   + intros P2.
     destruct (in_union_in _ _ P2) as [y [P3 P4]].
-    destruct (successor_elim _ _ P3) as [P5|P5].
+    destruct (suc_elim _ _ P3) as [P5|P5].
     - rewrite <- P5.
       apply P4.
     - apply (P1 _ _ (conj P4 P5)).
@@ -220,7 +215,7 @@ Proof.
     apply (in_in_union).
     exists A.
     split.
-    - apply successor_intro_1.
+    - apply suc_intro_1.
     - apply P2.
 Qed.
 
@@ -236,9 +231,9 @@ Proof.
   assert (forall k, k ∈ ω -> trans k -> trans (S(k))) as P3.
   { intros k _ P3.
     apply trans_intro_1.
-    rewrite (union_trans_successor _ P3).
+    rewrite (union_trans_suc _ P3).
     intros x P4.
-    apply (successor_intro_2 _ _ P4). }
+    apply (suc_intro_2 _ _ P4). }
   pose (omega_intro _ P1) as P4.
   apply (induction_principle _ P2 P3 A P4).
 Qed.
@@ -253,7 +248,7 @@ Proof.
     + apply P1. }
   assert (forall k, k ∈ ω -> k ⊆ ω -> S(k) ⊆ ω) as P2.
   { intros k P2 P3 x P4.
-    destruct (successor_elim _ _ P4) as [P5|P5].
+    destruct (suc_elim _ _ P4) as [P5|P5].
     + rewrite P5.
       apply P2.
     + apply (P3 _ P5). }
@@ -269,25 +264,25 @@ Proof.
   { intros k P3 P4 P5.
     absurd (k ∈ k). 
     + apply P4.
-    + destruct (successor_elim _ _ P5) as [P6|P6].
-      - pose (P7 := successor_intro_1 k).
+    + destruct (suc_elim _ _ P5) as [P6|P6].
+      - pose (P7 := suc_intro_1 k).
         rewrite P6 in P7.
         apply P7.
-      - pose (P7 := successor_intro_1 k).
+      - pose (P7 := suc_intro_1 k).
         apply (nat_is_trans _ (omega_elim _ P3) _ _ (conj P7 P6)). }
   apply (induction_principle _ P2 P3 _ P1).
 Qed.
 
-Lemma successor_unique: forall x y, x ∈ ω -> y ∈ ω -> S(x) = S(y) -> x = y.
+Lemma suc_unique: forall x y, x ∈ ω -> y ∈ ω -> S(x) = S(y) -> x = y.
 Proof. 
   intros x y P1 P2 P3.
-  pose (successor_intro_1 x) as P4.
+  pose (suc_intro_1 x) as P4.
   rewrite P3 in P4.
-  destruct (successor_elim _ _ P4) as [P5|P5].
+  destruct (suc_elim _ _ P4) as [P5|P5].
   + apply P5.
-  + pose (successor_intro_1 y) as P6.
+  + pose (suc_intro_1 y) as P6.
     rewrite <- P3 in P6.
-    destruct (successor_elim _ _ P6) as [P7|P7].
+    destruct (suc_elim _ _ P6) as [P7|P7].
     - symmetry. 
       apply P7.
     - absurd (x ∈ x). 
@@ -401,7 +396,7 @@ Proof.
   { intros n P3 P4.
     rewrite (single_value_domain ∅ a) in P4. 
     absurd (∅ = S(n)).
-    + apply empty_not_successor.
+    + apply empty_not_suc.
     + apply (in_singleton_equal _ _ P4). }
 Qed.
 
@@ -447,7 +442,7 @@ Proof.
       apply (in_power_subset _ _ Q3 _ Q2).
     + rewrite <- (in_singleton_equal _ _ Q2). 
       apply cp_intro.
-      - apply (successor_in_omega _ P5).
+      - apply (suc_in_omega _ P5).
       - destruct P2 as [Q3 [Q4 Q5]]. 
         apply Q5.
         apply (fun_val_range).
@@ -465,7 +460,7 @@ Proof.
       apply (Q3 _ Q2).
     + rewrite single_value_domain in Q2.
       rewrite <- (in_singleton_equal _ _ Q2).
-      apply (successor_in_omega _ P5). }
+      apply (suc_in_omega _ P5). }
   split.
   { intros z Q1.
     rewrite (union2_range) in Q1.
@@ -517,13 +512,13 @@ Proof.
     + split. 
       - rewrite single_value_domain in Q3.
         apply in_in_union2_1.
-        rewrite <- (successor_unique _ _ P5 Q1 (in_singleton_equal _ _ Q3)).
+        rewrite <- (suc_unique _ _ P5 Q1 (in_singleton_equal _ _ Q3)).
         apply domain_intro.
         exists y.
         apply P4. 
       - assert (x = n) as QQ. 
         { rewrite single_value_domain in Q3.
-          apply (successor_unique _ _ P5 Q1 (in_singleton_equal _ _ Q3)). }
+          apply (suc_unique _ _ P5 Q1 (in_singleton_equal _ _ Q3)). }
         destruct (subset_elim _ _ _ P6) as [_ [Q4 [_ [_ [_ [_ _]]]]]].
         rewrite <- (union2_fun_equal_2 _ _ _ Q4 (single_value_is_function (S(x)) 
           (fun_val F y)) (_rec_union_function _ _ _ _ _ _ P1 P2 P3 P4 P5 P6) Q3).
@@ -649,7 +644,7 @@ Proof.
       - apply in_singleton. } 
   { intros n P3.
     assert (S(n) ∈ dom(h)) as P4.
-    { pose (successor_in_omega _ P3) as P4.
+    { pose (suc_in_omega _ P3) as P4.
       rewrite <- (_rec_domain A a F P1 P2) in P4.
       apply P4. }
     destruct (domain_elim _ _ P4) as [y P5].
@@ -700,7 +695,7 @@ Proof.
       apply subset_intro.
       - apply cp_intro.
         * apply P2.
-        * apply (successor_in_omega _ P2).
+        * apply (suc_in_omega _ P2).
       - exists x.
         reflexivity. }
     { intros y P1.
@@ -724,7 +719,7 @@ Proof.
   + apply subset_intro.
     - apply cp_intro.
       * apply P1.
-      * apply (successor_in_omega _ P1).
+      * apply (suc_in_omega _ P1).
     - exists k.
       reflexivity.
 Qed.
@@ -732,7 +727,7 @@ Qed.
 Definition add_proto (m: set) :=
   extract_set (recursion_theorem ω m σ sigma_is_function).
 
-Lemma add_propto_elim_1: forall m, m ∈ ω -> fun_val (add_proto m) ∅ = m.
+Lemma add_proto_elim_1: forall m, m ∈ ω -> fun_val (add_proto m) ∅ = m.
 Proof.
   intros m P1.
   destruct (extract_set_property (recursion_theorem ω m σ sigma_is_function) P1) 
@@ -740,7 +735,7 @@ Proof.
   apply P2.
 Qed.
 
-Lemma add_propto_elim_2: forall m n, m ∈ ω -> n ∈ ω -> 
+Lemma add_proto_elim_2: forall m n, m ∈ ω -> n ∈ ω -> 
     fun_val (add_proto m) (S(n)) = S(fun_val (add_proto m) n).
 Proof.
   intros m n P1 P2.
@@ -758,4 +753,33 @@ Proof.
   apply P2.
 Qed.
     
-Notation "m + n" := (fun_val (add_proto m) n) (at level 65, no associativity).
+Notation "m ₙ+ n" := (fun_val (add_proto m) n) (at level 65, no associativity).
+
+Notation "ₙ0" := ∅       (at level 60, no associativity).
+Notation "ₙ1" := (S(ₙ0)) (at level 60, no associativity).
+Notation "ₙ2" := (S(ₙ1)) (at level 60, no associativity).
+Notation "ₙ3" := (S(ₙ2)) (at level 60, no associativity).
+Notation "ₙ4" := (S(ₙ3)) (at level 60, no associativity).
+
+Lemma add_zero: forall m, m ∈ ω -> m ₙ+ ₙ0 = m.
+Proof.
+  intros m P1.
+  apply (add_proto_elim_1 _ P1).
+Qed.
+
+Lemma add_red: forall m n, m ∈ ω -> n ∈ ω -> m ₙ+ S(n) = S(m ₙ+ n).
+Proof.
+  intros m n P1 P2.
+  apply (add_proto_elim_2 _ _ P1 P2).
+Qed.
+
+Theorem one_one_two: ₙ1 ₙ+ ₙ1 = ₙ2.
+Proof.
+  assert (ₙ1 ∈ ω) as P1.
+  { apply suc_in_omega. 
+    apply empty_in_omega. }
+  rewrite (add_red (ₙ1) (ₙ0) P1 empty_in_omega).
+  rewrite (add_zero (ₙ1) P1).
+  reflexivity.
+Qed.
+
