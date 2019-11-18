@@ -159,7 +159,6 @@ Proof.
 Qed.
     
 (* Skip Peano's System *)
-Definition σ := subset_ctor (fun x => exists y, x = ⟨y, S(y)⟩) (cp ω ω).
 
 (* Transition *)
 Definition trans (A: set) := forall x a, x ∈ a /\ a ∈ A -> x ∈ A.
@@ -615,15 +614,16 @@ Proof.
   apply (P6 _ (range_intro _ _ (in_range_intro _ _ _ P5))).
 Qed.
 
-Theorem recursion_theorem: forall A a F, a ∈ A -> fun_maps F A A ->
-  exists h, fun_maps h ω A /\ (fun_val h ∅) = a /\ 
+Theorem recursion_theorem: forall A a F, fun_maps F A A ->
+  exists h, a ∈ A -> fun_maps h ω A /\ (fun_val h ∅) = a /\ 
     (forall n, n ∈ ω -> fun_val h (S(n)) = fun_val F (fun_val h n)).
 Proof.
-  intros A a F P1 P2.
+  intros A a F P2.
   pose (P := _rec_accept F A a).
   pose (H := subset_ctor P (𝒫(cp ω A))).
   pose (h := ∪(H)).
   exists h.
+  intros P1.
   split.
   (* fun_maps h ω A *)
   { split.
@@ -663,5 +663,99 @@ Proof.
 Qed.
   
 (* Arithmetic *)
+Definition σ := subset_ctor (fun x => exists y, x = ⟨y, S(y)⟩) (cp ω ω).
+Lemma sigma_is_function: fun_maps σ ω ω.
+Proof.
+  split.
+  split.
+  { intros x P1.
+    destruct (subset_elim _ _ _ P1) as [_ [y P2]].
+    exists y.
+    exists (S(y)).
+    apply P2. }
+  { intros a b1 b2 [P1 P2].
+    destruct (subset_elim _ _ _ P1) as [_ [y1 P3]].
+    destruct (opair_equal_elim _ _ _ _ P3) as [P4 P5].
+    rewrite P5.
+    rewrite <- P4.
+    destruct (subset_elim _ _ _ P2) as [_ [y2 P6]].
+    destruct (opair_equal_elim _ _ _ _ P6) as [P7 P8].
+    rewrite P8.
+    rewrite <- P7.
+    reflexivity. }
+  split.
+  { apply ax_exten.
+    intros x.
+    split.
+    + intros P1.
+      destruct (domain_elim _ _ P1) as [y P2].
+      destruct (subset_elim _ _ _ P2) as [P3 _].
+      destruct (cp_elim _ _ _ P3) as [nx [ny [P4 [_ P5]]]].
+      destruct (opair_equal_elim _ _ _ _ P5) as [P6 _].
+      rewrite P6.
+      apply P4.
+    + intros P2.
+      apply domain_intro.
+      exists (S(x)).
+      apply subset_intro.
+      - apply cp_intro.
+        * apply P2.
+        * apply (successor_in_omega _ P2).
+      - exists x.
+        reflexivity. }
+    { intros y P1.
+      destruct (range_elim _ _ P1) as [x P2].
+      destruct (subset_elim _ _ _ P2) as [P3 _].
+      destruct (cp_elim _ _ _ P3) as [nx [ny [_ [P4 P5]]]].
+      destruct (opair_equal_elim _ _ _ _ P5) as [_ P6].
+      rewrite P6.
+      apply P4. }
+Qed.
 
+Lemma sigma_intro: forall k, k ∈ ω -> S(k) = fun_val σ k.
+Proof.
+  intros k P1.
+  apply fun_val_intro.
+  + destruct sigma_is_function as [P2 _].
+    apply P2.
+  + destruct sigma_is_function as [_ [P2 _]].
+    rewrite P2.
+    apply P1.
+  + apply subset_intro.
+    - apply cp_intro.
+      * apply P1.
+      * apply (successor_in_omega _ P1).
+    - exists k.
+      reflexivity.
+Qed.
 
+Definition add_proto (m: set) :=
+  extract_set (recursion_theorem ω m σ sigma_is_function).
+
+Lemma add_propto_elim_1: forall m, m ∈ ω -> fun_val (add_proto m) ∅ = m.
+Proof.
+  intros m P1.
+  destruct (extract_set_property (recursion_theorem ω m σ sigma_is_function) P1) 
+    as [_ [P2 _]].
+  apply P2.
+Qed.
+
+Lemma add_propto_elim_2: forall m n, m ∈ ω -> n ∈ ω -> 
+    fun_val (add_proto m) (S(n)) = S(fun_val (add_proto m) n).
+Proof.
+  intros m n P1 P2.
+  destruct (extract_set_property (recursion_theorem ω m σ sigma_is_function) P1) 
+    as [[P3 [P4 P5]] [_ P6]].
+  assert ((fun_val (extract_set (recursion_theorem ω m σ sigma_is_function)) n) ∈ ω) as P7.
+  { apply P5. 
+    apply fun_val_range.
+    + apply P3.
+    + rewrite P4.
+      apply P2. }
+  pose (P6 n) as P8.
+  rewrite <- (sigma_intro _ P7) in P8.
+  apply P8.
+  apply P2.
+Qed.
+    
+Notation "m + n" := (fun_val (add_proto m) n) (at level 65, no associativity).
