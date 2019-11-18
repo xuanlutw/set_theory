@@ -781,6 +781,19 @@ Proof.
   apply (add_proto_elim_2 _ _ P1 P2).
 Qed.
 
+Lemma add_in_omega: forall m n, m ∈ ω -> n ∈ ω -> m ₙ+ n ∈ ω.
+Proof.
+  intros m n P1 P2.
+  destruct (add_proto_is_function _ P1) as [P3 [P4 P5]].
+  apply P5.
+  apply range_intro.
+  exists n.
+  apply fun_val_basic.
+  + apply P3.
+  + rewrite P4.
+    apply P2.
+Qed.
+
 Theorem one_one_two: ₙ1 ₙ+ ₙ1 = ₙ2.
 Proof.
   assert (ₙ1 ∈ ω) as P1.
@@ -819,7 +832,7 @@ Proof.
   apply (P3 _ P2).
 Qed.
     
-Notation "m ₙx n" := (fun_val (multi_proto m) n) (at level 65, no associativity).
+Notation "m ₙx n" := (fun_val (multi_proto m) n) (at level 64, no associativity).
 
 Lemma multi_zero: forall m, m ∈ ω -> m ₙx ₙ0 = ₙ0.
 Proof.
@@ -831,6 +844,19 @@ Lemma multi_red: forall m n, m ∈ ω -> n ∈ ω -> m ₙx S(n) = m ₙ+ (m ₙ
 Proof.
   intros m n P1 P2.
   apply (multi_proto_elim_2 _ _ P1 P2).
+Qed.
+
+Lemma multi_in_omega: forall m n, m ∈ ω -> n ∈ ω -> m ₙx n ∈ ω.
+Proof.
+  intros m n P1 P2.
+  destruct (multi_proto_is_function _ P1) as [P3 [P4 P5]].
+  apply P5.
+  apply range_intro.
+  exists n.
+  apply fun_val_basic.
+  + apply P3.
+  + rewrite P4.
+    apply P2.
 Qed.
 
 Lemma one_in_omega: ₙ1 ∈ ω.
@@ -879,4 +905,171 @@ Proof.
   intros m n P1 P2.
   apply (exp_proto_elim_2 _ _ P1 P2).
 Qed.
+
+Lemma add_zero_l: forall m, m ∈ ω -> ₙ0 ₙ+ m = m.
+Proof.
+  intros m P1.
+  assert (ₙ0 ₙ+ ₙ0 = ₙ0) as P2.
+  { apply (add_zero _ empty_in_omega). }
+  assert (forall k, k ∈ ω -> ₙ0 ₙ+ k = k -> ₙ0 ₙ+ S(k) = S(k)) as P3.
+  { intros k P3 P4.
+    rewrite (add_red _ _ empty_in_omega P3).
+    f_equal.
+    apply P4. }
+  apply (induction_principle _ P2 P3 _ P1).
+Qed.
+
+Lemma add_red_l: forall m n, m ∈ ω -> n ∈ ω -> S(m) ₙ+ n = S(m ₙ+ n).
+Proof.
+  intros m n P1 P2.
+  assert (S(m) ₙ+ ₙ0 = S(m ₙ+ ₙ0)) as P3.
+  { rewrite (add_zero _ (suc_in_omega _ P1)).
+    rewrite (add_zero _ P1).
+    reflexivity. }
+  assert (forall k, k ∈ ω -> 
+    S(m) ₙ+ k = S(m ₙ+ k) -> S(m) ₙ+ S(k) = S(m ₙ+ S(k))) as P4.
+  { intros k P4 P5.
+    rewrite (add_red _ _ (suc_in_omega _ P1) P4).
+    rewrite P5.
+    f_equal.
+    symmetry.
+    apply (add_red _ _ P1 P4). }
+  apply (induction_principle _ P3 P4 _ P2).
+Qed.
+
+Lemma add_commutative: forall m n, m ∈ ω -> n ∈ ω -> m ₙ+ n = n ₙ+ m.
+Proof. 
+  intros m n P1 P2.
+  assert (m ₙ+ ₙ0 = ₙ0 ₙ+ m) as P3.
+  { rewrite (add_zero _ P1).
+    rewrite (add_zero_l _ P1).
+    reflexivity. }
+  assert (forall k, k ∈ ω -> m ₙ+ k = k ₙ+ m -> m ₙ+ S(k) = S(k) ₙ+ m) as P4.
+  { intros k P4 P5.
+    rewrite (add_red _ _ P1 P4).
+    rewrite (add_red_l _ _ P4 P1).
+    f_equal.
+    apply P5. }
+  apply (induction_principle _ P3 P4 _ P2).
+Qed.
+
+Lemma add_associative: forall m n p, m ∈ ω -> n ∈ ω -> p ∈ ω ->
+  m ₙ+ (n ₙ+ p) = (m ₙ+ n) ₙ+ p.
+Proof.
+  intros m n p P1 P2 P3.
+  assert (m ₙ+ (n ₙ+ ₙ0) = (m ₙ+ n) ₙ+ ₙ0) as P4.
+  { rewrite (add_zero _ P2).
+    symmetry.    
+    apply add_zero.
+    apply (add_in_omega _ _ P1 P2). }
+  assert (forall k, k ∈ ω -> m ₙ+ (n ₙ+ k) = (m ₙ+ n) ₙ+ k ->
+    m ₙ+ (n ₙ+ S(k)) = (m ₙ+ n) ₙ+ S(k)) as P5.
+  { intros k P5 P6.
+    rewrite (add_red _ _ (add_in_omega _ _ P1 P2) P5).
+    rewrite <- P6.
+    rewrite <- (add_red _ _ P1 (add_in_omega _ _ P2 P5)).
+    rewrite <- (add_red _ _ P2 P5).
+    reflexivity. }
+  apply (induction_principle _ P4 P5 _ P3).
+Qed.
+
+Lemma multi_zero_l: forall m, m ∈ ω -> ₙ0 ₙx m = ₙ0.
+Proof.
+  intros m P1.
+  assert (ₙ0 ₙx ₙ0 = ₙ0) as P2.
+  { apply (multi_zero _ empty_in_omega). }
+  assert (forall k, k ∈ ω -> ₙ0 ₙx k = ₙ0 -> ₙ0 ₙx S(k) = ₙ0) as P3.
+  { intros k P3 P4.
+    rewrite (multi_red _ _ empty_in_omega P3).
+    rewrite P4.
+    apply (add_zero _ empty_in_omega). }
+  apply (induction_principle _ P2 P3 _ P1).
+Qed.
+
+Lemma multi_red_l: forall m n, m ∈ ω -> n ∈ ω -> S(m) ₙx n = n ₙ+ (m ₙx n).
+Proof.
+  intros m n P1 P2.
+  assert (S(m) ₙx ₙ0 = ₙ0 ₙ+ (m ₙx ₙ0)) as P3.
+  { rewrite (multi_zero _ (suc_in_omega _ P1)).
+    rewrite (multi_zero _ P1).
+    rewrite (add_zero _ empty_in_omega).
+    reflexivity. }
+  assert (forall k, k ∈ ω -> 
+    S(m) ₙx k = k ₙ+ (m ₙx k) -> S(m) ₙx S(k) = S(k) ₙ+ (m ₙx S(k))) as P4.
+  { intros k P4 P5.
+    rewrite (multi_red _ _ (suc_in_omega _ P1) P4).
+    rewrite (multi_red _ _ P1 P4).
+    rewrite P5.
+    rewrite (add_associative _ _ _ (suc_in_omega _ P1) P4 (multi_in_omega _ _ P1 P4)).
+    rewrite (add_associative _ _ _ (suc_in_omega _ P4) P1 (multi_in_omega _ _ P1 P4)).
+    rewrite (add_commutative _ _ (suc_in_omega _ P4) P1).
+    rewrite (add_red _ _ P1 P4).
+    rewrite (add_red_l _ _ P1 P4).
+    reflexivity. }
+  apply (induction_principle _ P3 P4 _ P2).
+Qed.
+
+Lemma distributive_l: forall m n p, m ∈ ω -> n ∈ ω -> p ∈ ω ->
+  m ₙx (n ₙ+ p) = m ₙx n ₙ+ m ₙx p.
+Proof.
+  intros m n p P1 P2 P3.
+  assert (m ₙx (n ₙ+ ₙ0) = m ₙx n ₙ+ m ₙx ₙ0) as P4.
+  { rewrite (add_zero _ P2).
+    rewrite (multi_zero _ P1).
+    rewrite (add_zero _ (multi_in_omega _ _ P1 P2)). 
+    reflexivity. }
+  assert (forall k, k ∈ ω -> m ₙx (n ₙ+ k) = m ₙx n ₙ+ m ₙx k -> 
+    m ₙx (n ₙ+ S(k)) = m ₙx n ₙ+ m ₙx S(k)) as P5.
+  { intros k P5 P6.
+    rewrite (add_red _ _ P2 P5).
+    rewrite (multi_red _ _ P1 (add_in_omega _ _ P2 P5)).
+    rewrite P6.
+    rewrite (multi_red _ _ P1 P5).
+    rewrite (add_associative _ _ _ 
+      (multi_in_omega _ _ P1 P2) P1 (multi_in_omega _ _ P1 P5)).
+    rewrite (add_commutative _ _ (multi_in_omega _ _ P1 P2) P1).
+    rewrite <- (add_associative _ _ _ 
+      P1 (multi_in_omega _ _ P1 P2) (multi_in_omega _ _ P1 P5)).
+    reflexivity. }
+  apply (induction_principle _ P4 P5 _ P3).
+Qed.
+
+Lemma multi_commutative: forall m n, m ∈ ω -> n ∈ ω -> m ₙx n = n ₙx m.
+Proof.
+  intros m n P1 P2.
+  assert (m ₙx ₙ0 = ₙ0 ₙx m) as P3.
+  { rewrite (multi_zero _ P1).
+    rewrite (multi_zero_l _ P1).
+    reflexivity. }
+  assert (forall k, k ∈ ω -> m ₙx k = k ₙx m -> m ₙx S(k) = S(k) ₙx m) as P4.
+  { intros k P4 P5.
+    rewrite (multi_red _ _ P1 P4).
+    rewrite (multi_red_l _ _ P4 P1).
+    f_equal.
+    apply P5. }
+  apply (induction_principle _ P3 P4 _ P2).
+Qed.
+
+Lemma multi_associative: forall m n p, m ∈ ω -> n ∈ ω -> p ∈ ω ->
+  m ₙx (n ₙx p) = (m ₙx n) ₙx p.
+Proof.
+  intros m n p P1 P2 P3.
+  assert (m ₙx (n ₙx ₙ0) = (m ₙx n) ₙx ₙ0) as P4.
+  { rewrite (multi_zero _ P2).
+    rewrite (multi_zero _ P1).
+    rewrite (multi_zero _ (multi_in_omega _ _ P1 P2)).
+    reflexivity. }
+  assert (forall k, k ∈ ω -> m ₙx (n ₙx k) = (m ₙx n) ₙx k ->
+    m ₙx (n ₙx S(k)) = (m ₙx n) ₙx S(k)) as P5.
+  { intros k P5 P6.
+    rewrite (multi_red _ _ (multi_in_omega _ _ P1 P2) P5).
+    rewrite <- P6.
+    rewrite (multi_red _ _ P2 P5). 
+    rewrite (distributive_l _ _ _ P1 P2 (multi_in_omega _ _ P2 P5)).
+    reflexivity. }
+  apply (induction_principle _ P4 P5 _ P3).
+Qed.
+  
+
+
 
