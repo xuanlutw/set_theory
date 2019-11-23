@@ -125,7 +125,17 @@ Axiom ax_infinity: exists A, inductive A.
 
 
 (* Axiom of Choice *)
-Axiom ax_choice: forall S, (forall a, a ∈ S -> a <> ∅) ->
-  (forall a b, a ∈ S -> b ∈ S -> a <> b -> a ∩ b = ∅) ->
-  exists C, forall a, a ∈ S -> exists x, C ∩ a = {x}.
+Definition opair (A: set) (B: set) := {{A}, {A, B}}.
+Notation "⟨ A , B ⟩" := (opair A B) (at level 60).
+Definition relation (R: set) :=
+  forall r, r ∈ R -> exists a b, r = ⟨a, b⟩. 
+Definition function (F: set) := 
+  (relation F) /\ (forall a b1 b2, ⟨a, b1⟩ ∈ F /\ ⟨a, b2⟩ ∈ F -> b1 = b2).
+Definition in_domain (x: set) (R: set) :=
+  exists y, ⟨x, y⟩ ∈ R.
+Definition domain (A: set) := 
+  subset_ctor (fun x => (in_domain x A)) (∪(∪(A))).
+Notation "dom( A )" := (domain A) (at level 60, no associativity).
+Axiom ax_choice: forall R, relation R -> 
+  exists H, function H /\ H ⊆ R /\ dom(H) = dom(R).
 (*----------------------------------------------------------------------------*)
