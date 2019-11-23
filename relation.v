@@ -3,8 +3,8 @@ Require Import axiom.
 Require Import basic.
 
 (* order pair *)
-Definition opair (A: set) (B: set) := {{A}, {A, B}}.
-Notation "⟨ A , B ⟩" := (opair A B) (at level 60).
+(* Definition opair (A: set) (B: set) := {{A}, {A, B}}. *)
+(* Notation "⟨ A , B ⟩" := (opair A B) (at level 60). *)
 
 Lemma in_opair_elim: forall A B x, x ∈ ⟨A, B⟩ -> x = {A} \/ x = {A, B}.
 Proof.
@@ -67,6 +67,20 @@ Proof.
         { apply P4. }
 Qed.
           
+Theorem opair_equal_elim_1: forall A B C D, ⟨A, B⟩ = ⟨C, D⟩ -> (A = C).
+Proof.
+  intros A B C D P1.
+  destruct (opair_equal_elim _ _ _ _ P1) as [P2 _].
+  apply P2.
+Qed.
+
+Theorem opair_equal_elim_2: forall A B C D, ⟨A, B⟩ = ⟨C, D⟩ -> (B = D).
+Proof.
+  intros A B C D P1.
+  destruct (opair_equal_elim _ _ _ _ P1) as [_ P2].
+  apply P2.
+Qed.
+
 (* 3B *)
 Lemma opair_superset: forall A B C, A ∈ C -> B ∈ C -> ⟨A, B⟩ ∈ 𝒫(𝒫(C)).
 Proof.
@@ -128,14 +142,14 @@ Proof.
   apply P3.
 Qed.
 
-Definition relation (R: set) :=
-  forall r, r ∈ R -> exists a b, r = ⟨a, b⟩. 
+(* Definition relation (R: set) := *)
+(*   forall r, r ∈ R -> exists a b, r = ⟨a, b⟩. *)
 
-Definition in_domain (x: set) (R: set) :=
-  exists y, ⟨x, y⟩ ∈ R.
-Definition domain (A: set) := 
-  subset_ctor (fun x => (in_domain x A)) (∪(∪(A))).
-Notation "dom( A )" := (domain A) (at level 60, no associativity).
+(* Definition in_domain (x: set) (R: set) := *)
+(*   exists y, ⟨x, y⟩ ∈ R. *)
+(* Definition domain (A: set) := *)
+(*   subset_ctor (fun x => (in_domain x A)) (∪(∪(A))). *)
+(* Notation "dom( A )" := (domain A) (at level 60, no associativity). *)
 
 Definition in_range (y: set) (R: set) :=
   exists x, ⟨x, y⟩ ∈ R.
@@ -271,8 +285,8 @@ Qed.
 
 (* Skip n-ary *)
 
-Definition function (F: set) := 
-  (relation F) /\ (forall a b1 b2, ⟨a, b1⟩ ∈ F /\ ⟨a, b2⟩ ∈ F -> b1 = b2).
+(* Definition function (F: set) := *)
+(*  (relation F) /\ (forall a b1 b2, ⟨a, b1⟩ ∈ F /\ ⟨a, b2⟩ ∈ F -> b1 = b2). *)
 
 Definition fun_maps (F: set) (A: set) (B: set) :=
   (function F) /\ (dom(F) = A) /\ (ran(F) ⊆ B).
@@ -1354,3 +1368,369 @@ Proof.
             apply P10. } }
     }
 Qed.
+
+(*
+Axiom ax_choice: forall S, (forall a, a ∈ S -> a <> ∅) ->
+  (forall a b, a ∈ S -> b ∈ S -> a <> b -> a ∩ b = ∅) ->
+  exists C, forall a, a ∈ S -> exists x, C ∩ a = {x}.
+Theorem choice_fun_exists: forall A, exists F, 
+  forall B, B <> ∅ -> B ⊆ A -> fun_val F B ∈ B
+  /\ fun_maps F (complement (𝒫(A)) ({∅})) A.
+Proof.
+  intros A.
+  pose (subset_ctor (fun S => exists a, a <> ∅  /\ a ⊆ A /\
+    (ran(S) = a) /\ (forall s, s ∈ S -> exists y, s = ⟨a, y⟩)) 
+    (𝒫(cp (𝒫(A)) A))) as B.
+  assert (forall b, b ∈ B -> b <> ∅) as P1.
+  { intros b P1.
+    destruct (subset_elim _ _ _ P1) as [_ [a [P2 [_ [P3 _]]]]].
+    destruct (not_empty_exist_elmn _ P2) as [x P4].
+    rewrite <- P3 in P4.
+    destruct (range_elim _ _ P4) as [y P5].
+    apply exist_elmn_not_empty.
+    exists (⟨y, x⟩).
+    apply P5. }
+  assert (forall b1 b2, b1 ∈ B -> b2 ∈ B -> b1 <> b2 -> b1 ∩ b2 = ∅) as P2.
+  { intros b1 b2 P2 P3 P4.
+    apply empty_unique.
+    intros x P5.
+    absurd (b1 = b2).
+    + apply P4.
+    + destruct (in_inter2_in _ _ _ P5) as [Q1 R1].
+      destruct (subset_elim _ _ _ P2) as [_  [a1 [Q2 [Q3 [Q4 Q5]]]]].
+      destruct (Q5 _ Q1) as [y1 Q6].
+      destruct (subset_elim _ _ _ P3) as [_  [a2 [R2 [R3 [R4 R5]]]]].
+      destruct (R5 _ R1) as [y2 R6].
+      assert (a1 = a2) as P6.
+      { rewrite Q6 in R6.
+        destruct (opair_equal_elim _ _ _ _ R6) as [P6 _].
+        apply P6. }
+      apply ax_exten.
+      intros s.
+      split.
+      - intros P7.
+        destruct (Q5 _ P7) as [yy P8].
+        rewrite P6 in P8.
+        rewrite P8 in P7.
+        pose (range_intro _ _ (in_range_intro _ _ _ P7)) as P9.
+        rewrite Q4 in P9.
+        rewrite P6 in P9.
+        rewrite <- R4 in P9.
+        destruct (range_elim _ _ P9) as [xx P10].
+        destruct (R5 _ P10) as [yyy P11].
+        rewrite (opair_equal_elim_1 _ _ _ _ P11) in P10.
+        rewrite <- P8 in P10.
+        apply P10.
+      - intros P7.
+        destruct (R5 _ P7) as [yy P8].
+        rewrite <- P6 in P8.
+        rewrite P8 in P7.
+        pose (range_intro _ _ (in_range_intro _ _ _ P7)) as P9.
+        rewrite R4 in P9.
+        rewrite <- P6 in P9.
+        rewrite <- Q4 in P9.
+        destruct (range_elim _ _ P9) as [xx P10].
+        destruct (Q5 _ P10) as [yyy P11].
+        rewrite (opair_equal_elim_1 _ _ _ _ P11) in P10.
+        rewrite <- P8 in P10.
+        apply P10. }
+  destruct (ax_choice _ P1 P2) as [C P3].
+  pose (F := (∪(B)) ∩ C).
+  exists F.
+  split. 
+  assert (fun_maps F (complement (𝒫( A)) ({∅})) A) as P4. {
+  split. split.
+  { intros x Q1.
+    destruct (in_inter2_in _ _ _ Q1) as [Q2 _].
+    destruct (in_union_in _ _ Q2) as [b [Q3 Q4]].
+    destruct (subset_elim _ _ _ Q3) as [Q5 _].
+    destruct (cp_elim _ _ _ (in_power_subset _ _ Q5 _ Q4)) as [aa [bb [_ [_ Q6]]]].
+    exists aa.
+    exists bb.
+    apply Q6. }
+  { intros a b1 b2 [Q1 Q2].
+    admit. }
+  split.
+  { apply ax_exten.
+    intros x.
+    split.
+    + intros Q1.
+      destruct (domain_elim _ _ Q1) as [y Q2].
+      destruct (in_inter2_in _ _ _ Q2) as [Q3 Q4].
+      destruct (in_union_in _ _ Q3) as [b [Q5 Q6]].
+      destruct (subset_elim _ _ _ Q5) as [Q7 _].
+      apply complement_intro.
+      split.
+      - destruct (cp_elim _ _ _ (in_power_subset _ _ Q7 _ Q6)) as
+          [xx [yy [Q8 [_ Q9]]]].
+        rewrite (opair_equal_elim_1 _ _ _ _ Q9).
+        apply Q8.
+      - intros Q8. 
+        destruct (subset_elim _ _ _ Q5) as [_ [a [Q10 [_[ _ Q11]]]]].
+        absurd (a = ∅).
+        * apply Q10.
+        * destruct (Q11 _ Q6) as [yy Q12].
+          rewrite <- (opair_equal_elim_1 _ _ _ _ Q12).
+          symmetry.
+          apply (in_singleton_equal _ _ Q8). }
+  { intros x Q1.
+    destruct (range_elim _ _ Q1) as [y Q2].
+    destruct (in_inter2_in _ _ _ Q2) as [Q3 _].
+    destruct (in_union_in _ _ Q3) as [b [Q4 Q5]].
+    destruct (subset_elim _ _ _ Q4) as [_ [a [_ [Q6 [Q7 _]]]]].
+    pose (range_intro _ _ (in_range_intro _ _ _ Q5)) as Q8.
+    rewrite Q7 in Q8.
+    apply (Q6 _ Q8). } }
+  { destruct P4 as [P4 _].  
+    pose(fun_val_intro). intros b Q1 Q2.
+
+  pose (subset_ctor (fun s => exists x y, s = ⟨x, y⟩ /\ y ∈ x) (cp (𝒫(A)) A)) as B.
+  pose (subset_ctor (fun s => exists x y, s = ⟨x, y⟩ /\ y ∈ x) (cp (𝒫(A)) A)) as B.
+  pose (subset_ctor (fun s => exists x, 
+    (forall e, e ∈ s -> exists y, e = ⟨x, y⟩) /\
+    (forall e, e ∈ B -> (exists y, e = ⟨x, y⟩) -> e ∈ s))
+    (𝒫(B))) as C.
+  assert (forall a, a ∈ C -> a <> ∅) as P1.
+  { intros a P1 P2.
+    destruct (subset_elim _ _ _ P1) as [P3 [x P4]].
+    destruct (in_power_ _ _ P3).
+    apply P2. }
+  assert (forall a b, a ∈ C -> b ∈ C -> a <> b -> a ∩ b = ∅) as P2.
+  { intros a b P2 P3 P4.
+    apply empty_unique.
+    intros x P5.
+    absurd (a = b).
+    + apply P4.
+    + destruct (in_inter2_in _ _ _ P5) as [P6 P7].
+      destruct (subset_elim _ _ _ P2) as [P8  [_ [aa [P9  P10]]]].
+      destruct (subset_elim _ _ _ P3) as [P11 [_ [bb [P12 P13]]]].
+      destruct (P9  _ P6) as  [aaa P14].
+      destruct (P12 _ P7) as [bbb P15].
+      rewrite P15 in P14.
+      destruct (opair_equal_elim _ _ _ _ P14) as [P16 P17].
+      apply ax_exten.
+      intros xx.
+      split.
+      - intros P18.
+        apply P13.
+        * apply (in_power_subset _ _ P8 _ P18).
+        * rewrite P16.
+          apply (P9 _ P18).
+      - intros P18.
+        apply P10.
+        * apply (in_power_subset _ _ P11 _ P18).
+        * rewrite <- P16.
+          apply (P12 _ P18). }
+  destruct (ax_choice _ P1 P2) as [D P3].
+  pose (F := (∪(C)) ∩ D).
+  exists F.
+  split. split. split.
+  { intros x P4.
+    destruct (in_inter2_in _ _ _ P4) as [P5 _].
+    destruct (in_union_in _ _ P5) as [c [P6 P7]].
+    destruct (subset_elim _ _ _ P6) as [_ [_ [aa [P8 _]]]].
+    destruct (P8 _ P7) as [bb P9].
+    exists aa.
+    exists bb.
+    apply P9. }
+  { intros a b1 b2 [P4 P5].
+    destruct (in_inter2_in _ _ _ P4) as [Q1 Q2].
+    destruct (in_union_in _ _ Q1) as [c1 [Q3 Q4]].
+    pose (P3 _ Q3).
+    admit. }
+  split.
+  { apply ax_exten.
+    intros x.
+    split.
+    + intros Q1.
+      destruct (domain_elim _ _ Q1) as [a Q2].
+      destruct (in_inter2_in _ _ _ Q2) as [Q3 _].
+      destruct (in_union_in _ _ Q3) as [c [Q4 Q5]].
+      destruct (subset_elim _ _ _ Q4) as [Q6 [Q7 _]].
+      apply complement_intro.
+      split.
+      - pose (in_power_subset _ _ Q6 _ Q5) as Q8.
+        destruct (subset_elim _ _ _ Q8) as [Q9 _].
+        destruct (cp_elim _ _ _ Q9) as [y [z [Q10 [_ Q11]]]].
+        destruct (opair_equal_elim _ _ _ _ Q11) as [Q12 _].
+        rewrite Q12.
+        apply Q10.
+      - intros Q8.
+       
+*)
+
+Lemma right_inverse: forall F A B, A <> ∅ -> fun_maps F A B -> 
+  ((exists H, fun_maps H B A /\ (id B = composition H F)) <-> onto F A B).
+Proof.
+  intros F A B P1 [P2 [P3 P4]].
+  split.
+  + intros [H [[[_ P5] _] P6]].
+    split.
+    - apply P2.
+    - split. 
+      * apply P3. 
+      * apply subset_asym.
+      split. 
+      { apply P4. }
+      { intros x P7.
+        pose (id_intro _ _ P7) as P8.
+        rewrite P6 in P8.
+        destruct (composition_elim _ _ _ _ P8) as [y [_ P9]].
+        apply (range_intro _ _ (in_range_intro _ _ _ P9)). }
+  + intros [[P5 P6] [P7 P8]].
+    destruct (ax_choice _ (inverse_is_relation F)) as [H [P9 [P10 P11]]].
+    exists H.
+    split. split.
+    - apply P9.
+    - split.
+      * rewrite P11.
+        rewrite (inverse_domain F).
+        apply P8.
+      * rewrite <- P3.
+        rewrite <- inverse_range.
+        apply (subset_range _ _ P10).
+    - apply ax_exten.
+      intros x.
+      split.
+      * intros P12.
+        destruct (id_elim _ _ P12) as [y [P13 P14]].
+        rewrite P14.
+        apply composition_intro.
+        exists (fun_val H y).
+        split.
+        { apply (fun_val_basic _ _ P9).
+          rewrite P11.
+          rewrite inverse_domain.
+          rewrite P8.
+          apply P13. }
+        { apply inverse_elim.
+          apply P10.
+          apply (fun_val_basic _ _ P9).
+          rewrite P11.
+          rewrite inverse_domain.
+          rewrite P8.
+          apply P13. }
+      * intros P12.
+        destruct (composition_is_relation H F x P12) as [a [b P13]].
+        rewrite P13 in P12.
+        destruct (composition_elim _ _ _ _ P12) as [c [P14 P15]].
+        destruct P2 as [_ P2].
+        rewrite (P2 c a b (conj (inverse_elim _ _ _ (P10 _ P14)) P15)) in P13.
+        rewrite P13.
+        apply id_intro.
+        apply P4.
+        apply range_intro.
+        exists c.
+        apply P15.
+Qed.
+      
+(* 3K *)
+Lemma image_union2: forall F A B, image F (A ∪ B) = (image F A) ∪ (image F B).
+Proof.
+  intros F A B.
+  apply ax_exten.
+  intros y.
+  split.
+  + intros P1.
+    destruct (image_elim _ _ _ P1) as [x [P2 P3]].
+    destruct (in_union2_in _ _ _ P3) as [P4|P4].
+    - apply in_in_union2_1.
+      apply image_intro.
+      exists x.
+      apply (conj P2 P4).
+    - apply in_in_union2_2.
+      apply image_intro.
+      exists x.
+      apply (conj P2 P4).
+  + intros P2.
+    apply image_intro.
+    destruct (in_union2_in _ _ _ P2) as [P3|P3].
+    - destruct (image_elim _ _ _ P3) as [x [P4 P5]].
+      exists x.
+      split.
+      * apply P4.
+      * apply in_in_union2_1.
+        apply P5.
+    - destruct (image_elim _ _ _ P3) as [x [P4 P5]].
+      exists x.
+      split.
+      * apply P4.
+      * apply in_in_union2_2.
+        apply P5.
+Qed.
+
+Lemma image_inter2: forall F A B, image F (A ∩ B) ⊆ (image F A) ∩ (image F B).
+Proof.
+  intros F A B y P1.
+  destruct (image_elim _ _ _ P1) as [x [P2 P3]].
+  destruct (in_inter2_in _ _ _ P3) as [P4 P5].
+  apply in_in_inter2.
+  + apply image_intro.
+    exists x.
+    apply (conj P2 P4).
+  + apply image_intro.
+    exists x.
+    apply (conj P2 P5).
+Qed.
+
+Lemma image_complement: forall F A B, complement (image F A) (image F B) ⊆ image F (complement A B).
+Proof.
+  intros F A B y P1.
+  destruct (complement_elim _ _ _ P1) as [P2 P3].
+  apply image_intro.
+  destruct (image_elim _ _ _ P2) as [x [P4 P5]].
+  exists x.
+  split.
+  + apply P4.
+  + apply complement_intro.
+    split.
+    - apply P5.
+    - intros P6.
+      absurd (y ∈ image F B).
+      * apply P3.
+      * apply image_intro.
+        exists x.
+        apply (conj P4 P6).
+Qed.
+   
+Definition fun_space (A: set) (B: set) :=
+  (subset_ctor (fun s => fun_maps s A B) (𝒫(cp A B))).
+
+Lemma fun_space_superset: forall F A B, fun_maps F A B -> F ∈ 𝒫(cp A B).
+Proof.
+  intros F A B [[P1 _] [P2 P3]].
+  apply subset_in_power.
+  intros x P4.
+  destruct (P1 x P4) as [a [b P5]].
+  rewrite P5 in P4.
+  rewrite P5.
+  apply cp_intro.
+  + rewrite <- P2.
+    apply (domain_intro _ _ (in_domain_intro _ _ _ P4)).
+  + apply P3.
+    apply (range_intro _ _ (in_range_intro _ _ _ P4)).
+Qed.
+
+Lemma fun_space_intro: forall F A B, fun_maps F A B -> F ∈ fun_space A B.
+Proof.
+  intros F A B P1.
+  destruct ((extract_set_property 
+    (ax_subset (fun s => fun_maps s A B) (𝒫(cp A B)))) F) as [_ P2].
+  apply P2.
+  split.
+  + apply (fun_space_superset _ _ _ P1).
+  + apply P1.
+Qed.
+
+Lemma fun_space_elim: forall F A B, F ∈ fun_space A B -> fun_maps F A B.
+Proof.
+  intros F A B P1.
+  destruct ((extract_set_property 
+    (ax_subset (fun s => fun_maps s A B) (𝒫(cp A B)))) F) as [P2 _].
+  apply P2.
+  apply P1.
+Qed.
+
+(* TODO classify different difition *)
+(* TODO intro and elim fun *)
+

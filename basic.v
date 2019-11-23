@@ -144,8 +144,17 @@ Proof.
   apply (contraposition2).
   intro P1.
   apply (empty_unique).
-  apply (not_exists_forall_not set (set_in2 A)).
-  apply P1.
+  apply (not_exists_forall_not).
+  apply P1. 
+Qed.
+
+Lemma exist_elmn_not_empty: forall A, (exists x, x ∈ A) -> A <> ∅.
+Proof.
+  intros A [x P1] P2.
+  absurd (x ∈ A).
+  + rewrite P2.
+    apply not_in_empty.
+  + apply P1.
 Qed.
 (*  apply *)
 (*  assert ((~(exists (a: set), a ∈ A) -> A = ∅ )).*)
