@@ -96,6 +96,15 @@ Proof.
   apply (P4 _ P3).
 Qed.
 
+Lemma suc_is_nat: forall k, nat k -> nat (S(k)).
+Proof. 
+  intros k P1.
+  apply omega_elim.
+  apply suc_in_omega.
+  apply omega_intro.
+  apply P1.
+Qed.
+
 Lemma induction_principle_: forall T, T ⊆ ω -> inductive T -> T = ω.
 Proof.
   intros T P1 P2.
@@ -123,22 +132,26 @@ Proof.
   apply P6.
 Qed.
     
-Lemma nat_is_suc: forall x, x ∈ ω -> x <> ∅ -> exists y, x = S(y).
+Lemma nat_is_suc: forall x, x ∈ ω -> x <> ∅ -> exists y, y ∈ ω /\ x = S(y).
 Proof.
   intros x P1 P2.
-  pose (P := fun x => x = ∅ \/ exists y, x = S(y)).
+  pose (P := fun x => x = ∅ \/ exists y, y ∈ ω /\ x = S(y)).
   assert (P ∅) as P3.
   { left.
     reflexivity. }
   assert (forall k, k ∈ ω -> P k -> P (S(k))) as P4.
-  { intros k _ [P4|P4].
+  { intros k P5 [P4|P4].
     + right.
       exists ∅.
       rewrite P4.
-      reflexivity.
+      split.
+      - apply empty_in_omega. 
+      - reflexivity.
     + right.
       exists k.
-      reflexivity. }
+      split.
+      - apply P5. 
+      - reflexivity. }
   destruct (induction_principle _ P3 P4 x P1) as [P5|P5].
   + contradiction.
   + apply P5.
@@ -1069,7 +1082,172 @@ Proof.
     reflexivity. }
   apply (induction_principle _ P4 P5 _ P3).
 Qed.
-  
 
+Lemma multi_equal_zero: forall m n, m ∈ ω -> n ∈ ω ->
+  m ₙx n = ₙ0 -> m = ₙ0 \/ n = ₙ0.
+Proof.
+  intros m n P1 P2.
+  apply contraposition4.
+  intros P3 P4.
+  destruct (not_or_and _ _ P3) as [P5 P6].
+  destruct (nat_is_suc _ P1 P5) as [mm [P7 P8]].
+  destruct (nat_is_suc _ P2 P6) as [nn [P9 P10]].
+  rewrite P8 in P4.
+  rewrite (multi_red_l _ _ P7 P2) in P4.
+  rewrite P10 in P4.
+  rewrite (add_red_l _ _ P9 (multi_in_omega _ _ P7 (suc_in_omega _ P9))) in P4.
+  absurd (ₙ0 = S( nn ₙ+ mm ₙx S( nn))).
+  + apply empty_not_suc.
+  + symmetry.
+    apply P4.
+Qed.
 
+Definition less (m: set) (n: set) := m ∈ n.
+Notation "m ₙ< n" := (less m n) (at level 65, no associativity).
 
+Definition less_equal (m: set) (n: set) := (less m n) \/ (m = n).
+Notation "m ₙ≤ n" := (less_equal m n) (at level 65, no associativity).
+
+Lemma in_suc: forall m n, nat n -> m ∈ S(n) -> m ∈ n \/ m = n.
+Proof.
+  intros m n P2 P3.
+  destruct (in_union2_in _ _ _ P3) as [P4|P4].
+  + left.
+    apply P4.
+  + right.
+    symmetry.   
+    apply (in_singleton_equal _ _ P4).
+Qed.
+
+Lemma in_nat_nat: forall m n, nat n -> m ∈ n -> nat m.
+Proof.
+  intros m n P1 P2.
+  assert (forall m1, m1 ∈ ₙ0 -> nat m1) as P3.
+  { intros m1 Q1.
+    absurd (m1 ∈ ₙ0).
+    + apply not_in_empty.
+    + apply Q1. }
+  assert (forall k, k ∈ ω -> (forall m1, m1 ∈ k -> nat m1) -> 
+    (forall m1, m1 ∈ S(k) -> nat m1)) as P4.
+  { intros k Q1 Q2 m1 Q3.
+    destruct (in_suc _ _ (omega_elim _ Q1) Q3) as [Q4|Q4].
+    + apply (Q2 _ Q4).
+    + rewrite Q4.
+      apply (omega_elim _ Q1). }
+  apply (induction_principle _ P3 P4 _ (omega_intro _ P1) _ P2).
+Qed.
+
+Lemma suc_less: forall m n, nat m -> nat n -> m ₙ< n -> S(m) ₙ< S(n).
+Proof.
+  intros m n P1 P2 P3.
+  assert (forall m, m ₙ< ₙ0 -> S(m) ₙ< S(ₙ0)) as P4.
+  { intros m1 Q1.
+    absurd (m1 ₙ< ₙ0).
+    + apply not_in_empty.
+    + apply Q1. }
+  assert (forall k, k ∈ ω -> (forall m1, m1 ₙ< k -> S(m1) ₙ< S(k)) ->
+    (forall m2, m2 ₙ< S(k) -> S(m2) ₙ< S(S(k)))) as P5.
+  { intros k Q1 Q2 m2 Q3.
+    destruct (in_suc _ _ (omega_elim _ Q1) Q3) as [Q4|Q4].
+    + pose (nat_is_trans _ (suc_is_nat _ (suc_is_nat _ (omega_elim _ Q1)))) as Q5.
+      apply (Q5 _ _ (conj (Q2 _ Q4) (suc_intro_1 (S(k))))).
+    + rewrite Q4.
+      apply suc_intro_1. }
+  apply (induction_principle _ P4 P5 _ (omega_intro _ P2) _ P3).
+Qed.
+
+Lemma empty_in_nat: forall n, nat n -> n <> ₙ0 -> ₙ0 ∈ n.
+Proof.
+  intros n P1 P2.
+  pose (fun k => nat k -> k <> ₙ0 -> ₙ0 ∈ k) as P.
+  assert (P (ₙ0)) as P3.
+  { intros Q1 Q2.
+    contradiction. }
+  assert (forall k, k ∈ ω -> P k -> P (S(k))) as P4.
+  { intros k Q1 Q2 Q3 Q4.
+    destruct (LEM (k = ₙ0)) as [Q5|Q5].
+    + rewrite Q5.
+      apply suc_intro_1.
+    + pose (nat_is_trans _ (suc_is_nat _ (omega_elim _ Q1))) as Q6.
+      apply (Q6 _ _ (conj (Q2 (omega_elim _ Q1) Q5) (suc_intro_1 k))). }
+  apply (induction_principle _ P3 P4 _ (omega_intro _ P1) P1 P2).
+Qed.
+    
+Theorem trichotomy_of_nat: forall m n, nat m -> nat n ->
+  ((m ₙ< n) /\ ~(m = n) /\ ~(n ₙ< m)) \/
+  (~(m ₙ< n) /\ (m = n) /\ ~(n ₙ< m)) \/
+  (~(m ₙ< n) /\ ~(m = n) /\ (n ₙ< m)).
+Proof.
+  intros m n P1 P2.
+  pose (fun k => nat k -> k ∈ n \/ k = n \/ n ∈ k) as P.
+  assert (P (ₙ0)) as P3.
+  { intros Q1.
+    destruct (LEM (n = ₙ0)) as [Q2|Q2].
+    + right. left.
+      symmetry.
+      apply Q2.
+    + left.
+      apply (empty_in_nat _ P2 Q2). }
+  assert (forall k, k ∈ ω -> P k -> P (S(k))) as P4.
+  { intros k Q1 Q2 Q3.
+    pose (in_nat_nat _ _ Q3 (suc_intro_1 k)) as Q4.
+    destruct (Q2 Q4) as [Q5|[Q5|Q5]].
+    + destruct (suc_elim _ _ (suc_less _ _ Q4 P2 Q5)) as [Q6|Q6].
+      - right. left.
+        apply Q6.
+      - left.
+        apply Q6.
+    + right. right.
+      rewrite Q5.
+      apply suc_intro_1.
+    + right. right.
+      apply (nat_is_trans _ Q3 _ _ (conj Q5 (suc_intro_1 k))). }
+  destruct (induction_principle _ P3 P4 _ (omega_intro _ P1) P1) as [P5|[P5|P5]].
+  + left.
+    split.
+    { apply P5. }
+    split.
+    { intros P6.
+      rewrite P6 in P5.
+      absurd (n ∈ n).
+      + apply (nat_not_in_self _ (omega_intro _ P2)).
+      + apply P5. }
+    { intros P6.
+      absurd (n ∈ n).
+      + apply (nat_not_in_self _ (omega_intro _ P2)).
+      + apply (nat_is_trans _ P2 _ _ (conj P6 P5)). }
+  + right. left.
+    split. 
+    { rewrite P5.
+      apply (nat_not_in_self _ (omega_intro _ P2)). }
+    split.
+    { apply P5. }
+    { rewrite P5.
+      apply (nat_not_in_self _ (omega_intro _ P2)). }
+  + right. right.
+    split.
+    { intros P6.
+      absurd (n ∈ n).
+      + apply (nat_not_in_self _ (omega_intro _ P2)).
+      + apply (nat_is_trans _ P2 _ _ (conj P5 P6)). }
+    split.
+    { intros P6.
+      rewrite P6 in P5.
+      absurd (n ∈ n).
+      + apply (nat_not_in_self _ (omega_intro _ P2)).
+      + apply P5. }
+    { apply P5. }
+Qed.
+
+Theorem trichotomy_of_nat_weak: forall m n, nat m -> nat n ->
+  (m ₙ< n) \/ (m = n) \/ (n ₙ< m).
+Proof. 
+  intros m n P1 P2.
+  destruct (trichotomy_of_nat _ _ P1 P2) as [[P3 _]|[[_ [P3 _]]|[_ [_ P3]]]]. 
+  + left. 
+    apply P3.
+  + right. left.
+    apply P3.
+  + right. right.
+    apply P3.
+Qed.
