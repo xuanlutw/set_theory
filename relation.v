@@ -157,6 +157,18 @@ Definition range (A: set) :=
   subset_ctor (fun x => (in_range x A)) (∪(∪(A))).
 Notation "ran( A )" := (range A) (at level 60, no associativity).
 
+Definition relation_on (R: set) (A: set) := 
+  forall r, r ∈ R -> exists a b, a ∈ A /\ b ∈ A /\ r = ⟨a, b⟩.
+
+Lemma relation_on_elim: forall R A, relation_on R A -> relation R.
+Proof.
+  intros R A P1 r P2.
+  destruct(P1 r P2) as [a [b [_ [_ P3]]]].
+  exists a.
+  exists b.
+  apply P3.
+Qed.
+  
 Definition filed (R:set) :=
   domain R ∪range R.
 Notation "fld( A )" := (filed A) (at level 60, no associativity).
@@ -1733,4 +1745,3 @@ Qed.
 
 (* TODO classify different difition *)
 (* TODO intro and elim fun *)
-
