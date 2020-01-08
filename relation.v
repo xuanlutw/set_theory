@@ -66,7 +66,7 @@ Proof.
           apply (singleton_pair_equal_3 A C D P2). }
         { apply P4. }
 Qed.
-          
+ 
 Theorem opair_equal_elim_1: forall A B C D, ⟨A, B⟩ = ⟨C, D⟩ -> (A = C).
 Proof.
   intros A B C D P1.
@@ -304,7 +304,7 @@ Definition fun_maps (F: set) (A: set) (B: set) :=
   (function F) /\ (dom(F) = A) /\ (ran(F) ⊆ B).
 
 Definition onto (F: set) (A: set) (B: set) :=
-  (function F) /\ (dom(F) = A) /\ (ran(F) = B).
+  (dom(F) = A) /\ (ran(F) = B).
 
 Lemma single_value_is_function: forall x y, function ({⟨x, y⟩}).
 Proof.
@@ -987,12 +987,10 @@ Lemma id_onto: forall A, onto (id A) A A.
 Proof.
   intros A.
   split.
-  + apply id_is_function.
-  + split.
-    - symmetry. 
-      apply id_domain.
-    - symmetry.
-      apply id_range.
+  + symmetry. 
+    apply id_domain.
+  + symmetry.
+    apply id_range.
 Qed.
 
 Lemma id_one_to_one: forall A, one_to_one(id A).
@@ -1603,9 +1601,7 @@ Proof.
   intros F A B P1 [P2 [P3 P4]].
   split.
   + intros [H [[[_ P5] _] P6]].
-    split.
-    - apply P2.
-    - split. 
+    - split.
       * apply P3. 
       * apply subset_asym.
       split. 
@@ -1615,7 +1611,7 @@ Proof.
         rewrite P6 in P8.
         destruct (composition_elim _ _ _ _ P8) as [y [_ P9]].
         apply (range_intro _ _ (in_range_intro _ _ _ P9)). }
-  + intros [[P5 P6] [P7 P8]].
+  + intros [P7 P8].
     destruct (ax_choice _ (inverse_is_relation F)) as [H [P9 [P10 P11]]].
     exists H.
     split. split.
