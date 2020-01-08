@@ -983,6 +983,32 @@ Proof.
     apply (id_intro _ _ P3).
 Qed.
 
+Lemma id_onto: forall A, onto (id A) A A.
+Proof.
+  intros A.
+  split.
+  + apply id_is_function.
+  + split.
+    - symmetry. 
+      apply id_domain.
+    - symmetry.
+      apply id_range.
+Qed.
+
+Lemma id_one_to_one: forall A, one_to_one(id A).
+Proof.
+  intros A.
+  split.
+  + apply id_is_function.
+  + intros a1 a2 b [P1 P2].
+    destruct (id_elim _ _ P1) as [x1 [_ P3]].
+    destruct (id_elim _ _ P2) as [x2 [_ P4]].
+    rewrite (opair_equal_elim_1 _ _ _ _ P3).
+    rewrite <- (opair_equal_elim_2 _ _ _ _ P3).
+    rewrite (opair_equal_elim_1 _ _ _ _ P4).
+    apply (opair_equal_elim_2 _ _ _ _ P4).
+Qed.
+
 Definition const (A: set) (c: set) :=
   cp A ({c}).
 Lemma const_intro: forall A c x, x ∈ A -> ⟨x, c⟩ ∈ const A c.
