@@ -511,6 +511,29 @@ Proof.
   rewrite (inter2_sym A B).
   apply inter2_subset_1.
 Qed.
+
+Lemma disjoint_selection: forall A B x, A ∩ B = ∅ -> x ∈ A ∪ B -> 
+  (x ∈ A /\ x ∉  B) \/ (x ∈ B /\ x ∉  A).
+Proof.
+  intros A B x P1 P2.
+  destruct (in_union2_in _ _ _ P2) as [P3|P3].
+  + left.
+    split.
+    - apply P3.
+    - intros P4.
+      absurd (x ∈ A ∩ B). 
+      * rewrite P1. 
+        apply not_in_empty.
+      * apply (in_in_inter2 _ _ _ P3 P4).
+  + right.
+    split.
+    - apply P3.
+    - intros P4.
+      absurd (x ∈ A ∩ B). 
+      * rewrite P1. 
+        apply not_in_empty.
+      * apply (in_in_inter2 _ _ _ P4 P3).
+Qed.
 (*----------------------------------------------------------------------------*)
 
 (* Complement *)
