@@ -437,6 +437,47 @@ Proof.
       apply P2.
 Qed.
 
+Lemma union2_subset_absorb_l: forall A B, A ⊆ B -> A ∪ B = B.
+Proof.
+  intros A B P1.
+  apply subset_asym.
+  split.
+  + intros x P2.
+    destruct (in_union2_in _ _ _ P2) as [P3|P3].
+    - apply (P1 _ P3).
+    - apply P3.
+  + intros x P2.
+    apply (in_in_union2_2 _ _ _ P2).
+Qed.
+
+Lemma union2_subset_absorb_r: forall A B, A ⊆ B -> B ∪ A = B.
+Proof.
+  intros A B P1.
+  rewrite union2_sym.
+  apply (union2_subset_absorb_l _ _ P1).
+Qed.
+
+Lemma union2_empty_absorb_l: forall A, ∅ ∪ A = A.
+Proof.
+  intros A.
+  apply subset_asym.
+  split.
+  + intros x P1.
+    destruct (in_union2_in _ _ _ P1) as [P2|P2].
+    - absurd (x ∈ ∅).
+      * apply not_in_empty.
+      * apply P2.
+    - apply P2.
+  + intros x P1.
+    apply (in_in_union2_2 _ _ _ P1).
+Qed.
+
+Lemma union2_empty_absorb_r: forall A, A ∪ ∅ = A.
+Proof.
+  intros A.
+  rewrite union2_sym.
+  apply union2_empty_absorb_l.
+Qed.
 (*----------------------------------------------------------------------------*)
 
 
@@ -540,7 +581,9 @@ Qed.
 Definition complement (A: set) (B: set) :=
   (subset_ctor (fun s => s ∉  B) A). 
 
-Lemma complement_intro: forall A B x, x ∈ A /\ x ∉  B -> x ∈ complement A B.
+Notation "A \ B" := (complement A B) (at level 60, no associativity).
+
+Lemma complement_intro: forall A B x, x ∈ A /\ x ∉  B -> x ∈ A \ B.
 Proof.
   intros A B x [P1 P2].
   destruct (extract_set_property (ax_subset (fun s => s ∉  B) A) x) as [_ P3].
@@ -548,14 +591,14 @@ Proof.
   apply (conj P1 P2).
 Qed.
 
-Lemma complement_elim: forall A B x, x ∈ complement A B -> x ∈ A /\ x ∉  B.
+Lemma complement_elim: forall A B x, x ∈ A \ B -> x ∈ A /\ x ∉  B.
 Proof.
   intros A B x P1.
   destruct (extract_set_property (ax_subset (fun s => s ∉  B) A) x) as [P2 _].
   apply (P2 P1).
 Qed.
 
-Lemma complement_inter2: forall A B, A ∩ (complement B A) = ∅.
+Lemma complement_inter2: forall A B, A ∩ (B \ A) = ∅.
 Proof.
   intros A B.
   apply ax_exten.
@@ -570,7 +613,7 @@ Proof.
     contradiction.
 Qed.
 
-Lemma complement_union2: forall A B, A ∪ (complement B A) = A ∪ B.
+Lemma complement_union2: forall A B, A ∪ (B \ A) = A ∪ B.
 Proof.
   intros A B.
   apply ax_exten.
@@ -591,7 +634,7 @@ Proof.
         apply (conj P2 P3).
 Qed.
 
-Lemma complement_proper_subset: forall A B, A ⊆ B -> A <> B -> exists x, x ∈ complement B A.
+Lemma complement_proper_subset: forall A B, A ⊆ B -> A <> B -> exists x, x ∈ B \ A.
 Proof. 
   intros A B P1 P2.
   destruct (not_equal_exist _ _ P2) as [x [[P3 P4]|P3]].
