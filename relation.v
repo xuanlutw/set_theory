@@ -341,6 +341,16 @@ Proof.
       apply subset_refl.
 Qed.
 
+Lemma fonto_intro: forall F, function F -> fonto F (dom(F)) (ran(F)).
+Proof.
+  intros F P1.
+  split.
+  + apply P1.
+  + split.
+    - reflexivity.
+    - reflexivity.
+Qed.
+
 (* Function Value *)
 Theorem fval_exist: forall F x, exists y, function F -> x ∈ dom(F) -> 
   (⟨x, y⟩ ∈ F /\ (forall z, ⟨x, z⟩ ∈ F -> y = z)).
@@ -1082,6 +1092,135 @@ Proof.
     (ax_subset (fun s => fover s A B) (𝒫(cp A B)))) F) as [P2 _].
   apply P2.
   apply P1.
+Qed.
+
+(* Empty Function *)
+Lemma empty_is_rel: rel ∅.
+Proof.
+  intros x P1.
+  absurd (x ∈ ∅).
+  + apply not_in_empty.
+  + apply P1.
+Qed.
+
+Lemma empty_is_single_value: single_value ∅.
+Proof.
+  intros a b1 b2 P1 P2.
+  absurd (⟨a, b1⟩ ∈ ∅).
+  + apply not_in_empty.
+  + apply P1.
+Qed.
+
+Lemma empty_is_single_rooted: single_rooted ∅.
+Proof.
+  intros a1 a2 b P1 P2.
+  absurd (⟨a1, b⟩ ∈ ∅).
+  + apply not_in_empty.
+  + apply P1.
+Qed.
+
+Lemma empty_is_function: function ∅.
+Proof.
+  split.
+  + apply empty_is_rel.
+  + apply empty_is_single_value.
+Qed.
+
+Lemma empty_is_injection: injection ∅.
+Proof.
+  split.
+  + apply empty_is_function.
+  + apply empty_is_single_rooted.
+Qed.
+
+Lemma empty_dom: dom(∅) = ∅.
+Proof.
+  apply subset_asym.
+  split.
+  + intros x P1.
+    destruct (dom_elim _ _ P1) as [y P2].
+    absurd (⟨x, y⟩ ∈ ∅).
+    - apply not_in_empty.
+    - apply P2.
+  + intros x P1.
+    absurd (x ∈ ∅).
+    - apply not_in_empty.
+    - apply P1.
+Qed.
+
+Lemma empty_ran: ran(∅) = ∅.
+Proof.
+  apply subset_asym.
+  split.
+  + intros y P1.
+    destruct (ran_elim _ _ P1) as [x P2].
+    absurd (⟨x, y⟩ ∈ ∅).
+    - apply not_in_empty.
+    - apply P2.
+  + intros y P1.
+    absurd (y ∈ ∅).
+    - apply not_in_empty.
+    - apply P1.
+Qed.
+
+Lemma fspace_empty_dom: forall B, fspace ∅ B = {∅}.
+Proof.
+  intros B.
+  apply subset_asym.
+  split.
+  + intros x P1.
+    assert (x = ∅) as P2.
+    { apply empty_unique.
+      intros s P2.
+      destruct (fspace_elim _ _ _ P1) as [[P3 _] [P4 _]].
+      destruct (P3 _ P2) as [p [q P5]].
+      rewrite P5 in P2.
+      absurd (dom(x) = ∅).
+      + apply exist_elmn_not_empty.
+        exists p.
+        apply (dom_intro_2 _ _ _ P2).
+      + apply P4. }
+    rewrite P2.
+    apply in_singleton.
+  + intros x P1.
+    apply fspace_intro.
+    rewrite <- (in_singleton_equal _ _ P1).
+    split.
+    - apply empty_is_function.
+    - split.
+      * apply empty_dom.
+      * rewrite empty_ran.
+        apply empty_subset.
+Qed.
+
+Lemma fspace_empty_ran: forall A, A <> ∅ -> fspace A ∅ = ∅.
+Proof.
+  intros A P1.
+  apply subset_asym.
+  split.
+  + intros x P2.
+    destruct (fspace_elim _ _ _ P2) as [_ [P3 P4]].
+    destruct (not_empty_exist_elmn _ P1) as [a P5].
+    rewrite <- P3 in P5.
+    destruct (dom_elim _ _ P5) as [b P7].
+    absurd (b ∈ ∅).
+    - apply not_in_empty.
+    - apply (P4 _ (ran_intro_2 _ _ _ P7)).
+  + intros x P2.
+    absurd (x ∈ ∅).
+    - apply not_in_empty.
+    - apply P2.
+Qed.
+
+Lemma empty_dom_empty_ran: forall F, function F -> dom(F) = ∅ -> ran(F) = ∅.
+Proof. 
+  intros F P1 P2.
+  pose (fonto_intro _ P1) as P3.
+  rewrite P2 in P3.
+  pose (fspace_intro _ _ _ (fonto_fover _ _ _ P3)) as P4.
+  rewrite fspace_empty_dom in P4.
+  rewrite <- (in_singleton_equal _ _ P4).
+  apply empty_ran.
 Qed.
 
 (* Single Pair Function *)
