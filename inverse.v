@@ -2,6 +2,7 @@ Require Import logic.
 Require Import axiom.
 Require Import basic.
 Require Import relation.
+Require Import ax_choice.
 
 (* Inverse Function *)
 (* 3J *)
@@ -77,9 +78,7 @@ Proof.
           apply inv_intro.
           apply (fval_intro_2 _ _ P2 P9). }
       * intros x P8.
-        destruct (comp_is_rel _ _ _ P8) as [s [r P9]].
-        rewrite P9 in P8.
-        destruct (comp_elim _ _ _ _ P8) as [t [P10 P11]].
+        destruct (comp_elim_2 _ _ _ P8) as [s [t [r [P9 [P10 P11]]]]].
         destruct (in_union2_in _ _ _ P11) as [P12|P12].
         { pose (inv_elim _ _ _ P12) as P13.
           rewrite (P6 _ _ _ P10 P13) in P9.
@@ -96,3 +95,59 @@ Proof.
           + apply (ran_intro_2 _ _ _ P10). }
 Qed.
 
+Lemma right_inverse: forall F A B, A <> ∅ -> fover F A B -> 
+  ((exists H, fover H B A /\ (id B = (F ∘ H))) <-> fonto F A B).
+Proof.
+  intros F A B P1 [P2 [P3 P4]].
+  split.
+  + intros [H [[[_ P5] _] P6]].
+    split.
+    - apply P2. 
+    - split.
+      * apply P3. 
+      * apply subset_asym.
+        split. 
+        { apply P4. }
+        { intros x P7.
+          pose (id_intro _ _ P7) as P8.
+          rewrite P6 in P8.
+          destruct (comp_elim _ _ _ _ P8) as [y [_ P9]].
+          apply (ran_intro_2 _ _ _ P9). }
+  + intros [_ [_ P7]].
+    destruct (ax_choice (inv F) (inv_is_rel F)) as [H [P8 [P9 P10]]].
+    exists H.
+    split. split.
+    - apply P8.
+    - split. 
+      * rewrite P10.
+        rewrite inv_dom.
+        apply P7.
+      * rewrite <- P3.
+        rewrite <- (inv_ran F).
+        apply (subset_ran _ _ P9).
+    - apply subset_asym.
+      split.
+      * intros x P11.
+        destruct (id_elim _ _ P11) as [b [P12 P13]].
+        rewrite <- P7 in P12.
+        rewrite <- inv_dom in P12.
+        rewrite <- P10 in P12.
+        rewrite P13.
+        apply comp_intro.
+        exists (H[b]).
+        split.
+        { apply (fval_intro_2 _ _ P8 P12). }
+        { apply (inv_elim).
+          apply P9.
+          apply (fval_intro_2 _ _ P8 P12). }
+      * intros x P11.
+        destruct (comp_elim_2 _ _ _ P11) as [a [b [c [P12 [P13 P14]]]]].
+        destruct P2 as [_ P2].
+        rewrite (P2 _ _ _ P14 (inv_elim _ _ _ (P9 _ P13))) in P12.
+        rewrite P12.
+        apply id_intro.
+        rewrite <- P7.
+        rewrite <- inv_dom.
+        rewrite <- P10.
+        apply (dom_intro_2 _ _ _ P13).
+Qed.

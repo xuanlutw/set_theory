@@ -2,7 +2,6 @@ Require Import logic.
 Require Import axiom.
 Require Import basic.
 
-
 (* Order Pairs *)
 Definition opair (A: set) (B: set) := {{A}, {A, B}}.
 
@@ -157,7 +156,7 @@ Definition in_dom (x: set) (R: set) :=
   exists y, ⟨x, y⟩ ∈ R.
 
 Definition dom (A: set) :=
-  subset_ctor (fun x => (in_domain x A)) (∪(∪(A))).
+  subset_ctor (fun x => (in_dom x A)) (∪(∪(A))).
 
 Notation "dom( A )" := (dom A) (at level 60, no associativity).
 
@@ -206,11 +205,11 @@ Proof.
   apply (in_dom_intro R x y P1).
 Qed.
 
-Lemma dom_elim: forall R x, x ∈ dom(R) -> in_domain x R.
+Lemma dom_elim: forall R x, x ∈ dom(R) -> in_dom x R.
 Proof.
   intros R x P1.
   destruct (extract_set_property 
-    (ax_subset (fun x => (in_domain x R)) (∪(∪(R)))) 
+    (ax_subset (fun x => (in_dom x R)) (∪(∪(R)))) 
     x) as [P2 _].
   apply P2.
   apply P1.
@@ -568,8 +567,7 @@ Proof.
     apply (conj P2 P5).
 Qed.
 
-Lemma image_complement: forall F A B, 
-  complement (F[|A|]) (F[|B|]) ⊆ F[|(complement A B)|].
+Lemma image_complement: forall F A B, (F[|A|]) \ (F[|B|]) ⊆ F[|(A \ B)|].
 Proof.
   intros F A B y P1.
   destruct (complement_elim _ _ _ P1) as [P2 P3].
@@ -582,7 +580,7 @@ Proof.
     split.
     - apply P5.
     - intros P6.
-      absurd (y ∈ image F B).
+      absurd (y ∈ F[|B|]).
       * apply P3.
       * apply image_intro.
         exists x.
@@ -870,6 +868,21 @@ Proof.
   apply P4.
 Qed.
 
+Lemma comp_elim_2: forall s F G, s ∈ G ∘ F-> 
+  (exists x y z, s = ⟨x, z⟩ /\ ⟨x, y⟩ ∈ F /\ ⟨y, z⟩ ∈ G).
+Proof. 
+  intros s F G P1.
+  destruct (comp_is_rel _ _ _ P1) as [x [z P2]].
+  rewrite P2 in P1.
+  destruct (comp_elim _ _ _ _ P1) as [y P3].
+  exists x.
+  exists y.
+  exists z.
+  split.
+  + apply P2. 
+  + apply P3.
+Qed.
+  
 (* 3H *)
 Lemma comp_single_value: forall F G, single_value F -> single_value G ->
   single_value (G ∘ F).
