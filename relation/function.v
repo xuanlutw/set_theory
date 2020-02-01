@@ -92,12 +92,13 @@ Proof.
   apply P4.
 Qed.
 
-Theorem fval_intro: forall F x y, function F -> x ∈ dom(F) -> ⟨x, y⟩ ∈ F -> 
+Theorem fval_intro: forall F x y, function F -> ⟨x, y⟩ ∈ F -> 
   y = F[x].
 Proof.
-  intros F x y P1 P2 P3.
-  destruct (extract_set_property (fval_exist F x) P1 P2) as [_ P4].
-  rewrite <- (P4 y P3). 
+  intros F x y P1 P2.
+  destruct 
+    (extract_set_property (fval_exist F x) P1 (dom_intro_2 _ _ _ P2)) as [_ P3].
+  rewrite <- (P3 y P2). 
   reflexivity.
 Qed.
 
@@ -457,10 +458,6 @@ Proof.
   apply fval_intro.
   + destruct (inv_function F) as [P4 _].
     apply (P4 P2).
-  + rewrite inv_dom.
-    apply ran_intro.
-    exists x.
-    apply (fval_intro_2 _ _ P1 P3).
   + apply inv_intro.
     apply (fval_intro_2 _ _ P1 P3).
 Qed.
@@ -471,13 +468,7 @@ Proof.
   intros F [P1 P2] x P3.
   symmetry.
   apply fval_intro.
-    apply P1.
-  + apply dom_intro.
-    exists x.
-    apply inv_elim.
-    destruct (inv_function F) as [P4 _].
-    rewrite <- inv_dom in P3.
-    apply (fval_intro_2 _ _ (P4 P2) P3).
+  + apply P1.
   + apply inv_elim.
     destruct (inv_function F) as [P4 _].
     rewrite <- inv_dom in P3.
@@ -640,11 +631,7 @@ Proof.
   destruct (comp_elim _ _ _ _ P4) as [y [P5 P6]].
   apply dom_intro.
   exists z.
-  assert (x ∈ dom(F)) as P7.
-  { apply dom_intro.
-    exists y.
-    apply P5. }
-  rewrite <- (fval_intro _ _ _ P1 P7 P5).
+  rewrite <- (fval_intro _ _ _ P1 P5).
   apply P6.
 Qed.
 
@@ -682,7 +669,7 @@ Lemma comp_elim_fval: forall F G x, function F -> function G -> x ∈ dom(G ∘ 
   G[F[x]] = (G ∘ F)[x].
 Proof.
   intros F G x P1 P2 P3.
-  apply (fval_intro _ _ _ (comp_function _ _ P1 P2) P3).
+  apply (fval_intro _ _ _ (comp_function _ _ P1 P2)).
   apply (comp_intro).
   exists (F[x]).
   split.
@@ -804,6 +791,20 @@ Proof.
     (ax_subset (fun s => fover s A B) (𝒫(cp A B)))) F) as [P2 _].
   apply P2.
   apply P1.
+Qed.
+
+Lemma fspace_dom: forall F A B, F ∈ fspace A B -> dom(F) = A.
+Proof.
+  intros F A B P1.
+  destruct (fspace_elim _ _ _ P1) as [_ [P2 _]].
+  apply P2.
+Qed.
+
+Lemma fspace_ran: forall F A B, F ∈ fspace A B -> ran(F) ⊆ B.
+Proof.
+  intros F A B P1.
+  destruct (fspace_elim _ _ _ P1) as [_ [_ P2]].
+  apply P2.
 Qed.
 (*----------------------------------------------------------------------------*)
 
@@ -932,16 +933,9 @@ Lemma union_fval: forall f H x, f ∈ H -> function f -> function (∪(H)) ->
 Proof.
   intros f H x P1 P2 P3 P4.
   destruct (dom_elim _ _ P4) as [y P5].
-  rewrite <- (fval_intro _ _ _ P2 P4 P5).
+  rewrite <- (fval_intro _ _ _ P2 P5).
   apply fval_intro.
   + apply P3.
-  + apply dom_intro.
-    exists y.
-    apply in_in_union.
-    exists f.
-    split.
-    - apply P1.
-    - apply P5.
   + apply in_in_union.
     exists f.
     split.
@@ -954,13 +948,9 @@ Lemma union2_fval_1: forall F G x, function F -> function (F ∪ G) ->
 Proof. 
   intros F G x P1 P2 P3.
   destruct (dom_elim _ _ P3) as [y P4].
-  rewrite <- (fval_intro _ _ _ P1 P3 P4).
+  rewrite <- (fval_intro _ _ _ P1 P4).
   apply fval_intro.
   + apply P2.
-  + apply dom_intro.
-    exists y.
-    apply in_in_union2_1.
-    apply P4.
   + apply in_in_union2_1.
     apply P4.
 Qed.

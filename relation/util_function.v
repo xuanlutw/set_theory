@@ -305,8 +305,6 @@ Proof.
   symmetry.
   apply fval_intro.
   + apply (id_is_function A).
-  + rewrite (id_dom A) in P1.
-    apply P1.
   + apply (id_intro _ _ P1).
 Qed.
 
@@ -438,8 +436,6 @@ Proof.
   intros A c x P1.
   apply fval_intro.
   + apply const_is_function.
-  + rewrite <- (const_dom A c).
-    apply P1.
   + apply (const_intro _ _ _ P1).
 Qed.
 (*----------------------------------------------------------------------------*)
