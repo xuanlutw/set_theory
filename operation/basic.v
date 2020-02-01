@@ -1,6 +1,7 @@
-Require Import logic.
-Require Import axiom.
+Require Import axiom.logic.
+Require Import axiom.axiom.
 
+(* Subset *)
 Lemma subset_asym: forall A B, A ⊆ B /\ B ⊆ A -> A = B.
 Proof.
   intros A B P1.
@@ -46,7 +47,8 @@ Proof.
   apply subset_refl.
 Qed.
 
-Lemma exten_reverse: forall A B: set, A = B -> (forall x: set, x ∈  A <-> x ∈  B).
+Lemma exten_reverse: forall A B: set, A = B -> 
+  (forall x: set, x ∈  A <-> x ∈  B).
 Proof.
   intros A B P1 x.
   rewrite P1.
@@ -108,9 +110,7 @@ Proof.
   destruct (extract_set_property (ax_subset P A) x) as [P2 _].
   apply (P2 P1).
 Qed.
-(* TODO rewrite other subset intro and elim *)
 (*----------------------------------------------------------------------------*)
-
 
 (* Empty Set *)
 Lemma not_in_empty: forall A, A ∉  ∅.
@@ -156,28 +156,9 @@ Proof.
     apply not_in_empty.
   + apply P1.
 Qed.
-(*  apply *)
-(*  assert ((~(exists (a: set), a ∈ A) -> A = ∅ )).*)
-(*  intro.*)
-(*  assert (forall a, a ∉ A).*)
-(*  apply (not_exists_forall_not). assumption.*)
-(*  apply (empty_unique). assumption.*)
-(*  apply e.*)
-(*  apply H.*)
-(**)
-(*  assert ((~(exists (a: set), a ∈ A) -> A = ∅ ) -> (A <> ∅ -> (exists a, a ∈ A))).*)
-(*  apply (contraposition2).*)
-(*  assert ((~(exists (a: set), a ∈ A) -> A = ∅ )).*)
-(*  intro.*)
-(*  assert (forall a, a ∉ A).*)
-(*  apply (not_exists_forall_not). assumption.*)
-(*  apply (empty_unique). assumption.*)
-(*  apply e.*)
-(*  apply H. *)
 (*----------------------------------------------------------------------------*)
 
-
-(* Power *)
+(* Power set *)
 Lemma in_power_subset: forall A x, x ∈ 𝒫(A) -> x ⊆ A.
 Proof.
   intros A x P1.
@@ -198,7 +179,6 @@ Proof.
   apply subset_in_power.
   apply subset_refl.
 Qed.
-
 (*----------------------------------------------------------------------------*)
 
 (* Union *)
@@ -215,9 +195,9 @@ Proof.
   destruct (extract_set_property (ax_union A) x) as [_ P2].
   apply (P2 P1).
 Qed.
+(*----------------------------------------------------------------------------*)
 
-
-(* Pair *)
+(* Singleton and Pair*)
 Lemma singleton_basic: forall A, {A} = singleton(A).
 Proof.
   intros A.
@@ -391,7 +371,7 @@ Proof.
 Qed.
 (*----------------------------------------------------------------------------*)
 
-(* Union *)
+(* Union of Two *)
 Lemma in_union2_in: forall A B x, x ∈ A ∪ B -> x ∈ A \/ x ∈ B.
 Proof.
   intros A B x P1.
@@ -480,8 +460,19 @@ Proof.
 Qed.
 (*----------------------------------------------------------------------------*)
 
+(* Intersection of Two *)
+Theorem thm_inter2: forall A B: set, exists C: set, 
+  forall x, x ∈ C <-> (x ∈ A /\ x ∈ B).
+Proof.
+  intros A B.
+  destruct (ax_subset (fun x => x ∈ B) A) as [x P].
+  exists x.
+  apply P.
+Qed.
 
-(* inter2 *)
+Definition inter2_ctor (A: set) (B: set) := extract_set(thm_inter2 A B).
+Notation "A ∩ B" := (inter2_ctor A B) (at level 64, no associativity).
+
 Lemma in_inter2_in: forall A B x, x ∈ A ∩ B -> x ∈ A /\ x ∈ B.
 Proof.
   intros A B x P1.
@@ -580,7 +571,6 @@ Qed.
 (* Complement *)
 Definition complement (A: set) (B: set) :=
   (subset_ctor (fun s => s ∉  B) A). 
-
 Notation "A \ B" := (complement A B) (at level 60, no associativity).
 
 Lemma complement_intro: forall A B x, x ∈ A /\ x ∉  B -> x ∈ A \ B.
@@ -634,7 +624,8 @@ Proof.
         apply (conj P2 P3).
 Qed.
 
-Lemma complement_proper_subset: forall A B, A ⊆ B -> A <> B -> exists x, x ∈ B \ A.
+Lemma complement_proper_subset: forall A B, A ⊆ B -> A <> B -> 
+  exists x, x ∈ B \ A.
 Proof. 
   intros A B P1 P2.
   destruct (not_equal_exist _ _ P2) as [x [[P3 P4]|P3]].
@@ -645,4 +636,4 @@ Proof.
   + exists x.
     apply (complement_intro _ _ _ P3).
 Qed.
-    
+(*----------------------------------------------------------------------------*)

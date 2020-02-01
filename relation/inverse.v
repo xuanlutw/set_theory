@@ -1,8 +1,10 @@
-Require Import logic.
-Require Import axiom.
-Require Import basic.
-Require Import relation.
-Require Import ax_choice.
+Require Import axiom.logic.
+Require Import axiom.axiom.
+Require Import axiom.ax_choice.
+Require Import operation.basic.
+Require Import relation.relation.
+Require Import relation.function.
+Require Import relation.util_function.
 
 (* Inverse Function *)
 (* 3J *)
@@ -151,3 +153,4 @@ Proof.
         rewrite <- P10.
         apply (dom_intro_2 _ _ _ P13).
 Qed.
+(*----------------------------------------------------------------------------*)

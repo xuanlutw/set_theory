@@ -1,7 +1,6 @@
-Require Import logic.
-Require Import axiom.
-Require Import basic.
-Require Import relation.
+Require Import axiom.axiom.
+Require Import relation.relation.
+Require Import relation.function.
 
 (* Axiom of Choice *)
 Axiom ax_choice: forall R, rel R -> 

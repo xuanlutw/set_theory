@@ -27,16 +27,6 @@ Proof.
   intros P Q H1 H2.
   apply NN_elim.
   apply (contraposition (~P) Q H1 H2).
-(*  apply contraposition.*)
-(*  assert ((~P -> Q) -> ~Q -> ~~P) as H1.*)
-(*  apply contraposition.*)
-(*  assert (~~P -> P) as H2.*)
-(*  apply NN_elim.*)
-(*  intros Q1 Q2.*)
-(*  apply H2.*)
-(*  apply H1.*)
-(*  assumption.*)
-(*  assumption.*)
 Qed.
 
 Lemma contraposition3: forall P Q: Prop, (P -> ~Q) -> (Q -> ~P).
@@ -137,3 +127,4 @@ Proof.
   + right. apply H2.
   + left. apply H2.
 Qed.
+(*----------------------------------------------------------------------------*)
