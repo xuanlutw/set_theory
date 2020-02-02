@@ -441,6 +441,33 @@ Proof.
   + symmetry.
     apply P4.
 Qed.
+
+Lemma add_equation: forall a b c d, a = b -> c = d -> a +ₙ c = b +ₙ d.
+Proof.
+  intros a b c d P1 P2.
+  rewrite P1.
+  rewrite P2.
+  reflexivity.
+Qed.
+
+Lemma add_cancellation: forall m n l, m ∈ ω -> n ∈ ω -> l ∈ ω ->
+  m +ₙ l = n +ₙ l -> m = n.
+Proof.
+  intros m n l P1 P2 P3 P4.
+  pose (P := fun k => m +ₙ k = n +ₙ k -> m = n).
+  assert (P n.0) as I1.
+  { intros Q1.
+    rewrite (add_zero _ P1) in Q1.
+    rewrite (add_zero _ P2) in Q1.
+    apply Q1. }
+  assert (induction_step P) as I2.
+  { intros k Q1 Q2 Q3.
+    rewrite (add_red _ _ P1 Q1) in Q3.
+    rewrite (add_red _ _ P2 Q1) in Q3.
+    apply (Q2 (suc_unique _ _ 
+      (add_is_nat _ _ P1 Q1) (add_is_nat _ _ P2 Q1) Q3)). }
+  apply (induction_principle _ I1 I2 _ P3 P4).
+Qed.
 (*----------------------------------------------------------------------------*)
 
 (* Order *)

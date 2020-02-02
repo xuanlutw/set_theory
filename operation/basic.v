@@ -110,6 +110,13 @@ Proof.
   destruct (extract_set_property (ax_subset P A) x) as [P2 _].
   apply (P2 P1).
 Qed.
+
+Lemma subset_elim_2: forall P: set -> Prop, forall A, (subset_ctor P A) ⊆ A.
+Proof.
+  intros P A x P1.
+  destruct (subset_elim _ _ _ P1) as [P2 _].
+  apply P2.
+Qed.
 (*----------------------------------------------------------------------------*)
 
 (* Empty Set *)

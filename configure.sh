@@ -1,4 +1,5 @@
 rm -f _CoqProject
+rm -f Makefile
 echo '-R . zfc'    >  _CoqProject
 echo axiom/*.v     >> _CoqProject
 echo operation/*.v >> _CoqProject

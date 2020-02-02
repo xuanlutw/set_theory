@@ -105,6 +105,14 @@ Proof.
     - rewrite P6.
       apply P2.
 Qed.
+
+Lemma opair_equal_swap: forall a b c d, ⟨a, b⟩ = ⟨c, d⟩ -> ⟨b, a⟩ = ⟨d, c⟩.
+Proof.
+  intros a b c d P1.
+  rewrite (opair_equal_elim_fst _ _ _ _ P1).
+  rewrite (opair_equal_elim_snd _ _ _ _ P1).
+  reflexivity.
+Qed.
 (*----------------------------------------------------------------------------*)
 
 (* Cartesion Product *)
@@ -147,11 +155,56 @@ Lemma cp_elim: forall A B x, x ∈ cp A B -> in_cp x A B.
   destruct (P2 P1) as [_ P3].
   apply P3.
 Qed.
+
+Lemma cp_elim_2: forall x y A B, ⟨x, y⟩ ∈ cp A B -> x ∈ A /\ y ∈ B.
+Proof.
+  intros x y A B P1.
+  destruct (cp_elim _ _ _ P1) as [a [b [P2 [P3 P4]]]].
+  split.
+  + rewrite (opair_equal_elim_fst _ _ _ _ P4).
+    apply P2.
+  + rewrite (opair_equal_elim_snd _ _ _ _ P4).
+    apply P3.
+Qed.
+
+Lemma cp_swap: forall A B x y, ⟨x, y⟩ ∈ cp A B -> ⟨y, x⟩ ∈ cp B A.
+Proof.
+  intros A B x y P1.
+  destruct (cp_elim _ _ _ P1) as [a [b [P2 [P3 P4]]]].
+  apply cp_intro.
+  + rewrite (opair_equal_elim_snd _ _ _ _ P4).
+    apply P3.
+  + rewrite (opair_equal_elim_fst _ _ _ _ P4).
+    apply P2.
+Qed.
 (*----------------------------------------------------------------------------*)
 
 (* Relation *)
 Definition rel (R: set) :=
   forall r, r ∈ R -> exists a b, r = ⟨a, b⟩.
+
+Lemma subset_rel: forall R S, rel R -> S ⊆ R -> rel S.
+Proof.
+  intros R S P1 P2 x P3.
+  apply (P1 _ (P2 _ P3)).
+Qed.
+
+Lemma cp_rel: forall A B, rel (cp A B).
+Proof.
+  intros A B x P1.
+  destruct (cp_elim _ _ _ P1) as [a [b [_ [_ P2]]]].
+  exists a.
+  exists b.
+  apply P2.
+Qed.
+
+Lemma cp_subset_rel: forall P A B, rel (subset_ctor P (cp A B)).
+Proof. 
+  intros P A B.
+  apply (subset_rel (cp A B) _).
+  + apply cp_rel.
+  + apply subset_elim_2.
+Qed.
 (*----------------------------------------------------------------------------*)
 
 (* Domain *)
@@ -235,6 +288,33 @@ Proof.
   exists y.
   apply (NN_elim _ P2).
 Qed.
+
+Lemma cp_dom: forall A B, B <> ∅ -> dom(cp A B) = A.
+Proof.
+  intros A B P1.
+  apply subset_asym.
+  split.
+  + intros x P2.
+    destruct (dom_elim _ _ P2) as [y P3].
+    destruct (cp_elim_2 _ _ _ _ P3) as [P4 _].
+    apply P4.
+  + intros x P2.
+    apply dom_intro.
+    destruct (not_empty_exist_elmn _ P1) as [y P3].
+    exists y.
+    apply cp_intro.
+    - apply P2.
+    - apply P3.
+Qed.
+
+Lemma cp_subset_dom: forall R A B, R ⊆ cp A B -> dom(R) ⊆ A.
+Proof.
+  intros R A B P1 x P2.
+  destruct (dom_elim _ _ P2) as [y P3].
+  destruct (cp_elim _ _ _ (P1 _ P3)) as [a [b [P4 [_ P5]]]].
+  rewrite (opair_equal_elim_fst _ _ _ _ P5).
+  apply P4.
+Qed.
 (*----------------------------------------------------------------------------*)
 
 (* Range *)
@@ -306,6 +386,33 @@ Proof.
   intros F G P1 y P2.
   destruct (ran_elim _ _ P2) as [x P3].
   apply (ran_intro _ _ (in_ran_intro _ _ _ (P1 _ P3))).
+Qed.
+
+Lemma cp_ran: forall A B, A <> ∅ -> ran(cp A B) = B.
+Proof.
+  intros A B P1.
+  apply subset_asym.
+  split.
+  + intros x P2.
+    destruct (ran_elim _ _ P2) as [y P3].
+    destruct (cp_elim_2 _ _ _ _ P3) as [_ P4].
+    apply P4.
+  + intros x P2.
+    apply ran_intro.
+    destruct (not_empty_exist_elmn _ P1) as [y P3].
+    exists y.
+    apply cp_intro.
+    - apply P3.
+    - apply P2.
+Qed.
+
+Lemma cp_subset_ran: forall R A B, R ⊆ cp A B -> ran(R) ⊆ B.
+Proof.
+  intros R A B P1 x P2.
+  destruct (ran_elim _ _ P2) as [y P3].
+  destruct (cp_elim _ _ _ (P1 _ P3)) as [a [b [_ [P4 P5]]]].
+  rewrite (opair_equal_elim_snd _ _ _ _ P5).
+  apply P4.
 Qed.
 (*----------------------------------------------------------------------------*)
 
