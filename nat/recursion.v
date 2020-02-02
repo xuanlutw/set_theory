@@ -86,7 +86,7 @@ Proof.
     intros x P2.
     rewrite <- (in_singleton_equal _ _ P2).
     apply cp_intro.
-    + apply empty_in_omega.
+    + apply empty_is_nat.
     + apply P1. }
   split.
   { apply single_pair_is_function. }
@@ -94,7 +94,7 @@ Proof.
   { intros x P2.
     rewrite (single_pair_dom ∅ a) in P2. 
     rewrite <- (in_singleton_equal _ _ P2).
-    apply empty_in_omega. }
+    apply empty_is_nat. }
   split.
   { intros x P2.
     rewrite (single_pair_ran ∅ a) in P2. 
@@ -157,7 +157,7 @@ Proof.
       apply (in_power_subset _ _ Q3 _ Q2).
     + rewrite <- (in_singleton_equal _ _ Q2). 
       apply cp_intro.
-      - apply (suc_in_omega _ P5).
+      - apply (suc_is_nat _ P5).
       - destruct P2 as [Q3 [Q4 Q5]]. 
         apply Q5.
         apply (fval_ran).
@@ -175,7 +175,7 @@ Proof.
       apply (Q3 _ Q2).
     + rewrite single_pair_dom in Q2.
       rewrite <- (in_singleton_equal _ _ Q2).
-      apply (suc_in_omega _ P5). }
+      apply (suc_is_nat _ P5). }
   split.
   { intros z Q1.
     rewrite (union2_ran) in Q1.
@@ -342,7 +342,7 @@ Proof.
       - apply in_singleton. } 
   { intros n P3.
     assert (S(n) ∈ dom(h)) as P4.
-    { pose (suc_in_omega _ P3) as P4.
+    { pose (suc_is_nat _ P3) as P4.
       rewrite <- (_rec_dom A a F P1 P2) in P4.
       apply P4. }
     destruct (dom_elim _ _ P4) as [y P5].

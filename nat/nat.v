@@ -4,6 +4,7 @@ Require Import operation.basic.
 Require Import nat.inductive.
 
 (* Nature Number *)
+(* Use k ∈ ω not nat k *)
 Definition nat (n: set) := forall B, inductive B -> n ∈ B.
 
 Theorem omega_exists: exists A, forall n, nat n <-> n ∈ A.
@@ -57,15 +58,14 @@ Proof.
   apply (omega_elim x P2 A P1).
 Qed.
 
-Lemma empty_in_omega: ∅ ∈ ω.
-Proof.
+Lemma empty_is_nat: ∅ ∈ ω.
+Proof. 
   apply omega_intro.
-  intros B P1.
-  destruct P1 as [P2 _].
-  apply P2.
+  intros x [P1 _].
+  apply P1.
 Qed.
 
-Lemma suc_in_omega: forall k, k ∈ ω -> S(k) ∈ ω.
+Lemma suc_is_nat: forall k, k ∈ ω -> S(k) ∈ ω.
 Proof.
   intros k P1.
   destruct (omega_is_inductive) as [_ P2].
@@ -95,10 +95,10 @@ Proof.
     apply P6. }
   assert (inductive (subset_ctor P ω)) as P5.
   { split.
-    + apply (subset_intro _ _ _ (empty_in_omega) P1).
+    + apply (subset_intro _ _ _ (empty_is_nat) P1).
     + intros x P5.
       destruct (subset_elim _ _ _ P5) as [P6 P7].
-      apply (subset_intro _ _ _ (suc_in_omega _ P6) (P2 _ P6 P7)). }
+      apply (subset_intro _ _ _ (suc_is_nat _ P6) (P2 _ P6 P7)). }
   rewrite <- (inductive_subset_omega_coincident _ P4 P5) in P3.
   destruct (subset_elim _ _ _ P3) as [_ P6].
   apply P6.
@@ -119,7 +119,7 @@ Proof.
       exists ∅.
       rewrite P4.
       split.
-      - apply empty_in_omega. 
+      - apply empty_is_nat. 
       - reflexivity.
     + right.
       exists k.
@@ -132,7 +132,7 @@ Proof.
 Qed.
 
 (* 4F *)
-Lemma nat_is_trans: forall A, nat A -> trans A.
+Lemma nat_is_trans: forall A, A ∈ ω -> trans A.
 Proof.
   intros A P1.
   assert (induction_step trans) as P2.
@@ -141,7 +141,7 @@ Proof.
     rewrite (union_trans_suc _ P2).
     intros x P3.
     apply (suc_intro_2 _ _ P3). }
-  apply (induction_principle _ (empty_is_trans) P2 A (omega_intro _ P1)).
+  apply (induction_principle _ (empty_is_trans) P2 A P1).
 Qed.
 
 (* 4G *)
@@ -175,7 +175,7 @@ Proof.
         rewrite P6 in P7.
         apply P7.
       - pose (P7 := suc_intro_1 k).
-        apply (nat_is_trans _ (omega_elim _ P3) _ _ P7 P6). }
+        apply (nat_is_trans _ P3 _ _ P7 P6). }
   apply (induction_principle _ P2 P3 _ P1).
 Qed.
 
@@ -193,6 +193,6 @@ Proof.
       apply P7.
     - absurd (x ∈ x). 
       * apply (nat_not_in_self _ P1). 
-      * apply (nat_is_trans _ (omega_elim _ P1) _ _ P5 P7).
+      * apply (nat_is_trans _ P1 _ _ P5 P7).
 Qed.
 (*----------------------------------------------------------------------------*)
