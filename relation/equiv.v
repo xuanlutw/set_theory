@@ -36,6 +36,18 @@ Proof.
       * apply P3.
 Qed.
 
+Lemma equiv_rel_elim_1: forall x y R A, equiv_rel R A -> ⟨x, y⟩ ∈ R -> x ∈ A.
+Proof.
+  intros x y R A [[_ [P1 _]] _] P2.
+  apply (P1 _ (dom_intro_2 _ _ _ P2)).
+Qed.
+
+Lemma equiv_rel_elim_2: forall x y R A, equiv_rel R A -> ⟨x, y⟩ ∈ R -> y ∈ A.
+Proof.
+  intros x y R A [[_ [_ P1]] _] P2.
+  apply (P1 _ (ran_intro_2 _ _ _ P2)).
+Qed.
+
 (* Equivalence Class *)
 Definition equiv_class (x: set) (R: set) (A: set) :=
   subset_ctor (fun r => x ∈ A /\ equiv_rel R A /\ ⟨x, r⟩ ∈ R) A.
@@ -155,6 +167,15 @@ Proof.
     - destruct (equiv_class_elim_4 _ _ _ _ P1) as [_ [_ [_ P3]]].
       apply (P3 _ _ _ (equiv_class_elim_1 _ _ _ _ P1) 
         (equiv_class_elim_1 _ _ _ _ P2)).
+Qed.
+
+Lemma equiv_class_eq_elim: forall R A x y, equiv_rel R A -> x ∈ A -> 
+  A[R, x] = A[R, y] -> ⟨x, y⟩ ∈ R.
+Proof.
+  intros R A x y P1 P2 P3.
+  pose (equiv_class_intro_self _ _ _ P1 P2) as P4.
+  rewrite P3 in P4.
+  apply (equiv_class_elim_2 _ _ _ _ P4).
 Qed.
 
 Lemma equiv_class_subset: forall R A x, equiv_rel R A -> x ∈ A -> 
