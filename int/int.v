@@ -123,6 +123,13 @@ Definition ℤ := (cp ω ω)[\ int_ctor_rel].
 Definition int_ctor (m: set) (n: set) :=
   (cp ω ω)[int_ctor_rel, ⟨m, n⟩].
 
+Lemma int_ctor_is_int: forall m n, m ∈ ω -> n ∈ ω -> int_ctor m n ∈ ℤ.
+Proof.
+  intros m n P1 P2.
+  apply (equiv_part_intro _ _ _ int_ctor_rel_is_equiv_rel).
+  apply (cp_intro _ _ _ _ P1 P2).
+Qed.
+
 Lemma int_elim: forall x, x ∈ ℤ -> exists m n, 
   m ∈ ω /\ n ∈ ω /\ x = (int_ctor m n).
 Proof.
@@ -251,6 +258,201 @@ Proof.
 Qed.
 
 Notation "x +z y" := (int_add [ ⟨x, y⟩ ]) (at level 60, no associativity).
+
+Lemma int_add_dom: dom(int_add) = cp ℤ ℤ.
+Proof.
+  apply subset_asym.
+  split.
+  + intros x P1.
+    destruct (dom_elim _ _ P1) as [y P2].
+    destruct (cp_elim_2 _ _ _ _ (subset_elim_2 _ _ _ P2)) as [P3 _].
+    apply P3. 
+  + intros x P1.
+    destruct (cp_elim _ _ _ P1) as [a [b [P2 [P3 P4]]]].
+    destruct (int_elim _ P2) as [qm [qn [Q1 [Q2 Q3]]]].
+    destruct (int_elim _ P3) as [rm [rn [R1 [R2 R3]]]].
+    apply dom_intro.
+    exists (int_ctor (qm +ₙ rm) (qn +ₙ rn)).
+    apply subset_intro.
+    - apply cp_intro.
+      * apply P1.
+      * apply (int_ctor_is_int _ _ (add_is_nat _ _ Q1 R1) (add_is_nat _ _ Q2 R2)).
+    - exists qm.
+      exists qn.
+      exists rm.
+      exists rn.
+      exists (int_ctor (qm +ₙ rm) (qn +ₙ rn)).
+      split.
+      * rewrite P4.
+        rewrite Q3.
+        rewrite R3.
+        reflexivity.
+      * reflexivity.
+Qed.
+
+Lemma int_add_ran: ran(int_add) = ℤ.
+Proof.
+  apply subset_asym.
+  split.
+  + intros y P1.
+    destruct (ran_elim _ _ P1) as [x P2].
+    destruct (cp_elim_2 _ _ _ _ (subset_elim_2 _ _ _ P2)) as [_ P3].
+    apply P3. 
+  + intros y P1.
+    destruct (int_elim _ P1) as [qm [qn [Q1 [Q2 Q3]]]].
+    apply ran_intro.
+    exists (⟨int_ctor qm qn, int_ctor n.0 n.0⟩).
+    apply subset_intro.
+    - apply cp_intro.
+      * apply cp_intro.
+        ++apply (int_ctor_is_int _ _ Q1 Q2).
+        ++apply (int_ctor_is_int _ _ empty_is_nat empty_is_nat).
+      * rewrite Q3. 
+        apply (int_ctor_is_int _ _ Q1 Q2).
+    - exists qm.
+      exists qn.
+      exists n.0.
+      exists n.0.
+      exists (int_ctor qm qn).
+      split.
+      * rewrite Q3.
+        reflexivity.
+      * rewrite (add_zero _ Q1). 
+        rewrite (add_zero _ Q2). 
+        reflexivity.
+Qed.
+
+Lemma int_add_is_int: forall a b, a ∈ ℤ -> b ∈ ℤ -> a +z b ∈ ℤ.
+Proof.
+  intros a b P1 P2.
+  rewrite <- int_add_ran.
+  apply (fval_ran _ _ int_add_is_function).
+  rewrite int_add_dom.
+  apply cp_intro.
+  + apply P1.
+  + apply P2.
+Qed.
+
+Lemma int_add_elim: forall m n p q, m ∈ ω -> n ∈ ω -> p ∈ ω -> q ∈ ω ->
+  (int_ctor m n) +z (int_ctor p q) = (int_ctor (m +ₙ p) (n +ₙ q)).
+Proof.
+  intros m n p q P1 P2 P3 P4.
+  symmetry.
+  apply (fval_intro _ _ _ int_add_is_function).
+  apply subset_intro.
+  + apply cp_intro.
+    - apply cp_intro.
+      * apply (int_ctor_is_int _ _ P1 P2).
+      * apply (int_ctor_is_int _ _ P3 P4).
+    - apply int_ctor_is_int.
+      * apply (add_is_nat _ _ P1 P3).
+      * apply (add_is_nat _ _ P2 P4).
+  + exists m.
+    exists n.
+    exists p.
+    exists q.
+    exists (int_ctor (m +ₙ p) (n +ₙ q)).
+    split.
+    - reflexivity.
+    - reflexivity.
+Qed.
+
+Lemma int_add_commutative: forall a b, a ∈ ℤ -> b ∈ ℤ -> a +z b = b +z a.
+Proof.
+  intros a b P1 P2.
+  destruct (int_elim _ P1) as [qm [qn [Q1 [Q2 Q3]]]].
+  destruct (int_elim _ P2) as [rm [rn [R1 [R2 R3]]]].
+  apply (fval_intro _ _ _ int_add_is_function).
+  apply (subset_intro).
+  + apply cp_intro.
+    - apply cp_intro.
+      * apply P2.
+      * apply P1.
+    - apply (int_add_is_int _ _ P1 P2).
+  + exists rm.
+    exists rn.
+    exists qm.
+    exists qn.
+    exists (a +z b).
+    split.
+    - rewrite Q3.
+      rewrite R3.
+      reflexivity.
+    - rewrite Q3.
+      rewrite R3.
+      rewrite (int_add_elim _ _ _ _ Q1 Q2 R1 R2).
+      rewrite (add_commutative _ _ Q1 R1).
+      rewrite (add_commutative _ _ Q2 R2).
+      reflexivity.
+Qed.
+
+Lemma int_add_associative: forall a b c, a ∈ ℤ -> b ∈ ℤ -> c ∈ ℤ -> 
+  a +z (b +z c) = (a +z b) +z c.
+Proof.
+  intros a b c P1 P2 P3.
+  destruct (int_elim _ P1) as [qm [qn [Q1 [Q2 Q3]]]].
+  destruct (int_elim _ P2) as [rm [rn [R1 [R2 R3]]]].
+  destruct (int_elim _ P3) as [sm [sn [S1 [S2 S3]]]].
+  destruct (int_elim _ (int_add_is_int _ _ P1 P2)) as [tm [tn [T1 [T2 T3]]]].
+  destruct (int_elim _ (int_add_is_int _ _ P2 P3)) as [um [un [U1 [U2 U3]]]].
+  apply (fval_intro _ _ _ int_add_is_function).
+  apply (subset_intro).
+  + apply cp_intro.
+    - apply cp_intro.
+      * apply (int_add_is_int _ _ P1 P2).
+      * apply P3.
+    - apply (int_add_is_int _ _ P1 (int_add_is_int _ _ P2 P3)).
+  + exists tm.
+    exists tn.
+    exists sm.
+    exists sn.
+    exists (int_ctor (tm +ₙ sm) (tn +ₙ sn)).
+    split.
+    - apply (opair_equal_intro).
+      * rewrite T3.
+        rewrite S3.
+        reflexivity.
+      * (* WTF... *)
+        symmetry. 
+        apply (fval_intro _ _ _ int_add_is_function).
+        apply (subset_intro).
+        ++apply cp_intro.
+          --apply cp_intro.
+            **apply P1.
+            **apply (int_add_is_int _ _ P2 P3).
+          --apply int_ctor_is_int. 
+            **apply (add_is_nat _ _ T1 S1).
+            **apply (add_is_nat _ _ T2 S2).
+        ++exists qm.
+          exists qn.
+          exists um.
+          exists un.
+          exists (int_ctor (tm +ₙ sm) (tn +ₙ sn)).
+          split.
+          --rewrite U3.
+            rewrite Q3.
+            reflexivity.
+          --rewrite Q3 in T3.
+            rewrite R3 in T3.
+            rewrite <- (int_add_elim _ _ _ _ T1 T2 S1 S2).
+            rewrite <- T3.
+            rewrite (int_add_elim _ _ _ _ Q1 Q2 R1 R2).
+            rewrite (int_add_elim _ _ _ _ (add_is_nat _ _ Q1 R1)
+              (add_is_nat _ _ Q2 R2) S1 S2).
+            rewrite R3 in U3.
+            rewrite S3 in U3.
+            rewrite <- (int_add_elim _ _ _ _ Q1 Q2 U1 U2).
+            rewrite <- U3.
+            rewrite (int_add_elim _ _ _ _ R1 R2 S1 S2).
+            rewrite (int_add_elim _ _ _ _ Q1 Q2
+              (add_is_nat _ _ R1 S1) (add_is_nat _ _ R2 S2)).
+            f_equal.
+            **symmetry.
+              apply (add_associative _ _ _ Q1 R1 S1).
+            **symmetry.
+              apply (add_associative _ _ _ Q2 R2 S2).
+    - reflexivity.
+Qed.
 
 (* TODO: Law of int add *)
 (* TODO: def two variable function *)
