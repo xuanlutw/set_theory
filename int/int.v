@@ -123,6 +123,8 @@ Definition ℤ := (cp ω ω)[\ int_ctor_rel].
 Definition int_ctor (m: set) (n: set) :=
   (cp ω ω)[int_ctor_rel, ⟨m, n⟩].
 
+Notation "z.0" := (int_ctor n.0 n.0).
+
 Lemma int_ctor_is_int: forall m n, m ∈ ω -> n ∈ ω -> int_ctor m n ∈ ℤ.
 Proof.
   intros m n P1 P2.
@@ -453,6 +455,54 @@ Proof.
               apply (add_associative _ _ _ Q2 R2 S2).
     - reflexivity.
 Qed.
+
+Lemma int_add_zero: forall a, a ∈ ℤ -> a +z z.0 = a.
+Proof.
+  intros a P1.
+  destruct (int_elim _ P1) as [m [n [P2 [P3 P4]]]].
+  rewrite P4.
+  rewrite (int_add_elim _ _ _ _ P2 P3 empty_is_nat empty_is_nat).
+  rewrite (add_zero _ P2).
+  rewrite (add_zero _ P3).
+  reflexivity.
+Qed.
+
+Lemma int_add_inverse_exist: forall a, exists b, a ∈ ℤ -> b ∈ ℤ -> a +z b = z.0.
+Proof.
+  intros a.
+  destruct (LEM (a ∈ ℤ)) as [P1 | P1].
+  + destruct (int_elim _ P1) as [m [n [P2 [P3 P4]]]].
+    exists (int_ctor n m).
+    intros _ P5.
+    rewrite P4.
+    rewrite (int_add_elim _ _ _ _ P2 P3 P3 P2).
+    apply (equiv_class_eq_intro).
+    apply (equiv_class_intro_1 _ _ _ _ int_ctor_rel_is_equiv_rel).
+    apply (subset_intro).
+    - apply cp_intro.
+      * apply cp_intro.
+        ++apply (add_is_nat _ _ P2 P3).
+        ++apply (add_is_nat _ _ P3 P2).
+      * apply cp_intro.
+        ++apply empty_is_nat.
+        ++apply empty_is_nat.
+    - exists (m +ₙ n).
+      exists (n +ₙ m).
+      exists n.0.
+      exists n.0.
+      split.
+      * reflexivity.
+      * rewrite (add_commutative _ _ P2 P3).
+        reflexivity.
+  + exists ∅.
+    intros P2.
+    contradiction.
+Qed.
+
+Definition int_inverse (a:set) :=
+  extract_set (int_add_inverse_exist a).
+
+Notation "z.inv a" := (int_inverse a) (at level 60).
 
 (* TODO: Law of int add *)
 (* TODO: def two variable function *)
