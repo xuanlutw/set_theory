@@ -468,6 +468,31 @@ Proof.
       (add_is_nat _ _ P1 Q1) (add_is_nat _ _ P2 Q1) Q3)). }
   apply (induction_principle _ I1 I2 _ P3 P4).
 Qed.
+
+Lemma add_cancellation_inverse: forall m n l, m = n -> m +ₙ l = n +ₙ l.
+Proof.
+  intros m n l P1.
+  rewrite P1.
+  reflexivity.
+Qed.
+
+Lemma multi_equation: forall a b c d, a = b -> c = d -> a ×ₙ c = b ×ₙ d.
+Proof.
+  intros a b c d P1 P2.
+  rewrite P1.
+  rewrite P2.
+  reflexivity.
+Qed.
+
+Lemma add_cyc: forall m n l, m ∈ ω -> n ∈ ω -> l ∈ ω -> 
+  (m +ₙ n) +ₙ l = (m +ₙ l) +ₙ n.
+Proof.
+  intros m n l P1 P2 P3.
+  rewrite <- (add_associative _ _ _ P1 P3 P2).
+  rewrite (add_commutative _ _ P3 P2).
+  rewrite (add_associative _ _ _ P1 P2 P3).
+  reflexivity.
+Qed.
 (*----------------------------------------------------------------------------*)
 
 (* Order *)
@@ -620,5 +645,78 @@ Proof.
     apply P3.
   + right. right.
     apply P3.
+Qed.
+(*----------------------------------------------------------------------------*)
+
+(* Ltac *)
+(* Flow: add enough equation into the goal *)
+(*       run nat_normal_form to normalize it *)
+(*       exchange order of multiple (I don't know how to do it automaticly now) *)
+(*       run nat_rea to reduce result *)
+(*       run is_nat to clean up *)
+Ltac is_nat :=
+  repeat match goal with
+    | [       |- ?P = ?P         ] => reflexivity
+    | [ H: ?P |- ?P              ] => apply H
+    | [       |- ⟨_, _⟩ ∈ cp _ _ ] => apply cp_intro
+    | [       |- ?P +ₙ ?Q ∈ ω    ] => apply add_is_nat
+    | [       |- ?P ×ₙ ?Q ∈ ω    ] => apply multi_is_nat
+  end.
+
+Ltac nat_unwrap_multi_ M :=
+  repeat match M with
+    | ?R ×ₙ (?P +ₙ ?Q) => rewrite (distributive_l R P Q)
+    | (?P +ₙ ?Q) ×ₙ ?R => rewrite (multi_commutative (P +ₙ Q) R)
+    | ?P ×ₙ (?Q ×ₙ ?R) => rewrite (multi_commutative P (Q ×ₙ R))
+    | ?P ×ₙ ?Q         => nat_unwrap_multi_ P; nat_unwrap_multi_ Q
+    | ?P +ₙ ?Q         => nat_unwrap_multi_ P; nat_unwrap_multi_ Q
+  end.
+
+Ltac nat_unwrap_multi :=
+  repeat match goal with
+    | [ |- ?P = ?Q ] => nat_unwrap_multi_ P; nat_unwrap_multi_ Q
+  end.
+
+Ltac nat_unwrap_add_ M :=
+  repeat match M with
+    | ?P +ₙ (?Q +ₙ ?R) => rewrite (add_associative P Q R)
+    | ?P +ₙ ?Q         => nat_unwrap_add_ P
+  end.
+
+Ltac nat_unwrap_add :=
+  repeat match goal with
+    | [ |- ?P = ?Q ] => nat_unwrap_add_ P; nat_unwrap_add_ Q
+  end.
+
+Ltac nat_normal_form :=
+  nat_unwrap_multi;
+  nat_unwrap_add.
+
+Ltac nat_red_ M P :=
+  repeat match M with
+    | P              => assumption
+    | _ +ₙ P         => assumption (*do nothing*)
+    | P +ₙ ?Q        => rewrite (add_commutative P Q)
+    | (?R +ₙ P) +ₙ ?Q => rewrite (add_cyc R P Q)
+    | ?Q +ₙ _        => nat_red_ Q P
+  end.
+
+Ltac nat_red :=
+  repeat match goal with
+    | [ |- ?P               = ?P      ] => reflexivity
+    | [ |- _          +ₙ ?P = _ +ₙ ?P ] => apply add_cancellation_inverse
+    | [ |- ?P         +ₙ ?Q = _ +ₙ ?P ] => rewrite (add_commutative P Q)
+    | [ |- (?R +ₙ ?P) +ₙ ?Q = _ +ₙ ?P ] => rewrite (add_cyc R P Q)
+    | [ |- ?R         +ₙ _  = _ +ₙ ?P ] => repeat nat_red_ R P
+  end.
+
+
+Lemma test: forall a b c d, a ∈ ω -> b ∈ ω -> c ∈ ω -> d ∈ ω ->
+  (a ×ₙ b) +ₙ a ×ₙ (c +ₙ d) ×ₙ (a +ₙ b) = a ×ₙ (c +ₙ d) ×ₙ (a +ₙ b) +ₙ (a ×ₙ b).
+Proof.
+  intros a b c d P1 P2 P3 P4.
+  nat_normal_form.
+  nat_red.
+  all: is_nat.
 Qed.
 (*----------------------------------------------------------------------------*)
