@@ -202,7 +202,14 @@ Proof.
   rewrite (add_commutative _ _ Pb Pd). 
   reflexivity.
 Qed.
-  
+
+Ltac is_nat_z :=
+  repeat match goal with
+    | [ H: int_ctor ?P _ ∈ ℤ |- ?P ∈ ω ] => apply (int_elim_fst _ _ H)
+    | [ H: int_ctor _ ?P ∈ ℤ |- ?P ∈ ω ] => apply (int_elim_snd _ _ H)
+    | _ => is_nat
+  end.
+
 Lemma int_add_is_function: function int_add.
 Proof.
   split.
@@ -225,38 +232,22 @@ Proof.
     apply equiv_class_eq_intro.
     apply (equiv_class_intro_1 _ _ _ _ int_ctor_rel_is_equiv_rel).
     apply subset_intro.
-    - apply cp_intro.
-      * apply cp_intro.
-        ++apply add_is_nat.
-          --apply (int_elim_fst _ _ Q9).  
-          --apply (int_elim_fst _ _ Q10).
-        ++apply add_is_nat.
-          --apply (int_elim_snd _ _ Q9).  
-          --apply (int_elim_snd _ _ Q10).
-      * apply cp_intro.
-        ++apply add_is_nat.
-          --apply (int_elim_fst _ _ R9).  
-          --apply (int_elim_fst _ _ R10).
-        ++apply add_is_nat.
-          --apply (int_elim_snd _ _ R9).  
-          --apply (int_elim_snd _ _ R10).
+    - is_nat_z.
     - exists (qm +ₙ qp). exists (qn +ₙ qq). 
       exists (rm +ₙ rp). exists (rn +ₙ rq).
       split.
       * reflexivity.
       * pose (opair_equal_elim_fst _ _ _ _ Q2) as P3.
         rewrite (opair_equal_elim_fst _ _ _ _ R2) in P3.
-        rewrite (support_add _ _ _ _ 
-          (int_elim_fst _ _ Q9) (int_elim_fst _ _ Q10)
-          (int_elim_snd _ _ R9) (int_elim_snd _ _ R10)).
-        rewrite (support_add _ _ _ _ 
-          (int_elim_snd _ _ Q9) (int_elim_snd _ _ Q10)
-          (int_elim_fst _ _ R9) (int_elim_fst _ _ R10)).
-        rewrite (int_equal_elim _ _ _ _ (int_elim_fst _ _ R9) 
-          (int_elim_snd _ _ R9) (opair_equal_elim_fst _ _ _ _ P3)).
-        rewrite (int_equal_elim _ _ _ _ (int_elim_fst _ _ R10) 
-          (int_elim_snd _ _ R10) (opair_equal_elim_snd _ _ _ _ P3)).
-        reflexivity.
+        apply (add_cancellation_2 _ _ _ _ 
+          (int_equal_elim _ _ _ _ (int_elim_fst _ _ R9) 
+          (int_elim_snd _ _ R9) (opair_equal_elim_fst _ _ _ _ P3))).
+        apply (add_cancellation_2 _ _ _ _ 
+          (int_equal_elim _ _ _ _ (int_elim_fst _ _ R10) 
+          (int_elim_snd _ _ R10) (opair_equal_elim_snd _ _ _ _ P3))).
+        nat_normal_form.
+        nat_red.
+        all: is_nat_z.
 Qed.
 
 Notation "x +z y" := (int_add [ ⟨x, y⟩ ]) (at level 60, no associativity).
@@ -504,11 +495,75 @@ Definition int_inverse (a:set) :=
 
 Notation "z.inv a" := (int_inverse a) (at level 60).
 
+Definition int_multi :=
+  subset_ctor (fun x => exists m n p q z,
+    x = ⟨⟨int_ctor m n , int_ctor p q⟩, z⟩ /\
+    z = int_ctor ((m ×ₙ p) +ₙ (n ×ₙ q)) ((m ×ₙ q) +ₙ (n ×ₙ p))) (cp (cp ℤ ℤ) ℤ).
+
+Lemma int_multi_is_function: function int_multi.
+Proof.
+  split.
+  + apply cp_subset_rel.
+  + intros a b1 b2 P1 P2.
+    destruct (subset_elim _ _ _ P1) as [Q1 [qm [qn [qp [qq [ql [Q2 Q3]]]]]]].
+    destruct (cp_elim_2 _ _ _ _ Q1) as [Q4 Q5].
+    destruct (cp_elim _ _ _ Q4) as [qa [qb [Q6 [Q7 Q8]]]].
+    rewrite (opair_equal_elim_snd _ _ _ _ Q2).
+    rewrite Q3.
+    rewrite (opair_equal_elim_fst _ _ _ _ Q2) in Q4.
+    destruct (cp_elim_2 _ _ _ _ Q4) as [Q9 Q10].
+    destruct (subset_elim _ _ _ P2) as [R1 [rm [rn [rp [rq [rl [R2 R3]]]]]]].
+    destruct (cp_elim_2 _ _ _ _ R1) as [R4 R5].
+    destruct (cp_elim _ _ _ R4) as [ra [rb [R6 [R7 R8]]]].
+    rewrite (opair_equal_elim_snd _ _ _ _ R2).
+    rewrite R3.
+    rewrite (opair_equal_elim_fst _ _ _ _ R2) in R4.
+    destruct (cp_elim_2 _ _ _ _ R4) as [R9 R10].
+    apply equiv_class_eq_intro.
+    apply (equiv_class_intro_1 _ _ _ _ int_ctor_rel_is_equiv_rel).
+    apply subset_intro.
+    - is_nat_z.
+    - exists (qm ×ₙ qp +ₙ qn ×ₙ qq). 
+      exists (qm ×ₙ qq +ₙ qn ×ₙ qp). 
+      exists (rm ×ₙ rp +ₙ rn ×ₙ rq).
+      exists (rm ×ₙ rq +ₙ rn ×ₙ rp).
+      split.
+      * reflexivity.
+      * pose (opair_equal_elim_fst _ _ _ _ Q2) as P3.
+        rewrite (opair_equal_elim_fst _ _ _ _ R2) in P3.
+        pose (int_equal_elim _ _ _ _ 
+          (int_elim_fst _ _ R9) (int_elim_snd _ _ R9) 
+          (opair_equal_elim_fst _ _ _ _ P3)) as P4.
+        apply (add_cancellation_2 _ _ _ _ (multi_equation_2 _ _ rp P4)).
+        symmetry.
+        apply (add_cancellation_2 _ _ _ _ (multi_equation_2 _ _ rq P4)).
+        pose (int_equal_elim _ _ _ _ 
+          (int_elim_fst _ _ R10) (int_elim_snd _ _ R10) 
+          (opair_equal_elim_snd _ _ _ _ P3)) as P5.
+        apply (add_cancellation_2 _ _ _ _ (multi_equation_2 _ _ qn P5)).
+        symmetry.
+        apply (add_cancellation_2 _ _ _ _ (multi_equation_2 _ _ qm P5)).
+        nat_normal_form.
+        rewrite (multi_commutative rq qm).
+        rewrite (multi_commutative rp qn).
+        rewrite (multi_commutative rq qn).
+        rewrite (multi_commutative rq rm).
+        rewrite (multi_commutative rp qm).
+        rewrite (multi_commutative rp rn).
+        rewrite (multi_commutative rn rq).
+        rewrite (multi_commutative rp rm).
+        nat_red.
+        all: is_nat_z.
+Qed.
+
 (* TODO: Law of int add *)
 (* TODO: def two variable function *)
 (* TODO: refine equiv and int *)
 (* TODO: refine names, intro -> i, elim -> e, equal -> eq ...*)
 (* TODO: refine elim_1 2 3 ... to some meanful name? *)
+
+(* TODO: int breakdown *)
+(* TODO: nat Ltac *)
 
 
 

@@ -469,6 +469,14 @@ Proof.
   apply (induction_principle _ I1 I2 _ P3 P4).
 Qed.
 
+Lemma add_cancellation_2: forall m n p q, p = q -> m +ₙ p = n +ₙ q -> 
+  m ∈ ω -> n ∈ ω -> p ∈ ω -> q ∈ ω -> m = n.
+Proof.
+  intros m n p q P1 P2 P3 P4 P5 P6.
+  rewrite P1 in P2.
+  apply (add_cancellation _ _ _ P3 P4 P6 P2).
+Qed.
+
 Lemma add_cancellation_inverse: forall m n l, m = n -> m +ₙ l = n +ₙ l.
 Proof.
   intros m n l P1.
@@ -481,6 +489,13 @@ Proof.
   intros a b c d P1 P2.
   rewrite P1.
   rewrite P2.
+  reflexivity.
+Qed.
+
+Lemma multi_equation_2: forall a b c, a = b -> a ×ₙ c = b ×ₙ c.
+Proof.
+  intros a b c P1.
+  rewrite P1.
   reflexivity.
 Qed.
 
@@ -694,8 +709,8 @@ Ltac nat_normal_form :=
 
 Ltac nat_red_ M P :=
   repeat match M with
-    | P              => assumption
-    | _ +ₙ P         => assumption (*do nothing*)
+    (*| P              => assumption*)
+    (*| _ +ₙ P         => assumption [>do nothing<]*)
     | P +ₙ ?Q        => rewrite (add_commutative P Q)
     | (?R +ₙ P) +ₙ ?Q => rewrite (add_cyc R P Q)
     | ?Q +ₙ _        => nat_red_ Q P
