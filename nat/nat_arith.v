@@ -200,6 +200,15 @@ Proof.
   apply (multi_proto_elim_2 _ _ P1 P2).
 Qed.
 
+Lemma multi_one: forall m, m ∈ ω -> m ×ₙ n.1 = m.
+Proof.
+  intros m P1.
+  rewrite (multi_red _ _ P1 empty_is_nat).
+  rewrite (multi_zero _ P1).
+  rewrite (add_zero _ P1).
+  reflexivity.
+Qed.
+
 Lemma multi_is_nat: forall m n, m ∈ ω -> n ∈ ω -> m ×ₙ n ∈ ω.
 Proof.
   intros m n P1 P2.
@@ -508,6 +517,25 @@ Proof.
   rewrite (add_associative _ _ _ P1 P2 P3).
   reflexivity.
 Qed.
+
+Lemma multi_cyc: forall m n l, m ∈ ω -> n ∈ ω -> l ∈ ω -> 
+  (m ×ₙ n) ×ₙ l = (m ×ₙ l) ×ₙ n.
+Proof.
+  intros m n l P1 P2 P3.
+  rewrite <- (multi_associative _ _ _ P1 P3 P2).
+  rewrite (multi_commutative _ _ P3 P2).
+  rewrite (multi_associative _ _ _ P1 P2 P3).
+  reflexivity.
+Qed.
+
+Lemma multi_cyc_2: forall m n l, m ∈ ω -> n ∈ ω -> l ∈ ω -> 
+  (m ×ₙ n) ×ₙ l = (l ×ₙ m) ×ₙ n.
+Proof.
+  intros m n l P1 P2 P3.
+  rewrite <- (multi_associative _ _ _ P3 P1 P2).
+  rewrite (multi_commutative _ _ P3 (multi_is_nat _ _ P1 P2)).
+  reflexivity.
+Qed.
 (*----------------------------------------------------------------------------*)
 
 (* Order *)
@@ -673,6 +701,7 @@ Ltac is_nat :=
   repeat match goal with
     | [       |- ?P = ?P         ] => reflexivity
     | [       |- n.0 ∈ ω         ] => apply empty_is_nat
+    | [       |- n.1 ∈ ω         ] => apply one_is_nat
     | [ H: ?P |- ?P              ] => apply H
     | [       |- ⟨_, _⟩ ∈ cp _ _ ] => apply cp_intro
     | [       |- ?P +ₙ ?Q ∈ ω    ] => apply add_is_nat
