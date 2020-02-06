@@ -672,6 +672,7 @@ Qed.
 Ltac is_nat :=
   repeat match goal with
     | [       |- ?P = ?P         ] => reflexivity
+    | [       |- n.0 ∈ ω         ] => apply empty_is_nat
     | [ H: ?P |- ?P              ] => apply H
     | [       |- ⟨_, _⟩ ∈ cp _ _ ] => apply cp_intro
     | [       |- ?P +ₙ ?Q ∈ ω    ] => apply add_is_nat
