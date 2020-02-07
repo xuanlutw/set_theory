@@ -451,6 +451,16 @@ Proof.
     apply P4.
 Qed.
 
+Lemma distributive_r: forall m n p, m ∈ ω -> n ∈ ω -> p ∈ ω ->
+  (m +ₙ n) ×ₙ p = m ×ₙ p +ₙ n ×ₙ p.
+Proof.
+  intros m n p P1 P2 P3.
+  rewrite (multi_commutative _ _ (add_is_nat _ _ P1 P2) P3).
+  rewrite (multi_commutative _ _ P1 P3).
+  rewrite (multi_commutative _ _ P2 P3).
+  apply (distributive_l _ _ _ P3 P1 P2).
+Qed.
+
 Lemma add_equation: forall a b c d, a = b -> c = d -> a +ₙ c = b +ₙ d.
 Proof.
   intros a b c d P1 P2.
@@ -538,159 +548,6 @@ Proof.
 Qed.
 (*----------------------------------------------------------------------------*)
 
-(* Order *)
-(* TODO Change nat k into k ∈ ω *)
-Definition less (m: set) (n: set) := m ∈ n.
-Notation "m <ₙ n" := (less m n) (at level 65, no associativity).
-
-Definition less_equal (m: set) (n: set) := (less m n) \/ (m = n).
-Notation "m ≤ₙ n" := (less_equal m n) (at level 65, no associativity).
-
-Lemma in_suc: forall m n, nat n -> m ∈ S(n) -> m ∈ n \/ m = n.
-Proof.
-  intros m n P2 P3.
-  destruct (in_union2_in _ _ _ P3) as [P4|P4].
-  + left.
-    apply P4.
-  + right.
-    symmetry.   
-    apply (in_singleton_equal _ _ P4).
-Qed.
-
-Lemma in_nat_nat: forall m n, nat n -> m ∈ n -> nat m.
-Proof.
-  intros m n P1 P2.
-  assert (forall m1, m1 ∈ n.0 -> nat m1) as P3.
-  { intros m1 Q1.
-    absurd (m1 ∈ n.0).
-    + apply not_in_empty.
-    + apply Q1. }
-  assert (forall k, k ∈ ω -> (forall m1, m1 ∈ k -> nat m1) -> 
-    (forall m1, m1 ∈ S(k) -> nat m1)) as P4.
-  { intros k Q1 Q2 m1 Q3.
-    destruct (in_suc _ _ (omega_elim _ Q1) Q3) as [Q4|Q4].
-    + apply (Q2 _ Q4).
-    + rewrite Q4.
-      apply (omega_elim _ Q1). }
-  apply (induction_principle _ P3 P4 _ (omega_intro _ P1) _ P2).
-Qed.
-
-Lemma suc_less: forall m n, nat m -> nat n -> m <ₙ n -> S(m) <ₙ S(n).
-Proof.
-  intros m n P1 P2 P3.
-  assert (forall m, m <ₙ n.0 -> S(m) <ₙ S(n.0)) as P4.
-  { intros m1 Q1.
-    absurd (m1 <ₙ n.0).
-    + apply not_in_empty.
-    + apply Q1. }
-  assert (forall k, k ∈ ω -> (forall m1, m1 <ₙ k -> S(m1) <ₙ S(k)) ->
-    (forall m2, m2 <ₙ S(k) -> S(m2) <ₙ S(S(k)))) as P5.
-  { intros k Q1 Q2 m2 Q3.
-    destruct (in_suc _ _ (omega_elim _ Q1) Q3) as [Q4|Q4].
-    + pose (nat_is_trans _ (suc_is_nat _ (suc_is_nat _ Q1))) as Q5.
-      apply (Q5 _ _ (Q2 _ Q4) (suc_intro_1 (S(k)))).
-    + rewrite Q4.
-      apply suc_intro_1. }
-  apply (induction_principle _ P4 P5 _ (omega_intro _ P2) _ P3).
-Qed.
-
-Lemma empty_in_nat: forall n, nat n -> n <> n.0 -> n.0 ∈ n.
-Proof.
-  intros n P1 P2.
-  pose (fun k => nat k -> k <> n.0 -> n.0 ∈ k) as P.
-  assert (P (n.0)) as P3.
-  { intros Q1 Q2.
-    contradiction. }
-  assert (forall k, k ∈ ω -> P k -> P (S(k))) as P4.
-  { intros k Q1 Q2 Q3 Q4.
-    destruct (LEM (k = n.0)) as [Q5|Q5].
-    + rewrite Q5.
-      apply suc_intro_1.
-    + pose (nat_is_trans _ (suc_is_nat _ Q1)) as Q6.
-      apply (Q6 _ _ (Q2 (omega_elim _ Q1) Q5) (suc_intro_1 k)). }
-  apply (induction_principle _ P3 P4 _ (omega_intro _ P1) P1 P2).
-Qed.
-    
-Theorem trichotomy_of_nat: forall m n, nat m -> nat n ->
-  ((m <ₙ n) /\ ~(m = n) /\ ~(n <ₙ m)) \/
-  (~(m <ₙ n) /\ (m = n) /\ ~(n <ₙ m)) \/
-  (~(m <ₙ n) /\ ~(m = n) /\ (n <ₙ m)).
-Proof.
-  intros m n P1 P2.
-  pose (fun k => nat k -> k ∈ n \/ k = n \/ n ∈ k) as P.
-  assert (P (n.0)) as P3.
-  { intros Q1.
-    destruct (LEM (n = n.0)) as [Q2|Q2].
-    + right. left.
-      symmetry.
-      apply Q2.
-    + left.
-      apply (empty_in_nat _ P2 Q2). }
-  assert (forall k, k ∈ ω -> P k -> P (S(k))) as P4.
-  { intros k Q1 Q2 Q3.
-    pose (in_nat_nat _ _ Q3 (suc_intro_1 k)) as Q4.
-    destruct (Q2 Q4) as [Q5|[Q5|Q5]].
-    + destruct (suc_elim _ _ (suc_less _ _ Q4 P2 Q5)) as [Q6|Q6].
-      - right. left.
-        apply Q6.
-      - left.
-        apply Q6.
-    + right. right.
-      rewrite Q5.
-      apply suc_intro_1.
-    + right. right.
-      apply (nat_is_trans _ (omega_intro _ Q3) _ _ Q5 (suc_intro_1 k)). }
-  destruct (induction_principle _ P3 P4 _ (omega_intro _ P1) P1) as [P5|[P5|P5]].
-  + left.
-    split.
-    { apply P5. }
-    split.
-    { intros P6.
-      rewrite P6 in P5.
-      absurd (n ∈ n).
-      + apply (nat_not_in_self _ (omega_intro _ P2)).
-      + apply P5. }
-    { intros P6.
-      absurd (n ∈ n).
-      + apply (nat_not_in_self _ (omega_intro _ P2)).
-      + apply (nat_is_trans _ (omega_intro _ P2) _ _ P6 P5). }
-  + right. left.
-    split. 
-    { rewrite P5.
-      apply (nat_not_in_self _ (omega_intro _ P2)). }
-    split.
-    { apply P5. }
-    { rewrite P5.
-      apply (nat_not_in_self _ (omega_intro _ P2)). }
-  + right. right.
-    split.
-    { intros P6.
-      absurd (n ∈ n).
-      + apply (nat_not_in_self _ (omega_intro _ P2)).
-      + apply (nat_is_trans _ (omega_intro _ P2) _ _ P5 P6). }
-    split.
-    { intros P6.
-      rewrite P6 in P5.
-      absurd (n ∈ n).
-      + apply (nat_not_in_self _ (omega_intro _ P2)).
-      + apply P5. }
-    { apply P5. }
-Qed.
-
-Theorem trichotomy_of_nat_weak: forall m n, nat m -> nat n ->
-  (m <ₙ n) \/ (m = n) \/ (n <ₙ m).
-Proof. 
-  intros m n P1 P2.
-  destruct (trichotomy_of_nat _ _ P1 P2) as [[P3 _]|[[_ [P3 _]]|[_ [_ P3]]]]. 
-  + left. 
-    apply P3.
-  + right. left.
-    apply P3.
-  + right. right.
-    apply P3.
-Qed.
-(*----------------------------------------------------------------------------*)
-
 (* Ltac *)
 (* Flow: add enough equation into the goal *)
 (*       run nat_normal_form to normalize it *)
@@ -704,6 +561,7 @@ Ltac is_nat :=
     | [       |- n.1 ∈ ω         ] => apply one_is_nat
     | [ H: ?P |- ?P              ] => apply H
     | [       |- ⟨_, _⟩ ∈ cp _ _ ] => apply cp_intro
+    | [       |- (S(_)) ∈ ω      ] => apply suc_is_nat
     | [       |- ?P +ₙ ?Q ∈ ω    ] => apply add_is_nat
     | [       |- ?P ×ₙ ?Q ∈ ω    ] => apply multi_is_nat
   end.
