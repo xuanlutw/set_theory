@@ -238,6 +238,19 @@ Proof.
     - apply P5.
 Qed.
 
+Lemma int_zero_ne_one: z.0 <> z.1.
+Proof.
+  intros P1.
+  pose (int_equal_elim _ _ _ _ empty_is_nat empty_is_nat P1) as P2.
+  rewrite (add_zero _ empty_is_nat) in P2.
+  rewrite (add_zero_l _ one_is_nat) in P2.
+  pose (suc_intro_1 n.0) as P3.
+  rewrite <- P2 in P3.
+  absurd (n.0 ∈ n.0).
+  + apply not_in_empty.
+  + apply P3. 
+Qed.
+
 Ltac is_nat_z :=
   repeat match goal with
     | [ H: int ?P _ ∈ ℤ |- ?P ∈ ω      ] => apply (int_elim_fst _ _ H)
@@ -687,12 +700,12 @@ Proof.
 Qed.
 
 Lemma int_distributive_r: forall m n p, m ∈ ℤ -> n ∈ ℤ -> p ∈ ℤ ->
-  (n +z p) ×z m = (n ×z m) +z (p ×z m).
+  (m +z n) ×z p = (m ×z p) +z (n ×z p).
 Proof.
   intros m n p P1 P2 P3.
-  rewrite (int_multi_commutative (n +z p) m).
-  rewrite (int_multi_commutative n m).
-  rewrite (int_multi_commutative p m).
+  rewrite (int_multi_commutative (m +z n) p).
+  rewrite (int_multi_commutative m p).
+  rewrite (int_multi_commutative n p).
   apply int_distributive_l.
   all: is_nat_z3.
 Qed.
@@ -952,26 +965,77 @@ Proof.
 Qed.
 (*----------------------------------------------------------------------------*)
 
+(* Sub Z *)
+Notation ℤ' := (ℤ \ ({z.0})).
+
+Lemma in_subz: forall m, m ∈ ℤ' -> m ∈ ℤ.
+Proof.
+  intros m P1.
+  destruct (complement_elim _ _ _ P1) as [P2 P3].
+  apply P2.
+Qed.
+
+Lemma in_subz_not_zero: forall m, m ∈ ℤ' -> m <> z.0.
+Proof.
+  intros m P1 P2.
+  destruct (complement_elim _ _ _ P1) as [_ P3].
+  absurd (m ∈ {z.0}).
+  + apply P3.
+  + rewrite P2. 
+    apply in_singleton.
+Qed.
+
+Lemma int_multi_subz: forall m n, m ∈ ℤ' -> n ∈ ℤ' -> (m ×z n) ∈ ℤ'.
+Proof.
+  intros m n P1 P2.
+  apply complement_intro.
+  split.
+  + apply (int_multi_is_int _ _ (in_subz _ P1) (in_subz _ P2)).
+  + apply not_in_singleton.
+    intros P3.
+    destruct (complement_elim _ _ _ P1) as [P4 P5].
+    destruct (complement_elim _ _ _ P2) as [P6 P7].
+    symmetry in P3.
+    destruct (int_no_zero_divisor _ _ P4 P6 P3) as [P8|P8].
+    - rewrite P8 in P5.
+      absurd (z.0 ∈ {z.0}).
+      * apply P5.
+      * apply in_singleton.
+    - rewrite P8 in P7.
+      absurd (z.0 ∈ {z.0}).
+      * apply P7.
+      * apply in_singleton.
+Qed.
+
+Lemma int_one_in_subz: z.1 ∈ ℤ'.
+Proof.
+  apply (complement_intro).
+  split.
+  + apply (int_ctor_is_int _ _ one_is_nat empty_is_nat).
+  + intros P1.
+    absurd (z.0 = z.1).
+    - apply int_zero_ne_one.
+    - apply (in_singleton_equal _ _ P1).
+Qed.
+(*----------------------------------------------------------------------------*)
+
 (* Skip order of integer *)
 (*----------------------------------------------------------------------------*)
 
 (* Ltac *)
-(* Flow: add enough equation into the goal *)
-(*       run nat_normal_form to normalize it *)
-(*       exchange order of multiple (I don't know how to do it automaticly now) *)
-(*       run nat_rea to reduce result *)
-(*       run is_nat to clean up *)
 Ltac is_int :=
   repeat match goal with
-    | [       |- ?P = ?P         ] => reflexivity
-    | [       |- z.0 ∈ ℤ         ] => 
-        apply (int_ctor_is_int _ _ empty_is_nat empty_is_nat)
-    | [       |- z.1 ∈ ℤ         ] => 
-        apply (int_ctor_is_int _ _ one_is_nat empty_is_nat)
-    | [ H: ?P |- ?P              ] => apply H
-    | [       |- ⟨_, _⟩ ∈ cp _ _ ] => apply cp_intro
-    | [       |- ?P +z ?Q ∈ ℤ    ] => apply int_add_is_int
-    | [       |- ?P ×z ?Q ∈ ℤ    ] => apply int_multi_is_int
+    | [            |- ?P = ?P         ] => reflexivity
+    | [            |- z.0 ∈ ℤ         ] => apply zero_is_int
+    | [            |- z.1 ∈ ℤ         ] => apply one_is_int
+    | [            |- z.-1 ∈ ℤ        ] => apply inverse_one_is_int
+    | [            |- z.1 ∈ ℤ'        ] => apply int_one_in_subz
+    | [ H: ?P      |- ?P              ] => apply H
+    | [ H: ?P ∈ ℤ' |- ?P ∈ ℤ          ] => apply (in_subz P H)
+    | [            |- ?P ×z ?Q ∈ ℤ'   ] => apply int_multi_subz
+    | [            |- ⟨_, _⟩ ∈ cp _ _ ] => apply cp_intro
+    | [            |- ?P +z ?Q ∈ ℤ    ] => apply int_add_is_int
+    | [            |- ?P ×z ?Q ∈ ℤ    ] => apply int_multi_is_int
   end.
 
 (*Ltac int_unwrap_multi_ M :=*)
