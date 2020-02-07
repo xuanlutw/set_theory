@@ -6,6 +6,7 @@ echo operation/*.v >> _CoqProject
 echo relation/*.v  >> _CoqProject
 echo nat/*.v       >> _CoqProject
 echo int/*.v       >> _CoqProject
+echo rat/*.v       >> _CoqProject
 coq_makefile -f _CoqProject -o Makefile
 make
 make gallinahtml
