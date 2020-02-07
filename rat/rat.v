@@ -197,6 +197,20 @@ Proof.
   apply P7.
 Qed.
 
+Lemma rat_equal_intro: forall m1 n1 m2 n2, m1 ∈ ℤ -> n1 ∈ ℤ' ->
+  m2 ∈ ℤ -> n2 ∈ ℤ' -> m1 ×z n2 = n1 ×z m2 -> rat m1 n1 = rat m2 n2.
+Proof.
+  intros m1 n1 m2 n2 P1 P2 P3 P4 P5.
+  apply equiv_class_eq_intro.
+  apply (equiv_class_intro_1 _ _ _ _ rat_ctor_rel_is_equiv_rel).
+  apply subset_intro.
+  + is_int.
+  + exists m1. exists n1. exists m2. exists n2.
+    split.
+    - reflexivity.
+    - apply P5.
+Qed.
+
 Ltac is_int_q :=
   repeat match goal with
     | [ H: rat ?P _ ∈ ℚ |- ?P ∈ ℤ      ] => apply (rat_elim_fst _ _ H)
@@ -358,7 +372,7 @@ Proof.
     reflexivity.
 Qed.
 
-Lemma rat_int_add_commutative: forall a b, a ∈ ℚ -> b ∈ ℚ -> a +q b = b +q a.
+Lemma rat_add_commutative: forall a b, a ∈ ℚ -> b ∈ ℚ -> a +q b = b +q a.
 Proof.
   intros a b P1 P2.
   destruct (rat_elim _ P1) as [qm [qn [Q1 [Q2 Q3]]]].
@@ -378,7 +392,7 @@ Proof.
     all: is_int_q2.
 Qed.
 
-Lemma rat_int_add_associative: forall a b c, a ∈ ℚ -> b ∈ ℚ -> c ∈ ℚ -> 
+Lemma rat_add_associative: forall a b c, a ∈ ℚ -> b ∈ ℚ -> c ∈ ℚ -> 
   a +q (b +q c) = (a +q b) +q c.
 Proof.
   intros a b c P1 P2 P3.
@@ -430,265 +444,279 @@ Proof.
 Qed.
 (*----------------------------------------------------------------------------*)
 
-(*[> Multiple <]*)
-(*Definition rat_multi :=*)
-  (*subset_ctor (fun x => exists m n p q,*)
-    (*x = ⟨⟨rat m n , rat p q⟩, rat ((m ×ₙ p) +ₙ (n ×ₙ q)) ((m ×ₙ q) +ₙ (n ×ₙ p))⟩) *)
-    (*(cp (cp ℤ ℤ) ℤ).*)
+(* Multiple *)
+Definition rat_multi :=
+  subset_ctor (fun x => exists m n p q,
+    x = ⟨⟨rat m n , rat p q⟩, rat (m ×z p) (n ×z q)⟩) 
+    (cp (cp ℚ ℚ) ℚ).
 
-(*Notation "x ×z y" := (rat_multi [ ⟨x, y⟩ ]) (at level 60, no associativity).*)
+Notation "x ×q y" := (rat_multi [ ⟨x, y⟩ ]) (at level 60, no associativity).
 
-(*Lemma rat_multi_is_function: function rat_multi.*)
-(*Proof.*)
-  (*split.*)
-  (*+ apply cp_subset_rel.*)
-  (*+ intros a b1 b2 P1 P2.*)
-    (*destruct (subset_elim _ _ _ P1) as [Q1 [qm [qn [qp [qq Q2]]]]].*)
-    (*destruct (cp_elim_2 _ _ _ _ Q1) as [Q4 Q5].*)
-    (*destruct (cp_elim _ _ _ Q4) as [qa [qb [Q6 [Q7 Q8]]]].*)
-    (*rewrite (opair_equal_elim_snd _ _ _ _ Q2).*)
-    (*rewrite (opair_equal_elim_fst _ _ _ _ Q2) in Q4.*)
-    (*destruct (cp_elim_2 _ _ _ _ Q4) as [Q9 Q10].*)
-    (*destruct (subset_elim _ _ _ P2) as [R1 [rm [rn [rp [rq R2]]]]].*)
-    (*destruct (cp_elim_2 _ _ _ _ R1) as [R4 R5].*)
-    (*destruct (cp_elim _ _ _ R4) as [ra [rb [R6 [R7 R8]]]].*)
-    (*rewrite (opair_equal_elim_snd _ _ _ _ R2).*)
-    (*rewrite (opair_equal_elim_fst _ _ _ _ R2) in R4.*)
-    (*destruct (cp_elim_2 _ _ _ _ R4) as [R9 R10].*)
-    (*apply equiv_class_eq_intro.*)
-    (*apply (equiv_class_intro_1 _ _ _ _ rat_ctor_rel_is_equiv_rel).*)
-    (*apply subset_intro.*)
-    (*- is_int_z.*)
-    (*- exists (qm ×ₙ qp +ₙ qn ×ₙ qq). *)
-      (*exists (qm ×ₙ qq +ₙ qn ×ₙ qp). *)
-      (*exists (rm ×ₙ rp +ₙ rn ×ₙ rq).*)
-      (*exists (rm ×ₙ rq +ₙ rn ×ₙ rp).*)
-      (*split.*)
-      (** reflexivity.*)
-      (** pose (opair_equal_elim_fst _ _ _ _ Q2) as P3.*)
-        (*rewrite (opair_equal_elim_fst _ _ _ _ R2) in P3.*)
-        (*pose (rat_equal_elim _ _ _ _ *)
-          (*(rat_elim_fst _ _ R9) (rat_elim_snd _ _ R9) *)
-          (*(opair_equal_elim_fst _ _ _ _ P3)) as P4.*)
-        (*apply (add_cancellation_2 _ _ _ _ (multi_equation_2 _ _ rp P4)).*)
-        (*symmetry.*)
-        (*apply (add_cancellation_2 _ _ _ _ (multi_equation_2 _ _ rq P4)).*)
-        (*pose (rat_equal_elim _ _ _ _ *)
-          (*(rat_elim_fst _ _ R10) (rat_elim_snd _ _ R10) *)
-          (*(opair_equal_elim_snd _ _ _ _ P3)) as P5.*)
-        (*apply (add_cancellation_2 _ _ _ _ (multi_equation_2 _ _ qn P5)).*)
-        (*symmetry.*)
-        (*apply (add_cancellation_2 _ _ _ _ (multi_equation_2 _ _ qm P5)).*)
-        (*int_normal_form.*)
-        (*rewrite (int_multi_commutative rq qm).*)
-        (*rewrite (int_multi_commutative rp qn).*)
-        (*rewrite (int_multi_commutative rq qn).*)
-        (*rewrite (int_multi_commutative rq rm).*)
-        (*rewrite (int_multi_commutative rp qm).*)
-        (*rewrite (int_multi_commutative rp rn).*)
-        (*rewrite (int_multi_commutative rn rq).*)
-        (*rewrite (int_multi_commutative rp rm).*)
-        (*int_red.*)
-        (*all: is_int_z.*)
-(*Qed.*)
+Lemma rat_multi_is_function: function rat_multi.
+Proof.
+  split.
+  + apply cp_subset_rel.
+  + intros a b1 b2 P1 P2.
+    destruct (subset_elim _ _ _ P1) as [Q1 [qm [qn [qp [qq Q2]]]]].
+    destruct (cp_elim_2 _ _ _ _ Q1) as [Q4 Q5].
+    destruct (cp_elim _ _ _ Q4) as [qa [qb [Q6 [Q7 Q8]]]].
+    rewrite (opair_equal_elim_snd _ _ _ _ Q2).
+    rewrite (opair_equal_elim_fst _ _ _ _ Q2) in Q4.
+    destruct (cp_elim_2 _ _ _ _ Q4) as [Q9 Q10].
+    destruct (subset_elim _ _ _ P2) as [R1 [rm [rn [rp [rq R2]]]]].
+    destruct (cp_elim_2 _ _ _ _ R1) as [R4 R5].
+    destruct (cp_elim _ _ _ R4) as [ra [rb [R6 [R7 R8]]]].
+    rewrite (opair_equal_elim_snd _ _ _ _ R2).
+    rewrite (opair_equal_elim_fst _ _ _ _ R2) in R4.
+    destruct (cp_elim_2 _ _ _ _ R4) as [R9 R10].
+    apply equiv_class_eq_intro.
+    apply (equiv_class_intro_1 _ _ _ _ rat_ctor_rel_is_equiv_rel).
+    apply subset_intro.
+    - is_int_q2.
+    - exists (qm ×z qp). 
+      exists (qn ×z qq). 
+      exists (rm ×z rp).
+      exists (rn ×z rq).
+      split.
+      * reflexivity.
+      * rewrite (int_multi_associative (qm ×z qp) rn rq).
+        rewrite <- (int_multi_associative qm qp rn).
+        rewrite (int_multi_commutative qp rn).
+        rewrite (int_multi_associative qm rn qp).
+        rewrite <- (int_multi_associative (qm ×z rn) qp rq).
+        rewrite (int_multi_commutative qm rn).
+        rewrite (int_multi_commutative qp rq).
 
-(*Lemma rat_multi_dom: dom(rat_multi) = cp ℤ ℤ.*)
-(*Proof.*)
-  (*apply (subset_asym).*)
-  (*split.*)
-  (*+ intros x P1.*)
-    (*destruct (dom_elim _ _ P1) as [y P2].*)
-    (*destruct (subset_elim _ _ _ P2) as [P3 _].*)
-    (*destruct (cp_elim_2 _ _ _ _ P3) as [P4 _].*)
-    (*apply P4.*)
-  (*+ intros x P1.*)
-    (*destruct (cp_elim _ _ _ P1) as [a [b [P2 [P3 P4]]]].*)
-    (*destruct (rat_elim _ P2) as [qm [qn [Q1 [Q2 Q3]]]].*)
-    (*destruct (rat_elim _ P3) as [rm [rn [R1 [R2 R3]]]].*)
-    (*apply dom_intro.*)
-    (*exists (rat ((qm ×ₙ rm) +ₙ (qn ×ₙ rn)) ((qm ×ₙ rn) +ₙ (qn ×ₙ rm))).*)
-    (*apply subset_intro.*)
-    (*- is_int_z2.*)
-    (*- exists qm. exists qn. exists rm. exists rn.*)
-      (*rewrite P4.*)
-      (*rewrite Q3.*)
-      (*rewrite R3.*)
-      (*reflexivity. *)
-(*Qed.*)
+        rewrite (int_multi_associative (qn ×z qq) rm rp).
+        rewrite <- (int_multi_associative qn qq rm).
+        rewrite (int_multi_commutative qq rm).
+        rewrite (int_multi_associative qn rm qq).
+        rewrite <- (int_multi_associative (qn ×z rm) qq rp).
+        rewrite (int_multi_commutative qn rm).
+        rewrite (int_multi_commutative qq rp).
 
-(*Lemma rat_multi_ran: ran(rat_multi) = ℤ.*)
-(*Proof.*)
-  (*apply (subset_asym).*)
-  (*split.*)
-  (*+ intros y P1.*)
-    (*destruct (ran_elim _ _ P1) as [x P2].*)
-    (*destruct (subset_elim _ _ _ P2) as [P3 _].*)
-    (*destruct (cp_elim_2 _ _ _ _ P3) as [_ P4].*)
-    (*apply P4.*)
-  (*+ intros x P1.*)
-    (*destruct (rat_elim _ P1) as [qm [qn [Q1 [Q2 Q3]]]].*)
-    (*apply ran_intro.*)
-    (*exists (⟨rat qm qn, rat n.1 n.0⟩).*)
-    (*apply subset_intro.*)
-    (*- is_int_z2.*)
-    (*- exists qm. exists qn. exists n.1. exists n.0.*)
-      (*rewrite Q3.*)
-      (*rewrite (multi_zero _ Q1).*)
-      (*rewrite (multi_zero _ Q2).*)
-      (*rewrite (multi_one _ Q1).*)
-      (*rewrite (multi_one _ Q2).*)
-      (*rewrite (add_zero _ Q1).*)
-      (*rewrite (int_add_commutative _ _ empty_is_int Q2).*)
-      (*rewrite (add_zero _ Q2).*)
-      (*reflexivity. *)
-(*Qed.*)
+        pose (opair_equal_elim_fst _ _ _ _ Q2) as P3.
+        rewrite (opair_equal_elim_fst _ _ _ _ R2) in P3. 
+        rewrite (rat_equal_elim _ _ _ _ 
+          (rat_elim_fst _ _ R9) (rat_elim_snd _ _ R9) 
+          (opair_equal_elim_fst _ _ _ _ P3)).
+        rewrite (rat_equal_elim _ _ _ _ 
+          (rat_elim_fst _ _ R10) (rat_elim_snd _ _ R10) 
+          (opair_equal_elim_snd _ _ _ _ P3)).
+        reflexivity.
+        all: is_int_q2.
+Qed.
 
-(*Lemma rat_multi_is_rat: forall a b, a ∈ ℤ -> b ∈ ℤ -> a ×z b ∈ ℤ.*)
-(*Proof.*)
-  (*intros a b P1 P2.*)
-  (*rewrite <- rat_multi_ran.*)
-  (*apply (fval_ran _ _ rat_multi_is_function).*)
-  (*rewrite rat_multi_dom.*)
-  (*apply cp_intro.*)
-  (*+ apply P1.*)
-  (*+ apply P2.*)
-(*Qed.*)
+Lemma rat_multi_dom: dom(rat_multi) = cp ℚ ℚ.
+Proof.
+  apply (subset_asym).
+  split.
+  + intros x P1.
+    destruct (dom_elim _ _ P1) as [y P2].
+    destruct (subset_elim _ _ _ P2) as [P3 _].
+    destruct (cp_elim_2 _ _ _ _ P3) as [P4 _].
+    apply P4.
+  + intros x P1.
+    destruct (cp_elim _ _ _ P1) as [a [b [P2 [P3 P4]]]].
+    destruct (rat_elim _ P2) as [qm [qn [Q1 [Q2 Q3]]]].
+    destruct (rat_elim _ P3) as [rm [rn [R1 [R2 R3]]]].
+    apply dom_intro.
+    exists (rat (qm ×z rm) (qn ×z rn)).
+    apply subset_intro.
+    - is_int_q2.
+    - exists qm. exists qn. exists rm. exists rn.
+      rewrite P4.
+      rewrite Q3.
+      rewrite R3.
+      reflexivity. 
+Qed.
 
-(*Ltac is_int_z3 :=*)
-  (*repeat match goal with*)
-    (*| [ |- _ ×z _ ∈ ℤ ] => apply rat_multi_is_rat*)
-    (*| _                 => is_int_z2*)
-  (*end.*)
+Lemma rat_multi_ran: ran(rat_multi) = ℚ.
+Proof.
+  apply (subset_asym).
+  split.
+  + intros y P1.
+    destruct (ran_elim _ _ P1) as [x P2].
+    destruct (subset_elim _ _ _ P2) as [P3 _].
+    destruct (cp_elim_2 _ _ _ _ P3) as [_ P4].
+    apply P4.
+  + intros x P1.
+    destruct (rat_elim _ P1) as [qm [qn [Q1 [Q2 Q3]]]].
+    apply ran_intro.
+    exists (⟨rat qm qn, rat z.1 z.1⟩).
+    apply subset_intro.
+    - is_int_q2.
+    - exists qm. exists qn. exists z.1. exists z.1.
+      rewrite Q3.
+      rewrite (int_multi_one _ Q1).
+      rewrite (int_multi_one _ (in_subz _ Q2)).
+      reflexivity. 
+Qed.
 
-(*Lemma rat_multi_elim: forall m n p q, m ∈ ℤ -> n ∈ ℤ -> p ∈ ℤ -> q ∈ ℤ ->*)
-  (*(rat m n) ×z (rat p q) = (rat ((m ×ₙ p) +ₙ (n ×ₙ q)) ((m ×ₙ q) +ₙ (n ×ₙ p))).*)
-(*Proof.*)
-  (*intros m n p q P1 P2 P3 P4.*)
-  (*symmetry.*)
-  (*apply (fval_intro _ _ _ rat_multi_is_function).*)
-  (*apply subset_intro.*)
-  (*+ is_int_z. *)
-  (*+ exists m. exists n. exists p. exists q.*)
-    (*reflexivity.*)
-(*Qed.*)
+Lemma rat_multi_is_rat: forall a b, a ∈ ℚ -> b ∈ ℚ -> a ×q b ∈ ℚ.
+Proof.
+  intros a b P1 P2.
+  rewrite <- rat_multi_ran.
+  apply (fval_ran _ _ rat_multi_is_function).
+  rewrite rat_multi_dom.
+  apply cp_intro.
+  + apply P1.
+  + apply P2.
+Qed.
 
-(*Lemma rat_int_multi_commutative: forall a b, a ∈ ℤ -> b ∈ ℤ -> a ×z b = b ×z a.*)
-(*Proof.*)
-  (*intros a b P1 P2.*)
-  (*destruct (rat_elim _ P1) as [qm [qn [Q1 [Q2 Q3]]]].*)
-  (*destruct (rat_elim _ P2) as [rm [rn [R1 [R2 R3]]]].*)
-  (*apply (fval_intro _ _ _ rat_multi_is_function).*)
-  (*apply (subset_intro).*)
-  (*+ is_int_z3.*)
-  (*+ exists rm. exists rn. exists qm. exists qn.*)
-    (*rewrite Q3.*)
-    (*rewrite R3.*)
-    (*rewrite (rat_multi_elim _ _ _ _ Q1 Q2 R1 R2).*)
-    (*rewrite (int_multi_commutative _ _ Q1 R1).*)
-    (*rewrite (int_multi_commutative _ _ Q2 R2).*)
-    (*rewrite (int_multi_commutative _ _ Q1 R2).*)
-    (*rewrite (int_multi_commutative _ _ Q2 R1).*)
-    (*rewrite (int_add_commutative (rn ×ₙ qm) (rm ×ₙ qn)).*)
-    (*reflexivity.*)
-    (*all: is_int.*)
-(*Qed.*)
+Ltac is_int_q3 :=
+  repeat match goal with
+    | [ |- _ ×q _ ∈ ℚ ] => apply rat_multi_is_rat
+    | _                 => is_int_q2
+  end.
 
-(*Lemma rat_multi_associative: forall a b c, a ∈ ℤ -> b ∈ ℤ -> c ∈ ℤ -> *)
-  (*a ×z (b ×z c) = (a ×z b) ×z c.*)
-(*Proof.*)
-  (*intros a b c P1 P2 P3.*)
-  (*destruct (rat_elim _ P1) as [qm [qn [Q1 [Q2 Q3]]]].*)
-  (*destruct (rat_elim _ P2) as [rm [rn [R1 [R2 R3]]]].*)
-  (*destruct (rat_elim _ P3) as [sm [sn [S1 [S2 S3]]]].*)
-  (*destruct (rat_elim _ (rat_multi_is_rat _ _ P1 P2)) as [tm [tn [T1 [T2 T3]]]].*)
-  (*destruct (rat_elim _ (rat_multi_is_rat _ _ P2 P3)) as [um [un [U1 [U2 U3]]]].*)
-  (*apply (fval_intro _ _ _ rat_multi_is_function).*)
-  (*apply (subset_intro).*)
-  (*+ is_int_z3.*)
-  (*+ exists tm. exists tn. exists sm. exists sn.*)
-    (*apply (opair_equal_intro).*)
-    (*- rewrite T3.*)
-      (*rewrite S3.*)
-      (*reflexivity.*)
-    (*- rewrite <- (rat_multi_elim _ _ _ _ T1 T2 S1 S2).*)
-      (*rewrite <- T3.*)
-      (*rewrite Q3.*)
-      (*rewrite R3.*)
-      (*rewrite S3.*)
-      (*rewrite (rat_multi_elim _ _ _ _ R1 R2 S1 S2).*)
-      (*rewrite (rat_multi_elim _ _ _ _ Q1 Q2 R1 R2).*)
-      (*rewrite (rat_multi_elim qm qn _ _).*)
-      (*rewrite (rat_multi_elim _ _ sm sn).*)
-      (*f_equal.*)
-      (*int_normal_form.*)
-      (*rewrite (multi_cyc_2 _ _ _ R1 S2 Q2). *)
-      (*rewrite (multi_cyc_2 _ _ _ R2 S2 Q1). *)
-      (*rewrite (multi_cyc_2 _ _ _ R1 S1 Q1). *)
-      (*rewrite (multi_cyc_2 _ _ _ R2 S1 Q2). *)
-      (*int_red.*)
-      (*all: is_int.*)
-      (*int_normal_form.*)
-      (*rewrite (multi_cyc_2 _ _ _ R1 S1 Q2). *)
-      (*rewrite (multi_cyc_2 _ _ _ R2 S1 Q1). *)
-      (*rewrite (multi_cyc_2 _ _ _ R2 S2 Q2). *)
-      (*rewrite (multi_cyc_2 _ _ _ R1 S2 Q1). *)
-      (*int_red.*)
-      (*all: is_int.*)
-(*Qed.*)
+Lemma rat_multi_elim: forall m n p q, m ∈ ℤ -> n ∈ ℤ' -> p ∈ ℤ -> q ∈ ℤ' ->
+  (rat m n) ×q (rat p q) = (rat (m ×z p) (n ×z q)).
+Proof.
+  intros m n p q P1 P2 P3 P4.
+  symmetry.
+  apply (fval_intro _ _ _ rat_multi_is_function).
+  apply subset_intro.
+  + is_int_q3. 
+  + exists m. exists n. exists p. exists q.
+    reflexivity.
+Qed.
 
-(*Lemma rat_multi_zero: forall a, a ∈ ℤ -> a ×z z.0 = z.0.*)
-(*Proof.*)
-  (*intros a P1.*)
-  (*destruct (rat_elim _ P1) as [m [n [P2 [P3 P4]]]].*)
-  (*rewrite P4.*)
-  (*rewrite (rat_multi_elim _ _ _ _ P2 P3 empty_is_int empty_is_int).*)
-  (*rewrite (multi_zero _ P2).*)
-  (*rewrite (multi_zero _ P3).*)
-  (*rewrite (add_zero _ empty_is_int).*)
-  (*reflexivity.*)
-(*Qed.*)
+Lemma rat_multi_commutative: forall a b, a ∈ ℚ -> b ∈ ℚ -> a ×q b = b ×q a.
+Proof.
+  intros a b P1 P2.
+  destruct (rat_elim _ P1) as [qm [qn [Q1 [Q2 Q3]]]].
+  destruct (rat_elim _ P2) as [rm [rn [R1 [R2 R3]]]].
+  apply (fval_intro _ _ _ rat_multi_is_function).
+  apply (subset_intro).
+  + is_int_q3.
+  + exists rm. exists rn. exists qm. exists qn.
+    rewrite Q3.
+    rewrite R3.
+    rewrite (rat_multi_elim _ _ _ _ Q1 Q2 R1 R2).
+    rewrite (int_multi_commutative _ _ Q1 R1).
+    rewrite (int_multi_commutative _ _ (in_subz _ Q2) (in_subz _ R2)).
+    reflexivity.
+    all: is_int.
+Qed.
 
-(*Lemma rat_multi_one: forall a, a ∈ ℤ -> a ×z z.1 = a.*)
-(*Proof.*)
-  (*intros a P1.*)
-  (*destruct (rat_elim _ P1) as [m [n [P2 [P3 P4]]]].*)
-  (*rewrite P4.*)
-  (*rewrite (rat_multi_elim _ _ _ _ P2 P3 one_is_int empty_is_int).*)
-  (*rewrite (multi_zero _ P2).*)
-  (*rewrite (multi_zero _ P3).*)
-  (*rewrite (multi_one _ P2).*)
-  (*rewrite (multi_one _ P3).*)
-  (*rewrite (add_zero _ P2).*)
-  (*rewrite (add_zero_l _ P3).*)
-  (*reflexivity.*)
-(*Qed.*)
+Lemma rat_multi_associative: forall a b c, a ∈ ℚ -> b ∈ ℚ -> c ∈ ℚ -> 
+  a ×q (b ×q c) = (a ×q b) ×q c.
+Proof.
+  intros a b c P1 P2 P3.
+  destruct (rat_elim _ P1) as [qm [qn [Q1 [Q2 Q3]]]].
+  destruct (rat_elim _ P2) as [rm [rn [R1 [R2 R3]]]].
+  destruct (rat_elim _ P3) as [sm [sn [S1 [S2 S3]]]].
+  destruct (rat_elim _ (rat_multi_is_rat _ _ P1 P2)) as [tm [tn [T1 [T2 T3]]]].
+  destruct (rat_elim _ (rat_multi_is_rat _ _ P2 P3)) as [um [un [U1 [U2 U3]]]].
+  apply (fval_intro _ _ _ rat_multi_is_function).
+  apply (subset_intro).
+  + is_int_q3.
+  + exists tm. exists tn. exists sm. exists sn.
+    apply (opair_equal_intro).
+    - rewrite T3.
+      rewrite S3.
+      reflexivity.
+    - rewrite <- (rat_multi_elim _ _ _ _ T1 T2 S1 S2).
+      rewrite <- T3.
+      rewrite Q3.
+      rewrite R3.
+      rewrite S3.
+      rewrite (rat_multi_elim _ _ _ _ R1 R2 S1 S2).
+      rewrite (rat_multi_elim _ _ _ _ Q1 Q2 R1 R2).
+      rewrite (rat_multi_elim qm qn _ _).
+      rewrite (rat_multi_elim _ _ sm sn).
+      rewrite (int_multi_associative qm rm sm).
+      rewrite (int_multi_associative qn rn sn).
+      reflexivity.
+      all: is_int.
+Qed.
 
-(*Lemma rat_distributive_l: forall m n p, m ∈ ℤ -> n ∈ ℤ -> p ∈ ℤ ->*)
-  (*m ×z (n +z p) = (m ×z n) +z (m ×z p).*)
-(*Proof.*)
-  (*intros m n p P1 P2 P3.*)
-  (*destruct (rat_elim _ P1) as [qm [qn [Q1 [Q2 Q3]]]].*)
-  (*destruct (rat_elim _ P2) as [rm [rn [R1 [R2 R3]]]].*)
-  (*destruct (rat_elim _ P3) as [sm [sn [S1 [S2 S3]]]].*)
-  (*rewrite Q3.*)
-  (*rewrite R3.*)
-  (*rewrite S3.*)
-  (*rewrite (rat_add_elim _ _ _ _ R1 R2 S1 S2).*)
-  (*rewrite (rat_multi_elim _ _ _ _ Q1 Q2 R1 R2).*)
-  (*rewrite (rat_multi_elim _ _ _ _ Q1 Q2 S1 S2).*)
-  (*rewrite (rat_multi_elim _ _ _ _ Q1 Q2 *)
-    (*(add_is_int _ _ R1 S1) (add_is_int _ _ R2 S2)).*)
-  (*rewrite rat_add_elim. *)
-  (*all: is_int.*)
-  (*f_equal.*)
-  (*+ int_normal_form.*)
-    (*int_red.*)
-    (*all: is_int.*)
-  (*+ int_normal_form.*)
-    (*int_red.*)
-    (*all: is_int.*)
-(*Qed.*)
-(*[>----------------------------------------------------------------------------<]*)
+Lemma rat_multi_zero: forall a, a ∈ ℚ -> a ×q q.0 = q.0.
+Proof.
+  intros a P1.
+  destruct (rat_elim _ P1) as [m [n [P2 [P3 P4]]]].
+  rewrite P4.
+  rewrite (rat_multi_elim _ _ _ _ P2 P3 zero_is_int int_one_in_subz).
+  rewrite (int_multi_zero _ P2).
+  rewrite (int_multi_one _ (in_subz _ P3)).
+  apply (rat_equal_intro).
+  all: is_int.
+  rewrite (int_multi_zero _ (in_subz _ P3)).
+  rewrite (int_multi_one _ zero_is_int).
+  reflexivity.
+Qed.
+
+Lemma rat_multi_one: forall a, a ∈ ℚ -> a ×q q.1 = a.
+Proof.
+  intros a P1.
+  destruct (rat_elim _ P1) as [m [n [P2 [P3 P4]]]].
+  rewrite P4.
+  rewrite (rat_multi_elim _ _ _ _ P2 P3 one_is_int int_one_in_subz).
+  rewrite (int_multi_one _ P2).
+  rewrite (int_multi_one _ (in_subz _ P3)).
+  reflexivity.
+Qed.
+
+Lemma rat_distributive_l: forall m n p, m ∈ ℚ -> n ∈ ℚ -> p ∈ ℚ ->
+  m ×q (n +q p) = (m ×q n) +q (m ×q p).
+Proof.
+  intros m n p P1 P2 P3.
+  destruct (rat_elim _ P1) as [qm [qn [Q1 [Q2 Q3]]]].
+  destruct (rat_elim _ P2) as [rm [rn [R1 [R2 R3]]]].
+  destruct (rat_elim _ P3) as [sm [sn [S1 [S2 S3]]]].
+  rewrite Q3.
+  rewrite R3.
+  rewrite S3.
+  rewrite (rat_add_elim _ _ _ _ R1 R2 S1 S2).
+  rewrite (rat_multi_elim _ _ _ _ Q1 Q2 R1 R2).
+  rewrite (rat_multi_elim _ _ _ _ Q1 Q2 S1 S2).
+  rewrite (rat_multi_elim qm qn _ _).
+  rewrite rat_add_elim. 
+  apply (rat_equal_intro).
+  all: is_int.
+  rewrite <- (int_multi_associative qm rm (qn ×z sn)).
+  rewrite (int_multi_associative rm qn sn).
+  rewrite (int_multi_commutative rm qn).
+  rewrite (int_multi_associative qm (qn ×z rm) sn).
+  rewrite (int_multi_associative qm qn rm).
+  rewrite <- (int_multi_associative (qm ×z qn) rm sn).
+  rewrite (int_multi_associative (qn ×z rn) qm sm).
+  rewrite <- (int_multi_associative qn rn qm).
+  rewrite (int_multi_commutative rn qm).
+  rewrite (int_multi_associative qn qm rn).
+  rewrite <- (int_multi_associative (qn ×z qm) rn sm).
+  rewrite (int_multi_commutative qn qm).
+  rewrite <- (int_distributive_l (qm ×z qn) (rm ×z sn) (rn ×z sm)).
+  rewrite <- (int_multi_associative 
+    qm ((rm ×z sn) +z (rn ×z sm)) ((qn ×z rn) ×z (qn ×z sn))).
+  rewrite (int_multi_commutative 
+    ((rm ×z sn) +z (rn ×z sm)) ((qn ×z rn) ×z (qn ×z sn))).
+  rewrite (int_multi_associative
+    qm ((qn ×z rn) ×z (qn ×z sn)) ((rm ×z sn) +z (rn ×z sm))).
+  rewrite (int_multi_associative
+    (qn ×z (rn ×z sn)) (qm ×z qn) ((rm ×z sn) +z (rn ×z sm))).
+  rewrite <- (int_multi_associative qn rn (qn ×z sn)).
+  rewrite (int_multi_associative qm qn (rn ×z (qn ×z sn))).
+  rewrite (int_multi_associative rn qn sn).
+  rewrite (int_multi_commutative rn qn).
+  rewrite <- (int_multi_associative qn rn sn).
+  rewrite (int_multi_commutative (qm ×z qn) (qn ×z (rn ×z sn))).
+  reflexivity.
+  all: is_int.
+Qed.
+
+Lemma rat_distributive_r: forall m n p, m ∈ ℚ -> n ∈ ℚ -> p ∈ ℚ ->
+  (m +q n) ×q p = (m ×q p) +q (n ×q p).
+Proof.
+  intros m n p P1 P2 P3.
+  rewrite (rat_multi_commutative m p).
+  rewrite (rat_multi_commutative n p).
+  rewrite (rat_multi_commutative (m +q n) p).
+  apply rat_distributive_l.
+  all: is_int_q2.
+Qed.
+(*----------------------------------------------------------------------------*)
 
 (* Inverse *)
 (*Lemma rat_add_inverse_exist: forall a, exists b, a ∈ ℤ -> b ∈ ℤ -> a +z b = z.0.*)
