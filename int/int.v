@@ -9,6 +9,7 @@ Require Import nat.inductive.
 Require Import nat.nat.
 Require Import nat.recursion.
 Require Import nat.nat_arith.
+Require Import nat.order.
 
 (* Integer *)
 Definition int_ctor_rel := 
@@ -126,6 +127,8 @@ Notation "z.0" := (int n.0 n.0).
 
 Notation "z.1" := (int n.1 n.0).
 
+Notation "z.-1" := (int n.0 n.1).
+
 Lemma int_ctor_is_int: forall m n, m ∈ ω -> n ∈ ω -> int m n ∈ ℤ.
 Proof.
   intros m n P1 P2.
@@ -186,6 +189,27 @@ Proof.
     - reflexivity.
 Qed.
     
+Lemma zero_is_int: z.0 ∈ ℤ.
+Proof.
+  apply int_intro.
+  apply empty_is_nat.
+  apply empty_is_nat.
+Qed.
+
+Lemma one_is_int: z.1 ∈ ℤ.
+Proof.
+  apply int_intro.
+  apply one_is_nat.
+  apply empty_is_nat.
+Qed.
+
+Lemma inverse_one_is_int: z.-1 ∈ ℤ.
+Proof.
+  apply int_intro.
+  apply empty_is_nat.
+  apply one_is_nat.
+Qed.
+
 Lemma int_equal_elim: forall m1 n1 m2 n2, m1 ∈ ω -> n1 ∈ ω ->
   int m1 n1 = int m2 n2 -> m1 +ₙ n2 = n1 +ₙ m2.
 Proof.
@@ -198,6 +222,20 @@ Proof.
   rewrite (opair_equal_elim_snd _ _ _ _ (opair_equal_elim_fst _ _ _ _ P6)).
   rewrite (opair_equal_elim_snd _ _ _ _ (opair_equal_elim_snd _ _ _ _ P6)).
   apply P7.
+Qed.
+
+Lemma int_equal_intro: forall m1 n1 m2 n2, m1 ∈ ω -> n1 ∈ ω ->
+  m2 ∈ ω -> n2 ∈ ω -> m1 +ₙ n2 = n1 +ₙ m2 -> int m1 n1 = int m2 n2.
+Proof.
+  intros m1 n1 m2 n2 P1 P2 P3 P4 P5.
+  apply equiv_class_eq_intro.
+  apply (equiv_class_intro_1 _ _ _ _ int_ctor_rel_is_equiv_rel).
+  apply subset_intro.
+  + is_nat.
+  + exists m1. exists n1. exists m2. exists n2.
+    split.
+    - reflexivity.
+    - apply P5.
 Qed.
 
 Ltac is_nat_z :=
@@ -387,38 +425,6 @@ Proof.
   rewrite (add_zero _ P3).
   reflexivity.
 Qed.
-
-Lemma int_add_inverse_exist: forall a, exists b, a ∈ ℤ -> b ∈ ℤ -> a +z b = z.0.
-Proof.
-  intros a.
-  destruct (LEM (a ∈ ℤ)) as [P1 | P1].
-  + destruct (int_elim _ P1) as [m [n [P2 [P3 P4]]]].
-    exists (int n m).
-    intros _ P5.
-    rewrite P4.
-    rewrite (int_add_elim _ _ _ _ P2 P3 P3 P2).
-    apply (equiv_class_eq_intro).
-    apply (equiv_class_intro_1 _ _ _ _ int_ctor_rel_is_equiv_rel).
-    apply (subset_intro).
-    - is_nat_z2.
-    - exists (m +ₙ n).
-      exists (n +ₙ m).
-      exists n.0. exists n.0.
-      split.
-      * reflexivity.
-      * rewrite (add_commutative _ _ P2 P3).
-        reflexivity.
-  + exists ∅.
-    intros P2.
-    contradiction.
-Qed.
-
-Definition int_inverse (a:set) :=
-  extract_set (int_add_inverse_exist a).
-
-Notation "z.inv a" := (int_inverse a) (at level 60).
-
-Notation "a -z b"  := (a + (int_inverse b)) (at level 60).
 (*----------------------------------------------------------------------------*)
 
 (* Multiple *)
@@ -679,10 +685,345 @@ Proof.
     nat_red.
     all: is_nat.
 Qed.
+
+Lemma int_distributive_r: forall m n p, m ∈ ℤ -> n ∈ ℤ -> p ∈ ℤ ->
+  (n +z p) ×z m = (n ×z m) +z (p ×z m).
+Proof.
+  intros m n p P1 P2 P3.
+  rewrite (int_multi_commutative (n +z p) m).
+  rewrite (int_multi_commutative n m).
+  rewrite (int_multi_commutative p m).
+  apply int_distributive_l.
+  all: is_nat_z3.
+Qed.
+
+Lemma int_multi_equation: forall m n p q, m = n -> p = q -> m ×z p = n ×z q.
+Proof.
+  intros m n p q P1 P2.
+  rewrite P1.
+  rewrite P2.
+  reflexivity.
+Qed.
+(*----------------------------------------------------------------------------*)
+
+(* Addition Inverse *)
+Lemma int_add_inverse_exist: forall a, exists b, a ∈ ℤ -> b ∈ ℤ /\ a +z b = z.0.
+Proof.
+  intros a.
+  destruct (LEM (a ∈ ℤ)) as [P1 | P1].
+  + destruct (int_elim _ P1) as [m [n [P2 [P3 P4]]]].
+    exists (int n m).
+    intros P5.
+    split.
+    - apply (int_ctor_is_int _ _ P3 P2).
+    - rewrite P4.
+      rewrite (int_add_elim _ _ _ _ P2 P3 P3 P2).
+      apply (equiv_class_eq_intro).
+      apply (equiv_class_intro_1 _ _ _ _ int_ctor_rel_is_equiv_rel).
+      apply (subset_intro).
+      * is_nat_z2.
+      * exists (m +ₙ n).
+        exists (n +ₙ m).
+        exists n.0. exists n.0.
+        rewrite (add_commutative _ _ P2 P3).
+        split.
+        ++reflexivity.
+        ++reflexivity.
+  + exists ∅.
+    intros P2.
+    contradiction.
+Qed.
+
+Definition int_add_inverse (a:set) :=
+  extract_set (int_add_inverse_exist a).
+
+Notation "-z a" := (int_add_inverse a) (at level 60).
+
+Lemma int_add_inverse_intro_1: forall a, a ∈ ℤ -> -z a ∈ ℤ.
+Proof.
+  intros a P1.
+  destruct (extract_set_property (int_add_inverse_exist a) P1) as [P2 _].
+  apply P2.
+Qed.
+
+Ltac is_nat_z4 :=
+  repeat match goal with
+    | [ |- -z _ ∈ ℤ ] => apply int_add_inverse_intro_1
+    | _               => is_nat_z3
+  end.
+
+Lemma int_add_inverse_intro_2: forall a, a ∈ ℤ -> a +z (-z a) = z.0.
+Proof.
+  intros a P1.
+  destruct (extract_set_property (int_add_inverse_exist a) P1) as [_ P2].
+  apply P2.
+Qed.
+
+Lemma int_add_inverse_unique: forall a b, a ∈ ℤ -> b ∈ ℤ -> a +z b = z.0 -> 
+  b = -z a.
+Proof.
+  intros a b P1 P2 P4.
+  pose (int_add_inverse_intro_1 _ P1) as P3.
+  pose (int_add_inverse_intro_2 _ P1) as P5.
+  pose (int_add_zero _ P2) as P6.
+  rewrite <- P5 in P6.
+  rewrite (int_add_associative _ _ _ P2 P1 P3) in P6.
+  rewrite (int_add_commutative _ _ P2 P1) in P6.
+  rewrite P4 in P6.
+  rewrite (int_add_commutative _ _ zero_is_int P3) in P6.
+  rewrite (int_add_zero _ P3) in P6.
+  symmetry.
+  apply P6.
+Qed.
+
+Lemma inverse_one_is_inverse_one: z.-1 = -z z.1.
+Proof.
+  apply (int_add_inverse_unique _ _ one_is_int inverse_one_is_int).
+  rewrite int_add_elim.
+  rewrite add_zero.
+  rewrite add_zero_l.
+  apply int_equal_intro.
+  all: is_nat.
+Qed.
+
+Notation "a -z b"  := (a + (-z b)) (at level 60).
+
+Lemma int_add_inverse_elim_1: forall m n, m ∈ ω -> n ∈ ω -> -z int m n = int n m.
+Proof.
+  intros m n P1 P2.
+  symmetry.
+  apply int_add_inverse_unique.
+  all: is_nat_z2.
+  rewrite int_add_elim.
+  apply int_equal_intro.
+  all: is_nat_z2.
+  rewrite add_zero.
+  rewrite add_zero.
+  rewrite add_commutative.
+  all: is_nat_z2.
+Qed.
+
+Lemma int_add_inverse_elim_2: forall a, a ∈ ℤ -> -z a = z.-1 ×z a.
+Proof.
+  intros a P1.
+  destruct (int_elim _ P1) as [qm [qn [Q1 [Q2 Q3]]]].
+  rewrite Q3.
+  rewrite int_multi_commutative.
+  rewrite int_multi_elim.
+  rewrite multi_zero.
+  rewrite multi_zero.
+  rewrite multi_one.
+  rewrite multi_one.
+  rewrite add_zero.
+  rewrite add_zero_l.
+  apply int_add_inverse_elim_1.
+  all: is_nat_z2.
+Qed.
+
+Lemma int_equal_add_1: forall a b c, a = b -> a +z c = b +z c.
+Proof.
+  intros a b c P1.
+  rewrite P1.
+  reflexivity.
+Qed.
+
+Lemma int_equal_add_2: forall a b c, a ∈ ℤ -> b ∈ ℤ -> c ∈ ℤ -> 
+  a +z c = b +z c -> a = b.
+Proof.
+  intros a b c P1 P2 P3 P4.
+  pose (int_equal_add_1 _ _ (-z c) P4) as P5.
+  rewrite <- int_add_associative in P5.
+  rewrite <- int_add_associative in P5.
+  rewrite int_add_inverse_intro_2 in P5.
+  rewrite int_add_zero in P5.
+  rewrite int_add_zero in P5.
+  apply P5.
+  all: is_nat_z4.
+Qed.
+
+Lemma int_add_inverse_multi_distributive_l: forall a b, a ∈ ℤ -> b ∈ ℤ ->
+  -z (a ×z b) = (-z a) ×z b.
+Proof.
+  intros a b P1 P2.
+  rewrite (int_add_inverse_elim_2 (a ×z b)).
+  rewrite int_multi_associative.
+  rewrite <- (int_add_inverse_elim_2 a).
+  reflexivity.
+  all: is_nat_z3.
+Qed.
+
+Lemma int_add_inverse_multi_distributive_r: forall a b, a ∈ ℤ -> b ∈ ℤ ->
+  -z (a ×z b) = a ×z (-z b).
+Proof.
+  intros a b P1 P2.
+  rewrite (int_multi_commutative a b).
+  rewrite (int_multi_commutative a (-z b)).
+  apply int_add_inverse_multi_distributive_l.
+  all: is_nat_z4.
+Qed.
+
+Lemma int_not_zero_elim: forall m n, m ∈ ω -> n ∈ ω -> int m n <> z.0 -> m <> n.
+Proof.
+  intros m n P1 P2 P3 P4.
+  rewrite P4 in P3.
+  absurd (int n n = z.0).
+  + apply P3.
+  + apply int_equal_intro.
+    all: is_nat_z3.
+Qed.
+
+Lemma int_not_zero_intro: forall m n, m ∈ ω -> n ∈ ω -> m <> n -> int m n <> z.0.
+Proof.
+  intros m n P1 P2 P3 P4.
+  absurd (m = n).
+  + apply P3.
+  + pose (int_equal_elim _ _ _ _ P1 P2 P4) as P5.
+    rewrite (add_zero _ P1) in P5.
+    rewrite (add_zero _ P2) in P5.
+    apply P5.
+Qed.
+
+Lemma int_no_zero_divisor: forall m n, m ∈ ℤ -> n ∈ ℤ -> m ×z n = z.0
+  -> m = z.0 \/ n = z.0.
+Proof.
+  intros m n P1 P2.
+  apply contraposition4.
+  intros P3.
+  destruct (int_elim _ P1) as [qm [qn [Q1 [Q2 Q3]]]].
+  destruct (int_elim _ P2) as [rm [rn [R1 [R2 R3]]]].
+  rewrite Q3.
+  rewrite R3.
+  rewrite (int_multi_elim _ _ _ _ Q1 Q2 R1 R2).
+  apply int_not_zero_intro.
+  all: is_nat_z3.
+  rewrite Q3 in P3.
+  rewrite R3 in P3.
+  destruct (not_or_and _ _ P3) as [Q4 R4].
+  destruct (not_equal_less _ _ Q1 Q2 (int_not_zero_elim _ _ Q1 Q2 Q4)) as [Q5|Q5].
+  + destruct (not_equal_less _ _ R1 R2 (int_not_zero_elim _ _ R1 R2 R4)) as [R5|R5].
+    - apply (less_not_equal_2).
+      all: is_nat_z3.
+      apply (order_inequation _ _ _ _ Q1 Q2 R1 R2 Q5 R5).
+    - apply (less_not_equal_1).
+      all: is_nat_z3.
+      apply (order_inequation _ _ _ _ Q1 Q2 R2 R1 Q5 R5).
+  + destruct (not_equal_less _ _ R1 R2 (int_not_zero_elim _ _ R1 R2 R4)) as [R5|R5].
+    - apply (less_not_equal_1).
+      all: is_nat_z3.
+      rewrite (add_commutative (qm ×ₙ rm) (qn ×ₙ rn)).
+      rewrite (add_commutative (qm ×ₙ rn) (qn ×ₙ rm)).
+      apply (order_inequation _ _ _ _ Q2 Q1 R1 R2 Q5 R5).
+      all: is_nat_z3.
+    - apply (less_not_equal_2).
+      all: is_nat_z3.
+      rewrite (add_commutative (qm ×ₙ rm) (qn ×ₙ rn)).
+      rewrite (add_commutative (qm ×ₙ rn) (qn ×ₙ rm)).
+      apply (order_inequation _ _ _ _ Q2 Q1 R2 R1 Q5 R5).
+      all: is_nat_z3.
+Qed.
+
+Lemma int_multi_cancellation: forall m n l, m ∈ ℤ -> n ∈ ℤ -> l ∈ ℤ ->
+  l <> z.0 -> m ×z l = n ×z l -> m = n.
+Proof.
+  intros m n l P1 P2 P3 P4 P5.
+  pose (int_equal_add_1 (m ×z l) (n ×z l) (-z (n ×z l)) P5) as P6.
+  rewrite (int_add_inverse_intro_2 (n ×z l)) in P6.
+  rewrite int_add_inverse_multi_distributive_l in P6.
+  rewrite <- int_distributive_r in P6.
+  destruct (int_no_zero_divisor (m +z (-z n)) l) as [P7|P7].
+  all: is_nat_z4.
+  + pose (int_equal_add_1 (m +z (-z n)) (z.0) n P7) as P8.
+    rewrite <- int_add_associative in P8.
+    rewrite (int_add_commutative (-z n) n) in P8.
+    rewrite (int_add_inverse_intro_2 n) in P8.
+    rewrite (int_add_zero) in P8.
+    rewrite (int_add_commutative) in P8.
+    rewrite (int_add_zero) in P8.
+    apply P8.
+    all: is_nat_z4.
+  + contradiction.
+Qed.
 (*----------------------------------------------------------------------------*)
 
 (* Skip order of integer *)
+(*----------------------------------------------------------------------------*)
 
+(* Ltac *)
+(* Flow: add enough equation into the goal *)
+(*       run nat_normal_form to normalize it *)
+(*       exchange order of multiple (I don't know how to do it automaticly now) *)
+(*       run nat_rea to reduce result *)
+(*       run is_nat to clean up *)
+Ltac is_int :=
+  repeat match goal with
+    | [       |- ?P = ?P         ] => reflexivity
+    | [       |- z.0 ∈ ℤ         ] => 
+        apply (int_ctor_is_int _ _ empty_is_nat empty_is_nat)
+    | [       |- z.1 ∈ ℤ         ] => 
+        apply (int_ctor_is_int _ _ one_is_nat empty_is_nat)
+    | [ H: ?P |- ?P              ] => apply H
+    | [       |- ⟨_, _⟩ ∈ cp _ _ ] => apply cp_intro
+    | [       |- ?P +ₙ ?Q ∈ ℤ    ] => apply int_add_is_int
+    | [       |- ?P ×ₙ ?Q ∈ ℤ    ] => apply int_multi_is_int
+  end.
+
+(*Ltac int_unwrap_multi_ M :=*)
+  (*repeat match M with*)
+    (*| ?R ×ₙ (?P +ₙ ?Q) => rewrite (distributive_l R P Q)*)
+    (*| (?P +ₙ ?Q) ×ₙ ?R => rewrite (multi_commutative (P +ₙ Q) R)*)
+    (*| ?P ×ₙ (?Q ×ₙ ?R) => rewrite (multi_commutative P (Q ×ₙ R))*)
+    (*| ?P ×ₙ ?Q         => int_unwrap_multi_ P; int_unwrap_multi_ Q*)
+    (*| ?P +ₙ ?Q         => int_unwrap_multi_ P; int_unwrap_multi_ Q*)
+  (*end.*)
+
+(*Ltac int_unwrap_multi :=*)
+  (*repeat match goal with*)
+    (*| [ |- ?P = ?Q ] => int_unwrap_multi_ P; int_unwrap_multi_ Q*)
+  (*end.*)
+
+(*Ltac int_unwrap_add_ M :=*)
+  (*repeat match M with*)
+    (*| ?P +ₙ (?Q +ₙ ?R) => rewrite (add_associative P Q R)*)
+    (*| ?P +ₙ ?Q         => int_unwrap_add_ P*)
+  (*end.*)
+
+(*Ltac int_unwrap_add :=*)
+  (*repeat match goal with*)
+    (*| [ |- ?P = ?Q ] => int_unwrap_add_ P; int_unwrap_add_ Q*)
+  (*end.*)
+
+(*Ltac int_normal_form :=*)
+  (*int_unwrap_multi;*)
+  (*int_unwrap_add.*)
+
+(*Ltac int_red_ M P :=*)
+  (*repeat match M with*)
+    (*[>| P              => assumption<]*)
+    (*[>| _ +ₙ P         => assumption [>do nothing<]<]*)
+    (*| P +ₙ ?Q        => rewrite (add_commutative P Q)*)
+    (*| (?R +ₙ P) +ₙ ?Q => rewrite (add_cyc R P Q)*)
+    (*| ?Q +ₙ _        => int_red_ Q P*)
+  (*end.*)
+
+(*Ltac int_red :=*)
+  (*repeat match goal with*)
+    (*| [ |- ?P               = ?P      ] => reflexivity*)
+    (*| [ |- _          +ₙ ?P = _ +ₙ ?P ] => apply add_cancellation_inverse*)
+    (*| [ |- ?P         +ₙ ?Q = _ +ₙ ?P ] => rewrite (add_commutative P Q)*)
+    (*| [ |- (?R +ₙ ?P) +ₙ ?Q = _ +ₙ ?P ] => rewrite (add_cyc R P Q)*)
+    (*| [ |- ?R         +ₙ _  = _ +ₙ ?P ] => repeat int_red_ R P*)
+  (*end.*)
+
+
+(*Lemma test: forall a b c d, a ∈ ℤ -> b ∈ ℤ -> c ∈ ℤ -> d ∈ ℤ ->*)
+  (*(a ×ₙ b) +ₙ a ×ₙ (c +ₙ d) ×ₙ (a +ₙ b) = a ×ₙ (c +ₙ d) ×ₙ (a +ₙ b) +ₙ (a ×ₙ b).*)
+(*Proof.*)
+  (*intros a b c d P1 P2 P3 P4.*)
+  (*int_normal_form.*)
+  (*int_red.*)
+  (*all: is_int.*)
+(*Qed.*)
+(*----------------------------------------------------------------------------*)
 
 (* TODO: def two variable function *)
 (* TODO: refine equiv and int *)
