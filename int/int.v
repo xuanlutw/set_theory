@@ -841,6 +841,13 @@ Proof.
   all: is_nat_z4.
 Qed.
 
+Lemma int_equal_multi: forall a b c, a = b -> a ×z c = b ×z c.
+Proof.
+  intros a b c P1.
+  rewrite P1.
+  reflexivity.
+Qed.
+
 Lemma int_add_inverse_multi_distributive_l: forall a b, a ∈ ℤ -> b ∈ ℤ ->
   -z (a ×z b) = (-z a) ×z b.
 Proof.
@@ -963,8 +970,8 @@ Ltac is_int :=
         apply (int_ctor_is_int _ _ one_is_nat empty_is_nat)
     | [ H: ?P |- ?P              ] => apply H
     | [       |- ⟨_, _⟩ ∈ cp _ _ ] => apply cp_intro
-    | [       |- ?P +ₙ ?Q ∈ ℤ    ] => apply int_add_is_int
-    | [       |- ?P ×ₙ ?Q ∈ ℤ    ] => apply int_multi_is_int
+    | [       |- ?P +z ?Q ∈ ℤ    ] => apply int_add_is_int
+    | [       |- ?P ×z ?Q ∈ ℤ    ] => apply int_multi_is_int
   end.
 
 (*Ltac int_unwrap_multi_ M :=*)
