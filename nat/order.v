@@ -249,6 +249,86 @@ Proof.
   all: is_nat.
 Qed.
 
+Lemma less_add_eq: forall m n p, m ∈ ω -> n ∈ ω -> p ∈ ω -> m <ₙ n ->
+  (m +ₙ p) <ₙ (n +ₙ p).
+Proof.
+  intros m n p P1 P2 P3 P4.
+  pose (fun k => (m +ₙ k) <ₙ (n +ₙ k)) as P.
+  assert (P n.0) as I1.
+  { red. 
+    rewrite (add_zero _ P1).
+    rewrite (add_zero _ P2).
+    apply P4. }
+  assert (induction_step P) as I2.
+  { intros k Q1 Q2.
+    red.
+    rewrite (add_red _ _ P1 Q1).
+    rewrite (add_red _ _ P2 Q1).
+    apply (suc_less _ _ (add_is_nat _ _ P1 Q1) (add_is_nat _ _ P2 Q1)).
+    apply Q2. }
+  apply (induction_principle _ I1 I2 _ P3).
+Qed.
+
+Lemma less_add_cancellation: forall m n p, m ∈ ω -> n ∈ ω -> p ∈ ω -> 
+  (m +ₙ p) <ₙ (n +ₙ p) -> m <ₙ n.
+Proof.
+  intros m n p P1 P2 P3 P4.
+  destruct (less_exist_element _ _ (add_is_nat _ _ P1 P3) (add_is_nat _ _ P2 P3) P4) 
+    as [r [P5 P6]].
+  rewrite (add_cyc _ _ _ P1 P3 (suc_is_nat _ P5)) in P6.
+  apply (exist_element_less _ _ r P1 P2 P5).
+  apply (add_cancellation _ _ _ 
+    (add_is_nat _ _ P1 (suc_is_nat _ P5)) P2 P3 P6).
+Qed.
+
+Lemma less_add_less: forall m n p q, m ∈ ω -> n ∈ ω -> p ∈ ω -> q ∈ ω ->
+  m <ₙ n -> p <ₙ q -> m +ₙ p <ₙ (n +ₙ q).
+Proof.
+  intros m n p q P1 P2 P3 P4 P5 P6.
+  pose (less_add_eq _ _ _ P1 P2 P3 P5) as P7.
+  pose (less_add_eq _ _ _ P3 P4 P2 P6) as P8.
+  rewrite (add_commutative _ _ P3 P2) in P8.
+  rewrite (add_commutative _ _ P4 P2) in P8.
+  apply (less_less_less _ (n +ₙ p) _).
+  all: is_nat.
+Qed.
+
+Lemma less_multi_eq: forall m n p, m ∈ ω -> n ∈ ω -> p ∈ ω -> m <ₙ n ->
+  (m ×ₙ S(p)) <ₙ (n ×ₙ S(p)).
+Proof.
+  intros m n p P1 P2 P3 P4.
+  pose (fun k => (m ×ₙ S(k)) <ₙ (n ×ₙ S(k))) as P.
+  assert (P n.0) as I1.
+  { red. 
+    rewrite (multi_one _ P1).
+    rewrite (multi_one _ P2).
+    apply P4. }
+  assert (induction_step P) as I2.
+  { intros k Q1 Q2.
+    red.
+    rewrite (multi_red _ _ P1 (suc_is_nat _ Q1)).
+    rewrite (multi_red _ _ P2 (suc_is_nat _ Q1)).
+    apply (less_add_less m n (m ×ₙ S(k)) (n ×ₙ S(k))).
+    all: is_nat. }
+  apply (induction_principle _ I1 I2 _ P3).
+Qed.
+
+Lemma equal_less_less: forall m n p q, m ∈ ω -> n ∈ ω -> p ∈ ω -> q ∈ ω ->
+  (m +ₙ p) = (n +ₙ q) -> m <ₙ n -> q <ₙ p.
+Proof.
+  intros m n p q P1 P2 P3 P4 P5 P6.
+  destruct (less_exist_element _ _ P1 P2 P6) as [r [P7 P8]].
+  rewrite <- P8 in P5.
+  rewrite (add_commutative _ _ P1 P3) in P5.
+  rewrite (add_commutative _ _ P1 (suc_is_nat _ P7)) in P5.
+  rewrite (add_cyc _ _ _ (suc_is_nat _ P7) P1 P4) in P5.
+  rewrite (add_commutative _ _ (suc_is_nat _ P7) P4) in P5.
+  symmetry in P5.
+  apply (exist_element_less _ _ r P4 P3 P7).
+  apply (add_cancellation _ _ _ 
+    (add_is_nat _ _ P4 (suc_is_nat _ P7)) P3 P1 P5).
+Qed.
+
 Theorem nat_trichotomy: forall m n, m ∈ ω -> n ∈ ω ->
   ((m <ₙ n) /\ ~(m = n) /\ ~(n <ₙ m)) \/
   (~(m <ₙ n) /\ (m = n) /\ ~(n <ₙ m)) \/
@@ -328,6 +408,23 @@ Proof.
     apply P3.
 Qed.
 
+Lemma less_multi_cancellation: forall m n p, m ∈ ω -> n ∈ ω -> p ∈ ω -> 
+  (m ×ₙ S(p)) <ₙ (n ×ₙ S(p)) -> m <ₙ n.
+Proof.
+  intros m n p P1 P2 P3 P4.
+  destruct (nat_trichotomy _ _ P1 P2) as [[P5 _] | [[_ [P5 _]] | [_ [_ P5]]]].
+  + apply P5.
+  + rewrite P5 in P4.
+    pose (nat_not_in_self _ (multi_is_nat _ _ P2 (suc_is_nat _ P3))) as P6.
+    contradiction.
+  + pose (less_multi_eq _ _ _ P2 P1 P3 P5) as P6.
+    absurd (m ×ₙ S( p) <ₙ m ×ₙ S( p)).
+    - apply nat_not_in_self.
+      is_nat.
+    - apply (less_less_less _ (n ×ₙ S(p)) _).
+      all: is_nat.
+Qed.
+
 Lemma not_equal_less: forall m n, m ∈ ω -> n ∈ ω -> m <> n -> 
   m <ₙ n \/ n <ₙ m.
 Proof.
@@ -362,5 +459,57 @@ Proof.
   intros m n P1 P2 P3 P4.
   symmetry in P4.
   apply (less_not_equal_1 _ _ P1 P2 P3 P4).
+Qed.
+
+Lemma multi_cancellation: forall m n p, m ∈ ω -> n ∈ ω -> p ∈ ω ->
+  m ×ₙ S(p) = n ×ₙ S(p) -> m = n.
+Proof.
+  intros m n p P1 P2 P3 P4.
+  destruct (nat_trichotomy _ _ P1 P2) as [[P5 _] | [[_ [P5 _]] | [_ [_ P5]]]].
+  + absurd (m ×ₙ S(p) = n ×ₙ S(p)).
+    - apply less_not_equal_1.
+      all: is_nat.
+      apply (less_multi_eq _ _ p P1 P2 P3 P5).
+    - apply P4.
+  + apply P5.
+  + absurd (m ×ₙ S(p) = n ×ₙ S(p)).
+    - apply less_not_equal_2.
+      all: is_nat.
+      apply (less_multi_eq _ _ p P2 P1 P3 P5).
+    - apply P4.
+Qed.
+
+Lemma not_equal_cyc_equal: forall m n p q, m ∈ ω -> n ∈ ω -> p ∈ ω -> q ∈ ω ->
+  p <> q -> m ×ₙ p +ₙ n ×ₙ q = m ×ₙ q +ₙ n ×ₙ p -> m = n.
+Proof.
+  intros m n p q P1 P2 P3 P4 P5 P6.
+  destruct (not_equal_less _ _ P3 P4 P5) as [P7|P7].
+  + destruct (less_exist_element _ _ P3 P4 P7) as [x [P8 P9]].
+    rewrite <- P9 in P6.
+    rewrite (distributive_l n p (S(x))) in P6.
+    rewrite (add_associative (m ×ₙ p) (n ×ₙ p) (n ×ₙ S( x))) in P6.
+    rewrite (add_commutative (m ×ₙ p +ₙ n ×ₙ p) (n ×ₙ S( x))) in P6.
+    rewrite (distributive_l m p (S(x))) in P6.
+    rewrite (add_cyc (m ×ₙ p) (m ×ₙ S( x)) (n ×ₙ p)) in P6.
+    rewrite (add_commutative (m ×ₙ p +ₙ n ×ₙ p) (m ×ₙ S( x))) in P6.
+    assert (n ×ₙ S( x) = m ×ₙ S( x)) as P10.
+    { apply (add_cancellation _ _ (m ×ₙ p +ₙ n ×ₙ p)).
+      all: is_nat. }
+    symmetry.
+    apply (multi_cancellation _ _ x).
+    all: is_nat.
+  + destruct (less_exist_element _ _ P4 P3 P7) as [x [P8 P9]].
+    rewrite <- P9 in P6.
+    rewrite (distributive_l m q (S(x))) in P6.
+    rewrite (add_cyc (m ×ₙ q) (m ×ₙ S(x)) (n ×ₙ q)) in P6.
+    rewrite (add_commutative (m ×ₙ q +ₙ n ×ₙ q) (m ×ₙ S(x))) in P6.
+    rewrite (distributive_l n q (S(x))) in P6.
+    rewrite (add_associative (m ×ₙ q) (n ×ₙ q) (n ×ₙ S( x))) in P6.
+    rewrite (add_commutative (m ×ₙ q +ₙ n ×ₙ q) (n ×ₙ S( x))) in P6.
+    assert (m ×ₙ S( x) = n ×ₙ S( x)) as P10.
+    { apply (add_cancellation _ _ (m ×ₙ q +ₙ n ×ₙ q)).
+      all: is_nat. }
+    apply (multi_cancellation _ _ x).
+    all: is_nat.
 Qed.
 (*----------------------------------------------------------------------------*)

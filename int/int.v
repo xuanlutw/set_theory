@@ -203,13 +203,6 @@ Proof.
   apply empty_is_nat.
 Qed.
 
-Lemma inverse_one_is_int: z.-1 ∈ ℤ.
-Proof.
-  apply int_intro.
-  apply empty_is_nat.
-  apply one_is_nat.
-Qed.
-
 Lemma int_equal_elim: forall m1 n1 m2 n2, m1 ∈ ω -> n1 ∈ ω ->
   int m1 n1 = int m2 n2 -> m1 +ₙ n2 = n1 +ₙ m2.
 Proof.
@@ -236,6 +229,22 @@ Proof.
     split.
     - reflexivity.
     - apply P5.
+Qed.
+
+Lemma int_zero_elim: forall m n, m ∈ ω -> n ∈ ω -> int m n = z.0 -> m = n.
+Proof.
+  intros m n P1 P2 P3.
+  pose (int_equal_elim _ _ _ _ P1 P2 P3) as P4.
+  rewrite (add_zero _ P1) in P4.
+  rewrite (add_zero _ P2) in P4.
+  apply P4.
+Qed.
+
+Lemma inverse_one_is_int: z.-1 ∈ ℤ.
+Proof.
+  apply int_intro.
+  apply empty_is_nat.
+  apply one_is_nat.
 Qed.
 
 Lemma int_zero_ne_one: z.0 <> z.1.
@@ -1017,9 +1026,6 @@ Proof.
     - apply int_zero_ne_one.
     - apply (in_singleton_equal _ _ P1).
 Qed.
-(*----------------------------------------------------------------------------*)
-
-(* Skip order of integer *)
 (*----------------------------------------------------------------------------*)
 
 (* Ltac *)
