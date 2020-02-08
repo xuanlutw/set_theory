@@ -10,6 +10,7 @@ Require Import nat.nat.
 Require Import nat.recursion.
 Require Import nat.nat_arith.
 Require Import int.int.
+Require Import int.order.
 
 (* Rational Number *)
 Definition rat_ctor_rel := 
@@ -95,7 +96,6 @@ Proof.
       rewrite (int_multi_associative a2 b3 a4) in P5. 
       apply (int_multi_cancellation _ _ a4).
       all: is_int.
-      apply (in_subz_not_zero _ Q9).
 Qed.
 
 Lemma rat_ctor_rel_is_equiv_rel: equiv_rel rat_ctor_rel (cp ℤ ℤ').
@@ -718,6 +718,181 @@ Proof.
 Qed.
 (*----------------------------------------------------------------------------*)
 
+(* Skip add and multi inverse *)
+(*----------------------------------------------------------------------------*)
+
+(* Order *)
+Definition rat_less_rel :=
+  subset_ctor (fun x => exists m n p q, m ∈ ℤ /\ n ∈ ℤ' /\ p ∈ ℤ /\ q ∈ ℤ' /\
+    x = ⟨rat m n , rat p q⟩ /\ ((m ×z q) <z (n ×z p))) (cp ℚ ℚ).
+
+Notation "m <q n" := (⟨m, n⟩ ∈ rat_less_rel) (at level 65, no associativity).
+
+Lemma rat_less_elim_1: forall x y, x ∈ ℚ -> y ∈ ℚ -> x <q y ->
+  exists m n p q, m ∈ ℤ /\ n ∈ ℤ' /\ p ∈ ℤ /\ q ∈ ℤ' /\
+    x = rat m n /\ y = rat p q /\ (m ×z q) <z (n ×z p).
+Proof.
+  intros x y P1 P2 P3.
+  destruct (subset_elim _ _ _ P3) as [P4 [m [n [p [q [Q1 [Q2 [Q3 [Q4 [P5 P6]]]]]]]]]].
+  exists m. exists n. exists p. exists q.
+  repeat split.
+  all: is_int.
+  + apply (opair_equal_elim_fst _ _ _ _ P5).
+  + apply (opair_equal_elim_snd _ _ _ _ P5).
+Qed.
+
+Lemma rat_less_elim_2: forall m n p q, m ∈ ℤ -> n ∈ ℤ' -> p ∈ ℤ -> q ∈ ℤ' -> 
+  rat m n <q rat p q -> (m ×z q) <z (n ×z p).
+Proof.
+  intros m n p q P1 P2 P3 P4 P5.
+  destruct (rat_less_elim_1 _ _ (rat_ctor_is_rat _ _ P1 P2)
+    (rat_ctor_is_rat _ _ P3 P4) P5) 
+    as [m2 [n2 [p2 [q2 [R1 [R2 [R3 [R4 [P6 [P7 P8]]]]]]]]]].
+  pose (rat_equal_elim _ _ _ _ P1 P2 P6) as Q1.
+  pose (rat_equal_elim _ _ _ _ P3 P4 P7) as Q2.
+  (*symmetry in Q2.*)
+  (*pose (int_multi_equation _ _ _ _ Q1 Q2) as Q3.*)
+  (*rewrite (int_multi_associative (m ×z n2) q p2) in Q3.*)
+  (*rewrite (int_multi_cyc m n2 q) in Q3.*)
+  (*rewrite <- (int_multi_associative (m ×z q) n2 p2) in Q3.*)
+  (*rewrite (int_multi_associative (n ×z m2) p q2) in Q3.*)
+  (*rewrite (int_multi_cyc n m2 p) in Q3.*)
+  (*rewrite <- (int_multi_associative (n ×z p) m2 q2) in Q3.*)
+  (*all: is_int.*)
+  assert (((m2 ×z q2) ×z n ×z q) <z (((n2 ×z p2) ×z n) ×z q)) as P9.
+  { apply (int_less_multi_equal ((m2 ×z q2) ×z n) ((n2 ×z p2) ×z n) q).
+    all: is_int.
+    apply (in_subz_positive _ P4).
+    apply (int_less_multi_equal (m2 ×z q2) (n2 ×z p2) n).
+    all: is_int. 
+    apply (in_subz_positive _ P2). }
+  rewrite (int_multi_cyc m2 q2 n) in P9.
+  rewrite (int_multi_commutative m2 n) in P9.
+  rewrite <- Q1 in P9.
+  rewrite (int_multi_cyc (m ×z n2) q2 q) in P9.
+  rewrite (int_multi_cyc m n2 q) in P9.
+  rewrite <- (int_multi_associative (m ×z q) n2 q2) in P9.
+  rewrite (int_multi_cyc n2 p2 n) in P9.
+  rewrite <- (int_multi_associative (n2 ×z n) p2 q) in P9.
+  rewrite (int_multi_commutative p2 q) in P9.
+  rewrite <- Q2 in P9.
+  rewrite (int_multi_associative (n2 ×z n) p q2) in P9.
+  rewrite (int_multi_commutative n2 n) in P9.
+  rewrite (int_multi_cyc n n2 p) in P9.
+  rewrite <- (int_multi_associative (n ×z p) n2 q2) in P9.
+  apply (int_less_multi_cancellation _ _ (n2 ×z q2)).
+  all: is_int.
+Qed.
+
+Lemma rat_less_intro: forall m n p q, m ∈ ℤ -> n ∈ ℤ' -> p ∈ ℤ -> q ∈ ℤ' -> 
+  (m ×z q) <z (n ×z p) -> rat m n <q rat p q .
+Proof.
+  intros m n p q P1 P2 P3 P4 P5.
+  apply (subset_intro).
+  + is_int_q3.
+  + exists m. exists n. exists p. exists q.
+    repeat split.
+    all: is_nat.
+Qed.
+
+(*Lemma rat_less_trans: forall m n l, m ∈ ℚ -> n ∈ ℚ -> l ∈ ℚ ->*)
+ (*m <q n -> n <q l -> m <q l.*)
+(*Proof.*)
+  (*intros m n l P1 P2 P3 P4 P5.*)
+  (*destruct (rat_less_elim_1 _ _ P1 P2 P4) as *)
+    (*[q1 [q2 [r1 [r2 [Q1 [Q2 [R1 [R2 [Q3 [R3 P6]]]]]]]]]].*)
+  (*destruct (rat_less_elim_1 _ _ P2 P3 P5) as *)
+    (*[s1 [s2 [t1 [t2 [S1 [S2 [T1 [T2 [S3 [T3 P7]]]]]]]]]].*)
+  (*rewrite R3 in S3.*)
+  (*pose (rat_equal_elim _ _ _ _ R1 R2 S3) as P8.*)
+  (*rewrite Q3.*)
+  (*rewrite T3.*)
+  (*pose (int_less_multi_equal _ _ _ *)
+    (*(int_multi_is_int _ _ Q1 R2) (int_multi_is_int _ _ Q2 R1) *)
+    (*(int_multi_is_int _ _ S2 T2) P6) as P9. *)
+  (*rewrite (add_associative (q2 +z r1) s2 t2) in P9.*)
+  (*rewrite <- (add_associative q2 r1 s2) in P9.*)
+  (*rewrite (add_commutative q2 (r1 +z s2)) in P9.*)
+  (*rewrite <- (add_associative (r1 +z s2) q2 t2) in P9.*)
+  (*rewrite (add_commutative s2 t2) in P9.*)
+  (*rewrite (add_associative (q1 +z r2) t2 s2) in P9.*)
+  (*rewrite (add_cyc q1 r2 t2) in P9.*)
+  (*rewrite <- (add_associative (q1 +z t2) r2 s2) in P9.*)
+  
+  (*pose (less_add_eq _ _ _ *)
+    (*(add_is_nat _ _ S1 T2) (add_is_nat _ _ S2 T1) *)
+    (*(add_is_nat _ _ R2 Q2) P7) as P10. *)
+  (*rewrite (add_associative (s1 +z t2) r2 q2) in P10.*)
+  (*rewrite (add_cyc s1 t2 r2) in P10.*)
+  (*rewrite <- (add_associative (s1 +z r2) t2 q2) in P10.*)
+  (*rewrite (add_commutative s1 r2) in P10.*)
+  (*rewrite (add_commutative t2 q2) in P10.*)
+  (*rewrite (add_commutative r2 q2) in P10.*)
+  (*rewrite (add_associative (s2 +z t1) q2 r2) in P10.*)
+  (*rewrite <- (add_associative s2 t1 q2) in P10.*)
+  (*rewrite (add_commutative s2 (t1 +z q2)) in P10.*)
+  (*rewrite <- (add_associative (t1 +z q2) s2 r2) in P10.*)
+  (*rewrite (add_commutative t1 q2) in P10.*)
+  (*rewrite (add_commutative s2 r2) in P10.*)
+  (*rewrite <- P8 in P10.*)
+  (*apply rat_less_intro.*)
+  (*all: is_nat.*)
+  (*apply (less_add_cancellation _ _ (r2 +z s2)).*)
+  (*all: is_nat.*)
+  (*apply (less_less_less _ ((r1 +z s2) +z (q2 +z t2)) _). *)
+  (*all: is_nat.*)
+(*Qed.*)
+
+(*Lemma rat_trichotomy: forall m n, m ∈ ℚ -> n ∈ ℚ ->*)
+  (*((m <q n) /\ ~(m = n) /\ ~(n <q m)) \/*)
+  (*(~(m <q n) /\ (m = n) /\ ~(n <q m)) \/*)
+  (*(~(m <q n) /\ ~(m = n) /\ (n <q m)).*)
+(*Proof.*)
+  (*intros m n P1 P2.*)
+  (*destruct (rat_elim _ P1) as [qm [qn [Q1 [Q2 Q3]]]].*)
+  (*destruct (rat_elim _ P2) as [rm [rn [R1 [R2 R3]]]]. *)
+  (*rewrite Q3.*)
+  (*rewrite R3.*)
+  (*destruct (nat_trichotomy (qm +z rn) (qn +z rm)*)
+    (*(add_is_nat _ _ Q1 R2) (add_is_nat _ _ Q2 R1)) *)
+      (*as [[P3 [P4 P5]] | [[P3 [P4 P5]] | [P3 [P4 P5]]]].*)
+  (*+ left.*)
+    (*repeat split.*)
+    (*- apply rat_less_intro.*)
+      (*all: is_nat.*)
+    (*- intros P6.*)
+      (*pose (rat_equal_elim _ _ _ _ Q1 Q2 P6) as P7.*)
+      (*contradiction.*)
+    (*- intros P6.*)
+      (*pose (rat_less_elim_2 _ _ _ _ R1 R2 Q1 Q2 P6) as P7.*)
+      (*rewrite (add_commutative _ _ Q2 R1) in P5.*)
+      (*rewrite (add_commutative _ _ Q1 R2) in P5.*)
+      (*contradiction.*)
+  (*+ right. left.*)
+    (*repeat split.*)
+    (*- intros P6.*)
+      (*pose (rat_less_elim_2 _ _ _ _ Q1 Q2 R1 R2 P6) as P7.*)
+      (*contradiction.*)
+    (*- apply (rat_equal_intro _ _ _ _ Q1 Q2 R1 R2 P4). *)
+    (*- intros P6.*)
+      (*pose (rat_less_elim_2 _ _ _ _ R1 R2 Q1 Q2 P6) as P7.*)
+      (*rewrite (add_commutative _ _ Q2 R1) in P5.*)
+      (*rewrite (add_commutative _ _ Q1 R2) in P5.*)
+      (*contradiction.*)
+  (*+ right. right.*)
+    (*repeat split.*)
+    (*- intros P6.*)
+      (*pose (rat_less_elim_2 _ _ _ _ Q1 Q2 R1 R2 P6) as P7.*)
+      (*contradiction.*)
+    (*- intros P6.*)
+      (*pose (rat_equal_elim _ _ _ _ Q1 Q2 P6) as P7.*)
+      (*contradiction.*)
+    (*- rewrite (add_commutative _ _ Q2 R1) in P5.*)
+      (*rewrite (add_commutative _ _ Q1 R2) in P5.*)
+      (*apply rat_less_intro.*)
+      (*all: is_nat.*)
+(*Qed.*)
+(*----------------------------------------------------------------------------*)
 (* Inverse *)
 (*Lemma rat_add_inverse_exist: forall a, exists b, a ∈ ℤ -> b ∈ ℤ -> a +z b = z.0.*)
 (*Proof.*)

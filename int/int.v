@@ -974,132 +974,26 @@ Proof.
 Qed.
 (*----------------------------------------------------------------------------*)
 
-(* Sub Z *)
-Notation ℤ' := (ℤ \ ({z.0})).
-
-Lemma in_subz: forall m, m ∈ ℤ' -> m ∈ ℤ.
+(* Other thory *)
+Lemma int_add_cyc: forall m n l, m ∈ ℤ -> n ∈ ℤ -> l ∈ ℤ -> 
+  (m +z n) +z l = (m +z l) +z n.
 Proof.
-  intros m P1.
-  destruct (complement_elim _ _ _ P1) as [P2 P3].
-  apply P2.
+  intros m n l P1 P2 P3.
+  rewrite <- (int_add_associative _ _ _ P1 P3 P2).
+  rewrite (int_add_commutative _ _ P3 P2).
+  rewrite (int_add_associative _ _ _ P1 P2 P3).
+  reflexivity.
 Qed.
 
-Lemma in_subz_not_zero: forall m, m ∈ ℤ' -> m <> z.0.
+Lemma int_multi_cyc: forall m n l, m ∈ ℤ -> n ∈ ℤ -> l ∈ ℤ -> 
+  (m ×z n) ×z l = (m ×z l) ×z n.
 Proof.
-  intros m P1 P2.
-  destruct (complement_elim _ _ _ P1) as [_ P3].
-  absurd (m ∈ {z.0}).
-  + apply P3.
-  + rewrite P2. 
-    apply in_singleton.
+  intros m n l P1 P2 P3.
+  rewrite <- (int_multi_associative _ _ _ P1 P3 P2).
+  rewrite (int_multi_commutative _ _ P3 P2).
+  rewrite (int_multi_associative _ _ _ P1 P2 P3).
+  reflexivity.
 Qed.
-
-Lemma int_multi_subz: forall m n, m ∈ ℤ' -> n ∈ ℤ' -> (m ×z n) ∈ ℤ'.
-Proof.
-  intros m n P1 P2.
-  apply complement_intro.
-  split.
-  + apply (int_multi_is_int _ _ (in_subz _ P1) (in_subz _ P2)).
-  + apply not_in_singleton.
-    intros P3.
-    destruct (complement_elim _ _ _ P1) as [P4 P5].
-    destruct (complement_elim _ _ _ P2) as [P6 P7].
-    symmetry in P3.
-    destruct (int_no_zero_divisor _ _ P4 P6 P3) as [P8|P8].
-    - rewrite P8 in P5.
-      absurd (z.0 ∈ {z.0}).
-      * apply P5.
-      * apply in_singleton.
-    - rewrite P8 in P7.
-      absurd (z.0 ∈ {z.0}).
-      * apply P7.
-      * apply in_singleton.
-Qed.
-
-Lemma int_one_in_subz: z.1 ∈ ℤ'.
-Proof.
-  apply (complement_intro).
-  split.
-  + apply (int_ctor_is_int _ _ one_is_nat empty_is_nat).
-  + intros P1.
-    absurd (z.0 = z.1).
-    - apply int_zero_ne_one.
-    - apply (in_singleton_equal _ _ P1).
-Qed.
-(*----------------------------------------------------------------------------*)
-
-(* Ltac *)
-Ltac is_int :=
-  repeat match goal with
-    | [            |- ?P = ?P         ] => reflexivity
-    | [            |- z.0 ∈ ℤ         ] => apply zero_is_int
-    | [            |- z.1 ∈ ℤ         ] => apply one_is_int
-    | [            |- z.-1 ∈ ℤ        ] => apply inverse_one_is_int
-    | [            |- z.1 ∈ ℤ'        ] => apply int_one_in_subz
-    | [ H: ?P      |- ?P              ] => apply H
-    | [ H: ?P ∈ ℤ' |- ?P ∈ ℤ          ] => apply (in_subz P H)
-    | [            |- ?P ×z ?Q ∈ ℤ'   ] => apply int_multi_subz
-    | [            |- ⟨_, _⟩ ∈ cp _ _ ] => apply cp_intro
-    | [            |- ?P +z ?Q ∈ ℤ    ] => apply int_add_is_int
-    | [            |- ?P ×z ?Q ∈ ℤ    ] => apply int_multi_is_int
-  end.
-
-(*Ltac int_unwrap_multi_ M :=*)
-  (*repeat match M with*)
-    (*| ?R ×ₙ (?P +ₙ ?Q) => rewrite (distributive_l R P Q)*)
-    (*| (?P +ₙ ?Q) ×ₙ ?R => rewrite (multi_commutative (P +ₙ Q) R)*)
-    (*| ?P ×ₙ (?Q ×ₙ ?R) => rewrite (multi_commutative P (Q ×ₙ R))*)
-    (*| ?P ×ₙ ?Q         => int_unwrap_multi_ P; int_unwrap_multi_ Q*)
-    (*| ?P +ₙ ?Q         => int_unwrap_multi_ P; int_unwrap_multi_ Q*)
-  (*end.*)
-
-(*Ltac int_unwrap_multi :=*)
-  (*repeat match goal with*)
-    (*| [ |- ?P = ?Q ] => int_unwrap_multi_ P; int_unwrap_multi_ Q*)
-  (*end.*)
-
-(*Ltac int_unwrap_add_ M :=*)
-  (*repeat match M with*)
-    (*| ?P +ₙ (?Q +ₙ ?R) => rewrite (add_associative P Q R)*)
-    (*| ?P +ₙ ?Q         => int_unwrap_add_ P*)
-  (*end.*)
-
-(*Ltac int_unwrap_add :=*)
-  (*repeat match goal with*)
-    (*| [ |- ?P = ?Q ] => int_unwrap_add_ P; int_unwrap_add_ Q*)
-  (*end.*)
-
-(*Ltac int_normal_form :=*)
-  (*int_unwrap_multi;*)
-  (*int_unwrap_add.*)
-
-(*Ltac int_red_ M P :=*)
-  (*repeat match M with*)
-    (*[>| P              => assumption<]*)
-    (*[>| _ +ₙ P         => assumption [>do nothing<]<]*)
-    (*| P +ₙ ?Q        => rewrite (add_commutative P Q)*)
-    (*| (?R +ₙ P) +ₙ ?Q => rewrite (add_cyc R P Q)*)
-    (*| ?Q +ₙ _        => int_red_ Q P*)
-  (*end.*)
-
-(*Ltac int_red :=*)
-  (*repeat match goal with*)
-    (*| [ |- ?P               = ?P      ] => reflexivity*)
-    (*| [ |- _          +ₙ ?P = _ +ₙ ?P ] => apply add_cancellation_inverse*)
-    (*| [ |- ?P         +ₙ ?Q = _ +ₙ ?P ] => rewrite (add_commutative P Q)*)
-    (*| [ |- (?R +ₙ ?P) +ₙ ?Q = _ +ₙ ?P ] => rewrite (add_cyc R P Q)*)
-    (*| [ |- ?R         +ₙ _  = _ +ₙ ?P ] => repeat int_red_ R P*)
-  (*end.*)
-
-
-(*Lemma test: forall a b c d, a ∈ ℤ -> b ∈ ℤ -> c ∈ ℤ -> d ∈ ℤ ->*)
-  (*(a ×ₙ b) +ₙ a ×ₙ (c +ₙ d) ×ₙ (a +ₙ b) = a ×ₙ (c +ₙ d) ×ₙ (a +ₙ b) +ₙ (a ×ₙ b).*)
-(*Proof.*)
-  (*intros a b c d P1 P2 P3 P4.*)
-  (*int_normal_form.*)
-  (*int_red.*)
-  (*all: is_int.*)
-(*Qed.*)
 (*----------------------------------------------------------------------------*)
 
 (* TODO: def two variable function *)
