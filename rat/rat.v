@@ -1036,6 +1036,20 @@ Proof.
   apply P2.
 Qed.
 
+(* Ltac *)
+Ltac is_rat :=
+  repeat match goal with
+    | [            |- ?P = ?P         ] => reflexivity
+    | [            |- q.0 ∈ ℚ         ] => apply zero_is_rat
+    | [            |- q.1 ∈ ℚ         ] => apply one_is_rat
+    | [            |- q.-1 ∈ ℚ        ] => apply inverse_one_is_rat
+    | [ H: ?P      |- ?P              ] => apply H
+    | [            |- -q _ ∈ ℚ        ] => apply rat_add_inverse_is_rat
+    | [            |- ⟨_, _⟩ ∈ cp _ _ ] => apply cp_intro
+    | [            |- ?P +q ?Q ∈ ℚ    ] => apply rat_add_is_rat
+    | [            |- ?P ×q ?Q ∈ ℚ    ] => apply rat_multi_is_rat
+  end.
+
 Lemma rat_add_inverse_unique: forall a b, a ∈ ℚ -> b ∈ ℚ -> a +q b = q.0 -> 
   b = -q a.
 Proof.
@@ -1065,6 +1079,118 @@ Proof.
   all: is_int.
 Qed.
 
+Lemma rat_inverse_zero_is_zero: -q q.0 = q.0.
+Proof.
+  pose (rat_add_inverse_elim _ zero_is_rat) as P1.
+  rewrite (rat_add_commutative _ _ zero_is_rat 
+    (rat_add_inverse_is_rat _ zero_is_rat)) in P1.
+  rewrite (rat_add_zero _ (rat_add_inverse_is_rat _ zero_is_rat)) in P1.
+  apply P1.
+Qed.
+
+Lemma rat_add_equal: forall m n p, m ∈ ℚ -> n ∈ ℚ -> p ∈ ℚ ->
+  m = n -> m +q p = n +q p.
+Proof.
+  intros m n p P1 P2 P3 P4.
+  destruct (rat_elim _ P1) as [qm [qn [Q1 [Q2 Q3]]]].
+  destruct (rat_elim _ P2) as [rm [rn [R1 [R2 R3]]]]. 
+  destruct (rat_elim _ P3) as [sm [sn [S1 [S2 S3]]]]. 
+  rewrite Q3 in P4.
+  rewrite R3 in P4.
+  pose (rat_add_elim _ _ _ _ Q1 Q2 R1 R2) as P5.
+  rewrite Q3.
+  rewrite R3.
+  rewrite S3.
+  rewrite (rat_add_elim qm qn sm sn).
+  rewrite (rat_add_elim rm rn sm sn).
+  apply rat_equal_intro.
+  all: is_int.
+  rewrite (int_distributive_r (qm ×z sn) (qn ×z sm) (rn ×z sn)). 
+  rewrite (int_distributive_l (qn ×z sn) (rm ×z sn) (rn ×z sm)). 
+  rewrite (int_multi_associative (qm ×z sn) rn sn).
+  rewrite (int_multi_cyc qm sn rn).
+  rewrite <- (int_multi_associative (qm ×z rn) sn sn).
+  rewrite (int_multi_associative (qn ×z sn) rm sn).
+  rewrite (int_multi_cyc qn sn rm).
+  rewrite <- (int_multi_associative (qn ×z rm) sn sn).
+  rewrite (int_multi_associative (qn ×z sm) rn sn).
+  rewrite (int_multi_cyc qn sm rn).
+  rewrite <- (int_multi_associative (qn ×z rn) sm sn).
+  rewrite (int_multi_associative (qn ×z sn) rn sm).
+  rewrite (int_multi_cyc qn sn rn).
+  rewrite <- (int_multi_associative (qn ×z rn) sn sm).
+  rewrite (int_multi_commutative sm sn).
+  assert ((qm ×z rn) ×z (sn ×z sn) = (qn ×z rm) ×z (sn ×z sn)) as P6.
+  { apply (int_multi_equation _ _ (sn ×z sn) (sn ×z sn)).
+    all: is_int.
+    apply (rat_equal_elim _ _ _ _ Q1 Q2 P4). }
+  apply (int_add_equation _ _ ((qn ×z rn) ×z (sn ×z sm))).
+  all: is_int.
+Qed.
+
+Lemma rat_add_cancellation: forall m n p, m ∈ ℚ -> n ∈ ℚ -> p ∈ ℚ -> 
+  m +q p= n +q p -> m = n.
+Proof.
+  intros m n p P1 P2 P3 P4.
+  pose (rat_add_equal _ _ _ 
+    (rat_add_is_rat _ _ P1 P3) (rat_add_is_rat _ _ P2 P3)
+    (rat_add_inverse_is_rat _ P3) P4) as P5.
+  rewrite <- (rat_add_associative _ _ _ P1 P3 (rat_add_inverse_is_rat _ P3)) in P5.
+  rewrite <- (rat_add_associative _ _ _ P2 P3 (rat_add_inverse_is_rat _ P3)) in P5.
+  rewrite (rat_add_inverse_elim _ P3) in P5.
+  rewrite (rat_add_zero _ P1) in P5.
+  rewrite (rat_add_zero _ P2) in P5.
+  apply P5.
+Qed.
+
+Lemma rat_inverse_add_distributive: forall m n, m ∈ ℚ -> n ∈ ℚ -> 
+  -q (m +q n) = (-q m) +q (-q n).
+Proof.
+  intros m n P1 P2.
+  apply (rat_add_cancellation (-q (m +q n)) ((-q m) -q n) (m +q n)).
+  all: is_rat.
+  rewrite (rat_add_commutative (-q (m +q n)) (m +q n) ).
+  rewrite (rat_add_inverse_elim (m +q n)).
+  rewrite (rat_add_associative ((-q m) -q n) m n).
+  rewrite (rat_add_commutative (-q m) (-q n)).
+  rewrite <- (rat_add_associative (-q n) (-q m) m).
+  rewrite (rat_add_commutative (-q m) m).
+  rewrite (rat_add_inverse_elim m).
+  rewrite (rat_add_zero (-q n)).
+  rewrite (rat_add_commutative (-q n) n).
+  rewrite (rat_add_inverse_elim n).
+  all: is_rat.
+Qed.
+  
+Lemma rat_double_inverse_elim: forall m, m ∈ ℚ -> (-q (-q m)) = m.
+Proof.
+  intros m P1.
+  apply (rat_add_cancellation (-q (-q m)) m (-q m)).
+  all: is_rat.
+  rewrite (rat_add_inverse_elim m).
+  rewrite (rat_add_commutative (-q (-q m)) (-q m)).
+  rewrite (rat_add_inverse_elim (-q m)).
+  all: is_rat.
+Qed.
+
+Lemma rat_less_inverse: forall m n, m ∈ ℚ -> n ∈ ℚ -> m <q n -> -q n <q -q m.
+Proof.
+  intros m n P1 P2 P3.
+  pose (rat_less_add_equal _ _ _ P1 P2 (rat_add_inverse_is_rat _ P1) P3) as P4.
+  rewrite (rat_add_inverse_elim _ P1) in P4.
+  pose (rat_less_add_equal _ _ _ zero_is_rat 
+    (rat_add_is_rat _ _ P2 (rat_add_inverse_is_rat _ P1)) 
+    (rat_add_inverse_is_rat _ P2) P4) as P5.
+  rewrite (rat_add_commutative _ _ P2 (rat_add_inverse_is_rat _ P1)) in P5.
+  rewrite <- (rat_add_associative _ _ _ (rat_add_inverse_is_rat _ P1) P2
+    (rat_add_inverse_is_rat _ P2)) in P5.
+  rewrite (rat_add_inverse_elim _ P2) in P5.
+  rewrite (rat_add_zero _ (rat_add_inverse_is_rat _ P1)) in P5.
+  rewrite (rat_add_commutative _ _ zero_is_rat (rat_add_inverse_is_rat _ P2)) in P5.
+  rewrite (rat_add_zero _ (rat_add_inverse_is_rat _ P2)) in P5.
+  apply P5.
+Qed.
+
 Lemma rat_less_add_positive: forall m n l, m ∈ ℚ -> n ∈ ℚ -> l ∈ ℚ -> q.0 <q l
   -> m <q n -> m <q n +q l.
 Proof.
@@ -1087,10 +1213,39 @@ Proof.
   apply P7.
 Qed.
 
-Lemma rat_less_possitive: forall m n, m ∈ ℚ -> n ∈ ℚ -> m <q n -> q.0 <q n -q m.
+Lemma rat_less_minus_positive_2: forall m n, m ∈ ℚ -> n ∈ ℚ -> q.0 <q n -> 
+  m -q n <q m.
+Proof.
+  intros m n P1 P2 P3.
+  pose (rat_less_inverse _ _ zero_is_rat P2 P3) as P4.
+  rewrite rat_inverse_zero_is_zero in P4.
+  pose (rat_less_add_equal _ _ _ 
+    (rat_add_inverse_is_rat _ P2) zero_is_rat P1 P4) as P5.
+  rewrite (rat_add_commutative _ _ (rat_add_inverse_is_rat _ P2) P1) in P5.
+  rewrite (rat_add_commutative _ _ zero_is_rat P1) in P5.
+  rewrite (rat_add_zero _ P1) in P5.
+  apply P5.
+Qed.
+
+Lemma rat_less_positive: forall m n, m ∈ ℚ -> n ∈ ℚ -> m <q n -> q.0 <q n -q m.
 Proof.
   intros m n P1 P2 P3.
   pose (rat_less_add_equal _ _ _ P1 P2 (rat_add_inverse_is_rat _ P1) P3) as P4.
   rewrite (rat_add_inverse_elim _ P1) in P4.
   apply P4.
 Qed.
+
+Lemma rat_less_add_cancellation: forall m n p, m ∈ ℚ -> n ∈ ℚ -> p ∈ ℚ ->
+  m +q p <q n +q p -> m <q n.
+Proof.
+  intros m n p P1 P2 P3 P4.
+  rewrite <- (rat_add_zero m).
+  rewrite <- (rat_add_zero n).
+  rewrite <- (rat_add_inverse_elim p).
+  rewrite (rat_add_associative m p (-q p)).
+  rewrite (rat_add_associative n p (-q p)).
+  apply (rat_less_add_equal (m +q p) (n +q p) (-q p)).
+  all: is_rat.
+Qed.
+(*----------------------------------------------------------------------------*)
+

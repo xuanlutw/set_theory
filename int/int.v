@@ -447,6 +447,14 @@ Proof.
   rewrite (add_zero _ P3).
   reflexivity.
 Qed.
+
+Lemma int_add_equation: forall m n p q, m = n -> p = q -> m +z p = n +z q.
+Proof.
+  intros m n p q P1 P2.
+  rewrite P1.
+  rewrite P2.
+  reflexivity.
+Qed.
 (*----------------------------------------------------------------------------*)
 
 (* Multiple *)
