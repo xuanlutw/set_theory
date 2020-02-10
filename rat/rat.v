@@ -123,6 +123,8 @@ Notation "q.0" := (rat z.0 z.1).
 
 Notation "q.1" := (rat z.1 z.1).
 
+Notation "q.-1" := (rat z.-1 z.1).
+
 Lemma rat_ctor_is_rat: forall m n, m ∈ ℤ -> n ∈ ℤ' -> rat m n ∈ ℚ.
 Proof.
   intros m n P1 P2.
@@ -181,6 +183,27 @@ Proof.
     split.
     - is_int.
     - reflexivity.
+Qed.
+
+Lemma zero_is_rat: q.0 ∈ ℚ.
+Proof.
+  apply rat_intro.
+  apply zero_is_int.
+  apply int_one_in_subz.
+Qed.
+
+Lemma one_is_rat: q.1 ∈ ℚ.
+Proof.
+  apply rat_intro.
+  apply one_is_int.
+  apply int_one_in_subz.
+Qed.
+
+Lemma inverse_one_is_rat: q.-1 ∈ ℚ.
+Proof.
+  apply rat_intro.
+  apply inverse_one_is_int.
+  apply int_one_in_subz.
 Qed.
 
 Lemma rat_equal_elim: forall m1 n1 m2 n2, m1 ∈ ℤ -> n1 ∈ ℤ' ->
@@ -888,37 +911,186 @@ Proof.
       apply rat_less_intro.
       all: is_int.
 Qed.
+
+Lemma rat_not_less_self: forall m, m ∈ ℚ -> ~(m <q m).
+Proof.
+  intros m P1 P2.
+  destruct (rat_elim _ P1) as [qm [qn [Q1 [Q2 Q3]]]].
+  rewrite Q3 in P2.
+  pose (rat_less_elim_2 _ _ _ _ Q1 Q2 Q1 Q2 P2) as P3.
+  rewrite (int_multi_commutative _ _ Q1 (in_subz _ Q2)) in P3.
+  apply (int_not_less_self _ (int_multi_is_int _ _ (in_subz _ Q2) Q1) P3).
+Qed.
+
+Lemma rat_less_add_equal: forall m n p, m ∈ ℚ -> n ∈ ℚ -> p ∈ ℚ ->
+  m <q n -> m +q p <q n +q p.
+Proof.
+  intros m n p P1 P2 P3 P4.
+  destruct (rat_elim _ P1) as [qm [qn [Q1 [Q2 Q3]]]].
+  destruct (rat_elim _ P2) as [rm [rn [R1 [R2 R3]]]]. 
+  destruct (rat_elim _ P3) as [sm [sn [S1 [S2 S3]]]]. 
+  rewrite Q3 in P4.
+  rewrite R3 in P4.
+  pose (rat_less_elim_2 _ _ _ _ Q1 Q2 R1 R2 P4) as P5.
+  rewrite Q3.
+  rewrite R3.
+  rewrite S3.
+  rewrite (rat_add_elim qm qn sm sn).
+  rewrite (rat_add_elim rm rn sm sn).
+  apply rat_less_intro.
+  all: is_int.
+  rewrite (int_distributive_r (qm ×z sn) (qn ×z sm) (rn ×z sn)). 
+  rewrite (int_distributive_l (qn ×z sn) (rm ×z sn) (rn ×z sm)). 
+  rewrite (int_multi_associative (qm ×z sn) rn sn).
+  rewrite (int_multi_cyc qm sn rn).
+  rewrite <- (int_multi_associative (qm ×z rn) sn sn).
+  rewrite (int_multi_associative (qn ×z sn) rm sn).
+  rewrite (int_multi_cyc qn sn rm).
+  rewrite <- (int_multi_associative (qn ×z rm) sn sn).
+  rewrite (int_multi_associative (qn ×z sm) rn sn).
+  rewrite (int_multi_cyc qn sm rn).
+  rewrite <- (int_multi_associative (qn ×z rn) sm sn).
+  rewrite (int_multi_associative (qn ×z sn) rn sm).
+  rewrite (int_multi_cyc qn sn rn).
+  rewrite <- (int_multi_associative (qn ×z rn) sn sm).
+  rewrite (int_multi_commutative sm sn).
+  assert ((qm ×z rn) ×z (sn ×z sn) <z (qn ×z rm) ×z (sn ×z sn)) as P6.
+  { apply (int_less_multi_equal _ _ (sn ×z sn)).
+    all: is_int.
+    apply in_subz_positive.
+    apply (int_multi_subz _ _ S2 S2). }
+  apply (int_less_add_equal _ _ ((qn ×z rn) ×z (sn ×z sm))).
+  all: is_int.
+Qed.
+
+Lemma rat_less_add: forall m n p q, m ∈ ℚ -> n ∈ ℚ -> p ∈ ℚ -> q ∈ ℚ ->
+  m <q n -> p <q q -> m +q p <q n +q q.
+Proof.
+  intros m n p q P1 P2 P3 P4 P5 P6.
+  pose(rat_less_add_equal _ _ _ P1 P2 P3 P5) as P7. 
+  pose(rat_less_add_equal _ _ _ P3 P4 P2 P6) as P8. 
+  rewrite (rat_add_commutative _ _ P3 P2) in P8.
+  rewrite (rat_add_commutative _ _ P4 P2) in P8.
+  apply (rat_less_trans _ _ _ (rat_add_is_rat _ _ P1 P3) 
+    (rat_add_is_rat _ _ P2 P3) (rat_add_is_rat _ _ P2 P4) P7 P8).
+Qed.
 (*----------------------------------------------------------------------------*)
 
 (* Inverse *)
-(*Lemma rat_add_inverse_exist: forall a, exists b, a ∈ ℤ -> b ∈ ℤ -> a +z b = z.0.*)
-(*Proof.*)
-  (*intros a.*)
-  (*destruct (LEM (a ∈ ℤ)) as [P1 | P1].*)
-  (*+ destruct (rat_elim _ P1) as [m [n [P2 [P3 P4]]]].*)
-    (*exists (rat n m).*)
-    (*intros _ P5.*)
-    (*rewrite P4.*)
-    (*rewrite (rat_add_elim _ _ _ _ P2 P3 P3 P2).*)
-    (*apply (equiv_class_eq_intro).*)
-    (*apply (equiv_class_intro_1 _ _ _ _ rat_ctor_rel_is_equiv_rel).*)
-    (*apply (subset_intro).*)
-    (*- is_int_z2.*)
-    (*- exists (m +ₙ n).*)
-      (*exists (n +ₙ m).*)
-      (*exists n.0. exists n.0.*)
-      (*split.*)
-      (** reflexivity.*)
-      (** rewrite (int_add_commutative _ _ P2 P3).*)
-        (*reflexivity.*)
-  (*+ exists ∅.*)
-    (*intros P2.*)
-    (*contradiction.*)
-(*Qed.*)
+Lemma rat_add_inverse_exist: forall a, exists b, a ∈ ℚ -> b ∈ ℚ /\ a +q b = q.0.
+Proof.
+  intros a.
+  destruct (LEM (a ∈ ℚ)) as [P1 | P1].
+  + destruct (rat_elim _ P1) as [m [n [P2 [P3 P4]]]].
+    exists (rat (-z m) n).
+    intros P5.
+    split.
+    - is_int_q3. 
+    - rewrite P4.
+      rewrite (rat_add_elim m n (-z m) n). 
+      apply (equiv_class_eq_intro).
+      apply (equiv_class_intro_1 _ _ _ _ rat_ctor_rel_is_equiv_rel).
+      apply (subset_intro).
+      all: is_int_q2.
+      exists ((m ×z n) +z (n ×z (-z m))).
+      exists (n ×z n).
+      exists z.0. exists z.1.
+      split.
+      * reflexivity.
+      * rewrite (int_multi_zero (n ×z n)). 
+        rewrite (int_multi_one ((m ×z n) +z (n ×z (-z m)))).
+        rewrite (int_multi_commutative n (-z m)).
+        rewrite <- (int_add_inverse_multi_distributive_l m n).
+        rewrite (int_add_inverse_intro_2 (m ×z n)).
+        reflexivity.
+        all: is_int.
+  + exists ∅.
+    intros P2.
+    contradiction.
+Qed.
 
-(*Definition rat_inverse (a:set) :=*)
-  (*extract_set (rat_add_inverse_exist a).*)
+Definition rat_inverse (a:set) :=
+  extract_set (rat_add_inverse_exist a).
 
-(*Notation "z.inv a" := (rat_inverse a) (at level 60).*)
+Notation "-q a" := (rat_inverse a) (at level 60).
 
-(*Notation "a -z b"  := (a + (rat_inverse b)) (at level 60).*)
+Notation "a -q b"  := (a +q (rat_inverse b)) (at level 60).
+
+Lemma rat_add_inverse_is_rat: forall a, a ∈ ℚ -> -q a ∈ ℚ.
+Proof.
+  intros a P1.
+  destruct (extract_set_property (rat_add_inverse_exist a) P1) as [P2 _].
+  apply P2.
+Qed.
+
+Ltac is_int_q4 :=
+  repeat match goal with
+    | [ |- -q _ ∈ ℚ ] => apply rat_add_inverse_is_rat
+    | _               => is_int_q4
+  end.
+
+Lemma rat_add_inverse_elim: forall a, a ∈ ℚ -> a +q (-q a) = q.0.
+Proof.
+  intros a P1.
+  destruct (extract_set_property (rat_add_inverse_exist a) P1) as [_ P2].
+  apply P2.
+Qed.
+
+Lemma rat_add_inverse_unique: forall a b, a ∈ ℚ -> b ∈ ℚ -> a +q b = q.0 -> 
+  b = -q a.
+Proof.
+  intros a b P1 P2 P4.
+  pose (rat_add_inverse_is_rat _ P1) as P3.
+  pose (rat_add_inverse_elim _ P1) as P5.
+  pose (rat_add_zero _ P2) as P6.
+  rewrite <- P5 in P6.
+  rewrite (rat_add_associative _ _ _ P2 P1 P3) in P6.
+  rewrite (rat_add_commutative _ _ P2 P1) in P6.
+  rewrite P4 in P6.
+  rewrite (rat_add_commutative _ _ zero_is_rat P3) in P6.
+  rewrite (rat_add_zero _ P3) in P6.
+  symmetry.
+  apply P6.
+Qed.
+
+Lemma inverse_one_is_inverse_one: q.-1 = -q q.1.
+Proof.
+  apply (rat_add_inverse_unique _ _ one_is_rat inverse_one_is_rat).
+  rewrite rat_add_elim.
+  rewrite (int_multi_one z.1).
+  rewrite (int_multi_commutative z.1 z.-1).
+  rewrite (int_multi_one z.-1).
+  rewrite (inverse_one_is_inverse_one).
+  rewrite (int_add_inverse_intro_2 z.1).
+  all: is_int.
+Qed.
+
+Lemma rat_less_add_positive: forall m n l, m ∈ ℚ -> n ∈ ℚ -> l ∈ ℚ -> q.0 <q l
+  -> m <q n -> m <q n +q l.
+Proof.
+  intros m n l P1 P2 P3 P4 P5.
+  pose (rat_less_add _ _ _ _ P1 P2 zero_is_rat P3 P5 P4) as P6.
+  rewrite (rat_add_zero _ P1) in P6.
+  apply P6.
+Qed.
+
+Lemma rat_less_minus_positive: forall m n l, m ∈ ℚ -> n ∈ ℚ -> l ∈ ℚ -> q.0 <q l
+  -> m <q n -> m -q l <q n.
+Proof.
+  intros m n l P1 P2 P3 P4 P5.
+  pose (rat_less_add_positive _ _ _ P1 P2 P3 P4 P5) as P6.
+  pose (rat_less_add_equal _ _ _ P1 (rat_add_is_rat _ _ P2 P3)
+    (rat_add_inverse_is_rat _ P3) P6) as P7.
+  rewrite <- (rat_add_associative _ _ _ P2 P3 (rat_add_inverse_is_rat _ P3)) in P7.
+  rewrite (rat_add_inverse_elim _ P3) in P7.
+  rewrite (rat_add_zero _ P2) in P7.
+  apply P7.
+Qed.
+
+Lemma rat_less_possitive: forall m n, m ∈ ℚ -> n ∈ ℚ -> m <q n -> q.0 <q n -q m.
+Proof.
+  intros m n P1 P2 P3.
+  pose (rat_less_add_equal _ _ _ P1 P2 (rat_add_inverse_is_rat _ P1) P3) as P4.
+  rewrite (rat_add_inverse_elim _ P1) in P4.
+  apply P4.
+Qed.

@@ -77,7 +77,21 @@ Proof.
     - contradiction.
     - apply (NN_elim _ P5). 
 Qed.
-      
+
+Lemma exist_not_equal_1: forall A B x, x ∈ A -> x ∉  B -> A <> B.
+Proof.
+  intros A B x P1 P2 P3.
+  rewrite P3 in P1.
+  contradiction.
+Qed.
+
+Lemma exist_not_equal_2: forall A B x, x ∉  A -> x ∈  B -> A <> B.
+Proof.
+  intros A B x P1 P2 P3.
+  rewrite P3 in P1.
+  contradiction.
+Qed.
+
 Lemma subset_reduce: forall P: set -> Prop, forall A, 
   (forall x, (P x) -> x ∈ A) -> (exists B, forall y, y ∈ B <-> (P y)).
 Proof.

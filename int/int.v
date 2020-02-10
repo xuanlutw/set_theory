@@ -808,7 +808,7 @@ Proof.
   all: is_nat.
 Qed.
 
-Notation "a -z b"  := (a + (-z b)) (at level 60).
+Notation "a -z b"  := (a +z (-z b)) (at level 60).
 
 Lemma int_add_inverse_elim_1: forall m n, m ∈ ω -> n ∈ ω -> -z int m n = int n m.
 Proof.

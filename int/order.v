@@ -368,6 +368,36 @@ Proof.
   all: is_nat.
 Qed.
 
+Lemma int_add_less_cancellation: forall m n l, m ∈ ℤ -> n ∈ ℤ -> l ∈ ℤ ->
+  m +z l <z n +z l -> m <z n.
+Proof.
+  intros m n l P1 P2 P3 P4.
+  destruct (int_elim _ P1) as [qm [qn [Q1 [Q2 Q3]]]].
+  destruct (int_elim _ P2) as [rm [rn [R1 [R2 R3]]]]. 
+  destruct (int_elim _ P3) as [sm [sn [S1 [S2 S3]]]]. 
+  rewrite Q3 in P4.
+  rewrite R3 in P4.
+  rewrite S3 in P4.
+  rewrite (int_add_elim qm qn sm sn) in P4.
+  rewrite (int_add_elim rm rn sm sn) in P4.
+  pose (int_less_elim_2 (qm +ₙ sm) (qn +ₙ sn) (rm +ₙ sm) (rn +ₙ sn)
+    (add_is_nat _ _ Q1 S1) (add_is_nat _ _ Q2 S2)
+    (add_is_nat _ _ R1 S1) (add_is_nat _ _ R2 S2) P4) as P5.
+  rewrite (add_associative (qm +ₙ sm) rn sn) in P5.
+  rewrite (add_cyc qm sm rn)in P5.
+  rewrite <- (add_associative (qm +ₙ rn) sm sn) in P5.
+  rewrite (add_associative (qn +ₙ sn) rm sm) in P5.
+  rewrite (add_cyc qn sn rm)in P5.
+  rewrite <- (add_associative (qn +ₙ rm) sn sm) in P5.
+  rewrite (add_commutative sn sm) in P5.
+  rewrite Q3.
+  rewrite R3.
+  apply (int_less_intro).
+  all: is_nat.
+  apply (less_add_cancellation _ _ (sm +ₙ sn)).
+  all: is_nat.
+Qed.
+
 Lemma int_multi_cancellation: forall m n l, m ∈ ℤ -> n ∈ ℤ -> l ∈ ℤ' ->
   m ×z l = n ×z l -> m = n.
 Proof.
@@ -475,6 +505,7 @@ Ltac is_int :=
     | [            |- z.1 ∈ ℤ'        ] => apply int_one_in_subz
     | [ H: ?P      |- ?P              ] => apply H
     | [ H: ?P ∈ ℤ' |- ?P ∈ ℤ          ] => apply (in_subz P H)
+    | [            |- -z _ ∈ ℤ        ] => apply int_add_inverse_intro_1
     | [            |- ?P ×z ?Q ∈ ℤ'   ] => apply int_multi_subz
     | [            |- ⟨_, _⟩ ∈ cp _ _ ] => apply cp_intro
     | [            |- ?P +z ?Q ∈ ℤ    ] => apply int_add_is_int
