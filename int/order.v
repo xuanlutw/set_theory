@@ -493,6 +493,15 @@ Proof.
     pose (int_not_less_self _ (int_multi_is_int _ _ P1 (in_subz _ P3)) P7) as P8.
     contradiction.
 Qed.
+
+Lemma int_zero_less_one: z.0 <z z.1.
+Proof.
+  apply int_less_intro.
+  all: is_nat.
+  rewrite (add_red _ _ empty_is_nat empty_is_nat).
+  rewrite (add_zero _ empty_is_nat). 
+  apply suc_intro_1.
+Qed.
 (*----------------------------------------------------------------------------*)
 
 (* Ltac *)

@@ -1247,5 +1247,23 @@ Proof.
   apply (rat_less_add_equal (m +q p) (n +q p) (-q p)).
   all: is_rat.
 Qed.
+
+Lemma rat_zero_less_one: q.0 <q q.1.
+Proof.
+  apply rat_less_intro.
+  all: is_int.
+  rewrite (int_multi_one _ zero_is_int).
+  rewrite (int_multi_one _ one_is_int).
+  apply int_zero_less_one.
+Qed.
+
+Lemma rat_inverse_one_less_zero: q.-1 <q q.0.
+Proof.
+  rewrite (inverse_one_is_inverse_one).
+  rewrite <- (rat_inverse_zero_is_zero).
+  apply rat_less_inverse.
+  all: is_rat.
+  apply rat_zero_less_one.
+Qed.
 (*----------------------------------------------------------------------------*)
 

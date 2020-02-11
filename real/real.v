@@ -53,6 +53,29 @@ Proof.
         apply P8.
 Qed.
 
+Lemma real_exist_in_elmn: forall A, A ∈ ℝ -> exists x, x ∈ ℚ /\ x ∈ A /\
+  forall y, y ∈ ℚ -> y <q x -> y ∈ A.
+Proof.
+  intros A P1.
+  destruct (real_elim _ P1) as [P2 [_ [P3 [P4 _]]]].
+  destruct (not_equal_exist _ _ P3) as [x [[P5 P6]|[P5 P6]]].
+  + exists x. 
+    repeat split.
+    - apply (P2 _ P5).
+    - apply P5.
+    - intros y P7 P8.
+      apply (P4 _ _ P5 P7 P8).
+  + pose (not_in_empty x) as P7.
+    contradiction.
+Qed.
+
+Lemma in_real_rat: forall x m, m ∈ ℝ -> x ∈ m -> x ∈ ℚ.
+Proof.
+  intros x m P1 P2.
+  destruct (real_elim _ P1) as [P3 _].
+  apply (P3 _ P2).
+Qed.
+
 Lemma real_intro: forall A, dedekind_cut A -> A ∈ ℝ.
 Proof.
   intros A P1.
@@ -61,6 +84,43 @@ Proof.
     destruct P1 as [P1 _].
     apply P1.
   + apply P1.
+Qed.
+
+Definition rat_to_real (x: set) := (subset_ctor (fun k => k <q x) ℚ).
+
+Notation "r.0" := (rat_to_real q.0).
+
+Lemma rat_to_real_is_real: forall x, x ∈ ℚ -> (rat_to_real x) ∈ ℝ.
+Proof.
+  intros x P1.
+  apply real_intro.
+  repeat split.
+  + apply subset_elim_2.
+  + intros P2.
+    absurd (x ∈ ℚ).
+    - rewrite <- P2.
+      intros P3.
+      destruct (subset_elim _ _ _ P3) as [_ P4].
+      apply (rat_not_less_self _ P1 P4).
+    - apply P1.
+  + apply exist_elmn_not_empty.
+    exists (x -q q.1).
+    apply subset_intro.
+    - apply (rat_add_is_rat _ _ P1 (rat_add_inverse_is_rat _ one_is_rat)).
+    - apply (rat_less_minus_positive_2 _ _ P1 one_is_rat rat_zero_less_one). 
+  + intros p q P2 P3 P4.
+    apply subset_intro.
+    - apply P3.
+    - destruct (subset_elim _ _ _ P2) as [P5 P6].
+      apply (rat_less_trans _ p _ P3 P5 P1 P4 P6).
+  + intros [a [P2 P3]].
+    destruct (subset_elim _ _ _ P2) as [P4 _].
+    apply (rat_not_less_self _ P4 (P3 _ P2)).
+Qed.
+
+Lemma zero_is_rat: r.0 ∈ ℝ.
+Proof.
+  apply (rat_to_real_is_real _ zero_is_rat).
 Qed.
 (*----------------------------------------------------------------------------*)
 
@@ -147,4 +207,107 @@ Proof.
           --apply P10.
           --apply P8.
 Qed.
+
+Lemma in_real_add_elim: forall x A B, x ∈ A +r B -> 
+  exists a b, a ∈ A /\ b ∈ B /\ a +q b = x.
+Proof.
+  intros x A B P1.
+  destruct (subset_elim _ _ _ P1) as [P2 [a [b P3]]].
+  exists a. exists b.
+  apply P3.
+Qed.
+
+Lemma in_real_add_rat: forall x A B, x ∈ A +r B -> x ∈ ℚ.
+Proof.
+  intros x A B P1.
+  destruct (subset_elim _ _ _ P1) as [P2 [a [b P3]]].
+  apply P2.
+Qed.
+
+Lemma in_real_add_intro_1: forall x y A B, A ∈ ℝ -> B ∈ ℝ -> x ∈ A -> y ∈ B ->
+  x +q y ∈ A +r B.
+Proof.
+  intros x y A B P1 P2 P3 P4.
+  apply subset_intro.
+  + apply (rat_add_is_rat _ _ (in_real_rat _ _ P1 P3) (in_real_rat _ _ P2 P4)).
+  + exists x.
+    exists y.
+    repeat split.
+    - apply P3.
+    - apply P4.
+Qed.
+
+Lemma real_add_commutative: forall m n, m ∈ ℝ -> n ∈ ℝ -> m +r n = n +r m.
+Proof.
+  intros m n P1 P2.
+  apply ax_exten.
+  intros s.
+  split.
+  + intros P3.
+    apply subset_intro.
+    - apply (in_real_add_rat _ _ _ P3). 
+    - destruct (in_real_add_elim _ _ _ P3) as [x [y [P4 [P5 P6]]]].
+      exists y. exists x.
+      repeat split.
+      * apply P5.
+      * apply P4.
+      * rewrite (rat_add_commutative _ _ 
+          (in_real_rat _ _ P2 P5) (in_real_rat _ _ P1 P4)).
+        apply P6.
+  + intros P3.
+    apply subset_intro.
+    - apply (in_real_add_rat _ _ _ P3). 
+    - destruct (in_real_add_elim _ _ _ P3) as [x [y [P4 [P5 P6]]]].
+      exists y. exists x.
+      repeat split.
+      * apply P5.
+      * apply P4.
+      * rewrite (rat_add_commutative _ _ 
+          (in_real_rat _ _ P1 P5) (in_real_rat _ _ P2 P4)).
+        apply P6.
+Qed. 
+
+Lemma real_add_associative: forall m n l, m ∈ ℝ -> n ∈ ℝ -> l ∈ ℝ ->
+  m +r (n +r l) = (m +r n) +r l.
+Proof.
+  intros m n l P1 P2 P3.
+  apply subset_asym.
+  split.
+  + intros s P4.
+    apply subset_intro.
+    - apply (in_real_add_rat _ _ _ P4). 
+    - destruct (in_real_add_elim _ _ _ P4) as [a [p [P5 [P6 P7]]]].
+      destruct (in_real_add_elim _ _ _ P6) as [b [c [P8 [P9 P10]]]].
+      exists (a +q b).
+      exists c.
+      repeat split.
+      * apply (in_real_add_intro_1 _ _ _ _ P1 P2 P5 P8).
+      * apply P9.
+      * rewrite <- (rat_add_associative _ _ _ (in_real_rat _ _ P1 P5)
+          (in_real_rat _ _ P2 P8) (in_real_rat _ _ P3 P9)).
+        rewrite P10.
+        apply P7.
+  + intros s P4.
+    apply subset_intro.
+    - apply (in_real_add_rat _ _ _ P4). 
+    - destruct (in_real_add_elim _ _ _ P4) as [p [c [P5 [P6 P7]]]].
+      destruct (in_real_add_elim _ _ _ P5) as [a [b [P8 [P9 P10]]]].
+      exists a.
+      exists (b +q c).
+      repeat split.
+      * apply P8.
+      * apply (in_real_add_intro_1 _ _ _ _ P2 P3 P9 P6).
+      * rewrite (rat_add_associative _ _ _ (in_real_rat _ _ P1 P8)
+          (in_real_rat _ _ P2 P9) (in_real_rat _ _ P3 P6)).
+        rewrite P10.
+        apply P7.
+Qed. 
+
+(*Lemma real_add_zero: forall m, m ∈ ℝ -> m +r r.0 = m.*)
+(*Proof.*)
+  (*intros m P1.*)
+  (*apply subset_asym.*)
+  (*split.*)
+  (*+ intros s P2.*)
+    (*destruct (in_real_add_elim _ _ _ P2) as [x [y [P3 [P4 P5]]]].*)
 (*----------------------------------------------------------------------------*)
