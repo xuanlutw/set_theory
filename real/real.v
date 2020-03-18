@@ -16,7 +16,7 @@ Require Import rat.rat.
 (* Real Number *)
 Definition dedekind_cut (x: set) := 
   (x ⊆ ℚ) /\ (x <> ℚ) /\ (x <> ∅) /\ (forall p q, p ∈ x -> q ∈ ℚ -> q <q p -> q ∈ x) /\
-  (~ exists a, (a ∈ x /\ forall b, b ∈ x -> b <q a)).
+  (~ exists a, (a ∈ x /\ forall b, b ∈ x -> b ≤q a)).
 
 Definition real_number := (subset_ctor dedekind_cut (𝒫(ℚ))).
 
@@ -76,6 +76,41 @@ Proof.
   apply (P3 _ P2).
 Qed.
 
+Lemma in_real_bound: forall x m, m ∈ ℝ -> x ∈ m -> exists y, y ∈ m -> x <q y.
+Proof.
+  intros x m P1 P2.
+  destruct (real_elim _ P1) as [_ [_ [_ [_ P3]]]].
+  destruct (not_and_or _ _ (not_exists_forall_not _ _ P3 x)) as [P4|P4].
+  + contradiction.
+  + destruct (not_forall_exists_not _ _ P4) as [y P5].
+    exists y.
+    intros P6.
+    destruct (rat_trichotomy _ _ 
+      (in_real_rat _ _ P1 P2) (in_real_rat _ _ P1 P6)) as [P7|[P7|P7]].
+    - destruct P7 as [P7 _].
+      apply P7.
+    - destruct P7 as [_ [P7 _]].
+      absurd (y ∈ m -> y ≤q x).
+      * apply P5.
+      * intros P8.
+        right.
+        symmetry. 
+        apply P7. 
+    - destruct P7 as [_ [_ P7]].
+      absurd (y ∈ m -> y ≤q x).
+      * apply P5.
+      * intros P8.
+        left.
+        apply P7. 
+Qed.
+
+Lemma bound_in_real: forall x y m, m ∈ ℝ -> y ∈ ℚ -> x ∈ m -> y <q x -> y ∈ m.
+Proof.
+  intros x y m P1 P2 P3 P4.
+  destruct (real_elim _ P1) as [_ [_ [_ [P5 _]]]].
+  apply (P5 _ _ P3 P2 P4).
+Qed.
+
 Lemma real_intro: forall A, dedekind_cut A -> A ∈ ℝ.
 Proof.
   intros A P1.
@@ -115,7 +150,9 @@ Proof.
       apply (rat_less_trans _ p _ P3 P5 P1 P4 P6).
   + intros [a [P2 P3]].
     destruct (subset_elim _ _ _ P2) as [P4 _].
-    apply (rat_not_less_self _ P4 (P3 _ P2)).
+    pose (P3 _ P2).
+    pose (rat_not_less_self _ P4) as P5.
+    contradiction.
 Qed.
 
 Lemma zero_is_rat: r.0 ∈ ℝ.
@@ -303,11 +340,12 @@ Proof.
         apply P7.
 Qed. 
 
-(*Lemma real_add_zero: forall m, m ∈ ℝ -> m +r r.0 = m.*)
-(*Proof.*)
-  (*intros m P1.*)
-  (*apply subset_asym.*)
-  (*split.*)
-  (*+ intros s P2.*)
-    (*destruct (in_real_add_elim _ _ _ P2) as [x [y [P3 [P4 P5]]]].*)
+Lemma real_add_zero: forall m, m ∈ ℝ -> m +r r.0 = m.
+Proof.
+  intros m P1.
+  apply subset_asym.
+  split.
+  + intros s P2.
+    destruct (in_real_add_elim _ _ _ P2) as [x [y [P3 [P4 P5]]]].
+    apply subset_intro.
 (*----------------------------------------------------------------------------*)

@@ -751,6 +751,8 @@ Definition rat_less_rel :=
 
 Notation "m <q n" := (⟨m, n⟩ ∈ rat_less_rel) (at level 65, no associativity).
 
+Notation "m ≤q n" := (m <q n \/ m = n) (at level 65, no associativity).
+
 Lemma rat_less_elim_1: forall x y, x ∈ ℚ -> y ∈ ℚ -> x <q y ->
   exists m n p q, m ∈ ℤ /\ n ∈ ℤ' /\ p ∈ ℤ /\ q ∈ ℤ' /\
     x = rat m n /\ y = rat p q /\ (m ×z q) <z (n ×z p).

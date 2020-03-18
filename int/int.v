@@ -127,6 +127,8 @@ Notation "z.0" := (int n.0 n.0).
 
 Notation "z.1" := (int n.1 n.0).
 
+Notation "z.2" := (int n.2 n.0).
+
 Notation "z.-1" := (int n.0 n.1).
 
 Lemma int_ctor_is_int: forall m n, m ∈ ω -> n ∈ ω -> int m n ∈ ℤ.
@@ -199,6 +201,14 @@ Qed.
 Lemma one_is_int: z.1 ∈ ℤ.
 Proof.
   apply int_intro.
+  apply one_is_nat.
+  apply empty_is_nat.
+Qed.
+
+Lemma two_is_int: z.2 ∈ ℤ.
+Proof.
+  apply int_intro.
+  apply suc_is_nat.
   apply one_is_nat.
   apply empty_is_nat.
 Qed.
