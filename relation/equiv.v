@@ -5,10 +5,6 @@ Require Import relation.relation.
 Require Import relation.function.
 
 (* Equivalence Relation *)
-Definition r_refl  (R: set) (A: set) := forall x, x ∈ A -> ⟨x, x⟩ ∈ R.
-Definition r_sym   (R: set) := forall x y, ⟨x, y⟩ ∈ R -> ⟨y, x⟩ ∈ R.
-Definition r_trans (R: set) := forall x y z, ⟨x, y⟩ ∈ R -> ⟨y, z⟩ ∈ R -> ⟨x, z⟩ ∈ R.
-
 Definition equiv_rel (R: set) (A:set) := 
   (rover R A) /\ (r_refl R A) /\ (r_sym R) /\ (r_trans R).
 

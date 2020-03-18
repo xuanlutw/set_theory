@@ -144,6 +144,10 @@ Proof.
 Qed.
 (*----------------------------------------------------------------------------*)
 
+(* Binary Function *)
+Notation " x +[r] y" := (r[⟨x, y⟩]) (at level 63, left associativity).
+(*----------------------------------------------------------------------------*)
+
 (* Restriction *)
 Definition in_restr (x: set) (F: set) (A: set) :=
   (exists a b, ⟨a, b⟩ ∈ F /\ x = ⟨a, b⟩ /\ a ∈ A).

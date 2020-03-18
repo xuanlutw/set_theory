@@ -207,6 +207,12 @@ Proof.
 Qed.
 (*----------------------------------------------------------------------------*)
 
+(* Special Property *)
+Definition r_refl   (R: set) (A: set) := forall x, x ∈ A -> ⟨x, x⟩ ∈ R.
+Definition r_irrefl (R: set) (A: set) := forall x, x ∈ A -> ⟨x, x⟩ ∉ R.
+Definition r_sym    (R: set) := forall x y, ⟨x, y⟩ ∈ R -> ⟨y, x⟩ ∈ R.
+Definition r_trans  (R: set) := forall x y z, ⟨x, y⟩ ∈ R -> ⟨y, z⟩ ∈ R -> ⟨x, z⟩ ∈ R.
+
 (* Domain *)
 Definition in_dom (x: set) (R: set) :=
   exists y, ⟨x, y⟩ ∈ R.
