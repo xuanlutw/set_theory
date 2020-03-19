@@ -133,6 +133,48 @@ Proof.
 Qed.
 (*----------------------------------------------------------------------------*)
 
+(* Proper Subset *)
+Lemma psubset_intro_1: forall A B, A ⊆ B -> A <> B -> A ⊂ B.
+Proof.
+  intros A B P1 P2.
+  split.
+  + apply P1.
+  + apply P2.
+Qed.
+
+Lemma psubset_intro_2: forall A B, (forall x, x ∈ A -> x ∈ B) -> 
+  (exists y, y ∈ A /\ y ∉  B) -> A ⊂ B.
+Proof.
+  intros A B P1 [y [P2 P3]].
+  split.
+  + intros x P4.
+    apply (P1 _ P4).
+  + apply (exist_not_equal_1 _ _ _ P2 P3).
+Qed.
+
+Lemma psubset_elim_1: forall A B, A ⊂ B -> A ⊆ B.
+Proof.
+  intros A B [P1 _].
+  apply P1.
+Qed.
+
+Lemma psubset_elim_2: forall A B, A ⊂ B -> A <> B.
+Proof.
+  intros A B [_ P1].
+  apply P1.
+Qed.
+
+Lemma subset_elim_3: forall A B, A ⊆ B -> A ⊂ B \/ A = B.
+Proof.
+  intros A B P1.
+  destruct (LEM (A = B)) as [P2|P2].
+  + right.
+    apply P2.
+  + left.
+    apply (psubset_intro_1 _ _ P1 P2).
+Qed.
+(*----------------------------------------------------------------------------*)
+
 (* Empty Set *)
 Lemma not_in_empty: forall A, A ∉  ∅.
 Proof.
@@ -181,6 +223,7 @@ Qed.
 
 (* Power set *)
 Lemma in_power_subset: forall A x, x ∈ 𝒫(A) -> x ⊆ A.
+
 Proof.
   intros A x P1.
   destruct (extract_set_property (ax_power A) x) as [P2 _].
@@ -624,6 +667,16 @@ Proof.
     contradiction.
 Qed.
 
+Lemma complement_dilemma: forall A B x, x ∈ A -> x ∈ A ∩ B \/ x ∈ A \ B.
+Proof.
+  intros A B x P1.
+  destruct (LEM (x ∈ B)) as [P2|P2].
+  + left.
+    apply (in_in_inter2 _ _ _ P1 P2).
+  + right.
+    apply (complement_intro _ _ _ (conj P1 P2)).
+Qed.
+
 Lemma complement_union2: forall A B, A ∪ (B \ A) = A ∪ B.
 Proof.
   intros A B.
@@ -645,16 +698,29 @@ Proof.
         apply (conj P2 P3).
 Qed.
 
-Lemma complement_proper_subset: forall A B, A ⊆ B -> A <> B -> 
-  exists x, x ∈ B \ A.
-Proof. 
-  intros A B P1 P2.
-  destruct (not_equal_exist _ _ P2) as [x [[P3 P4]|P3]].
+Lemma complement_subset: forall A B, (A \ B) ⊆ A.
+Proof.
+  intros A B x P1.
+  destruct (complement_elim _ _ _ P1) as [P2 _].
+  apply P2.
+Qed.
+
+Lemma complement_proper_subset_exist: forall A B, A ⊂ B -> exists x, x ∈ B \ A.
+Proof.
+  intros A B P1.
+  destruct (not_equal_exist _ _ (psubset_elim_2 _ _ P1)) as [x [[P3 P4]|P3]].
   exists x.
   + absurd (x ∈ B). 
     - apply P4.
-    - apply (P1 _ P3).
+    - apply ((psubset_elim_1 _ _ P1) _ P3).
   + exists x.
     apply (complement_intro _ _ _ P3).
+Qed.
+
+Lemma complement_proper_subset_nonempty: forall A B, A ⊂ B -> B \ A <> ∅.
+Proof.
+  intros A B P1.
+  apply exist_elmn_not_empty.
+  apply (complement_proper_subset_exist _ _ P1).
 Qed.
 (*----------------------------------------------------------------------------*)

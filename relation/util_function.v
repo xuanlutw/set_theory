@@ -132,6 +132,17 @@ Proof.
   rewrite <- (in_singleton_equal _ _ P4).
   apply empty_ran.
 Qed.
+
+Lemma nonempty_dom_nonempty_ran: forall F, function F -> dom(F) <> ∅ -> 
+  ran(F) <> ∅.
+Proof. 
+  intros F P1 P2.
+  apply exist_elmn_not_empty.
+  destruct (not_empty_exist_elmn _ P2) as [x P3].
+  exists (F[x]).
+  apply (ran_intro_2 _ x _).
+  apply (fval_intro_2 _ _ P1 P3).
+Qed.
 (*----------------------------------------------------------------------------*)
 
 (* Single Pair Function *)
@@ -318,6 +329,14 @@ Proof.
       apply id_dom.
     - symmetry.
       apply id_ran.
+Qed.
+
+Lemma id_is_bijection: forall A, bijection (id A) A A.
+Proof.
+  intros A.
+  split.
+  + apply id_is_injection.
+  + apply id_fonto.
 Qed.
 
 Lemma id_inv: forall A, id A = inv (id A).

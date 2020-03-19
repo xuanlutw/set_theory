@@ -22,6 +22,9 @@ Definition fonto (F: set) (A: set) (B: set) :=
 Definition injection (F: set) :=
   function F /\ single_rooted F.
 
+Definition bijection (F: set) (A: set) (B: set) :=
+  injection F /\ fonto F A B.
+
 Theorem fonto_fover: forall F A B, fonto F A B -> fover F A B.
 Proof. 
   intros F A B [P1 [P2 P3]].
@@ -145,7 +148,7 @@ Qed.
 (*----------------------------------------------------------------------------*)
 
 (* Binary Function *)
-Notation " x +[r] y" := (r[⟨x, y⟩]) (at level 63, left associativity).
+Notation " x +[ r ] y" := (r[⟨x, y⟩]) (at level 63, left associativity).
 (*----------------------------------------------------------------------------*)
 
 (* Restriction *)
@@ -478,6 +481,25 @@ Proof.
     rewrite <- inv_dom in P3.
     apply (fval_intro_2 _ _ (P4 P2) P3).
 Qed.
+
+Lemma inv_bijection: forall F A B, bijection F A B -> bijection (inv F) B A.
+Proof.
+  intros F A B [[P1 P2] [[P3 _] [P4 P5]]].
+  split. split.
+  + apply inv_function.
+    apply P2. 
+  + apply inv_function.
+    rewrite (inv_inv _ P3).
+    apply P1.
+  + split.
+    - apply inv_function.
+      apply P2. 
+    - split.
+      * rewrite <- P5. 
+        apply inv_dom.
+      * rewrite <- P4. 
+        apply inv_ran.
+Qed.
 (*----------------------------------------------------------------------------*)
 
 (* Composition *)
@@ -725,6 +747,15 @@ Proof.
         apply comp_intro.
         exists y.
         apply (conj P8 P4).
+Qed.
+
+Lemma comp_bijection: forall F G A B C, bijection F A B -> bijection G B C ->
+  bijection (G ∘ F) A C.
+Proof.
+  intros F G A B C [P1 P2] [P3 P4].
+  split.
+  + apply (comp_injection _ _ P1 P3).
+  + apply (comp_fonto _ _ _ _ _ P2 P4).
 Qed.
 
 (* 3I *)

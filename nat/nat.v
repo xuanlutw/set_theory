@@ -71,6 +71,13 @@ Proof.
   destruct (omega_is_inductive) as [_ P2].
   apply (P2 _ P1).
 Qed.
+
+Lemma nat_nonempty: ω <> ∅.
+Proof.
+  apply exist_elmn_not_empty.
+  exists ∅.
+  apply empty_is_nat.
+Qed.
 (*----------------------------------------------------------------------------*)
 
 (* Induction Principle *)

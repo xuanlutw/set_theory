@@ -6,6 +6,8 @@ Notation  "x ∉ y" := (~(set_in x y)) (at level 65, no associativity).
 
 Definition subset (A: set) (B: set) := forall x: set, x ∈ A -> x ∈ B.
 Infix      "⊆" := (subset) (at level 65, no associativity).
+Definition proper_subset (A: set) (B: set) := A ⊆ B /\ A <> B.
+Infix      "⊂" := (proper_subset) (at level 65, no associativity).
 (*----------------------------------------------------------------------------*)
 
 (* Some function for build set object. *) 
