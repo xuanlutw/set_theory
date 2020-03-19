@@ -145,6 +145,16 @@ Proof.
   intros F A B x P1 P2.
   apply (fval_ran_fover F A B x (fonto_fover F A B P1) P2).
 Qed.
+
+Lemma fval_injection: forall F x y, injection F -> x ∈ dom(F) -> y ∈ dom(F) -> 
+  F[x] = F[y] -> x = y.
+Proof.
+  intros F x y [P1 P2] P3 P4 P5.
+  apply (P2 x y (F[x])).
+  + apply (fval_intro_2 _ _ P1 P3).
+  + rewrite P5.
+    apply (fval_intro_2 _ _ P1 P4).
+Qed. 
 (*----------------------------------------------------------------------------*)
 
 (* Binary Function *)

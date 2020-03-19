@@ -219,6 +219,16 @@ Proof.
     apply not_in_empty.
   + apply P1.
 Qed.
+
+Lemma subset_empty: forall P: set -> Prop, forall A t, (subset_ctor P A) = ∅ -> 
+  t ∈ A -> ~(P t).
+Proof.
+  intros P A t P1 P2 P3.
+  absurd (t ∈ (subset_ctor P A)).
+  + rewrite P1.
+    apply not_in_empty.
+  + apply (subset_intro _ _ _ P2 P3).
+Qed.
 (*----------------------------------------------------------------------------*)
 
 (* Power set *)
