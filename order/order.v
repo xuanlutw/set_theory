@@ -637,7 +637,98 @@ Proof.
   rewrite P5 in P2.
   apply (eps_image_intro_2 _ _ _ _ P1 P4 P2).
 Qed.
+(*----------------------------------------------------------------------------*)
 
+(* Isomorphrism *)
+Definition isom (R: set) (A: set) (S: set) (B: set) :=  
+  exists f, bijection f A B /\ 
+  (forall x y, x ∈ A -> y ∈ A -> ⟨x, y⟩ ∈ R -> ⟨f[x], f[y]⟩ ∈ S) /\
+  (forall x y, x ∈ A -> y ∈ A -> ⟨f[x], f[y]⟩ ∈ S -> ⟨x, y⟩ ∈ R).
 
-  
+Lemma isom_refl: forall R A, isom R A R A.
+Proof.
+  intros R A.
+  exists (id A).
+  split.
+  + apply id_is_bijection.
+  + split.
+    - intros x y P1 P2 P3.
+      rewrite (id_fval _ _ P1).
+      rewrite (id_fval _ _ P2).
+      apply P3.
+    - intros x y P1 P2 P3.
+      rewrite <- (id_fval _ _ P1).
+      rewrite <- (id_fval _ _ P2).
+      apply P3.
+Qed.
 
+Lemma isom_sym: forall R A S B, isom R A S B -> isom S B R A.
+Proof.
+  intros R A S B [f [P1 [P2 P3]]].
+  exists (inv f).
+  split.
+  + apply (inv_bijection _ _ _ P1).
+  + split.
+    - intros x y P4 P5 P6.
+      apply P3.
+      * destruct P1 as [[_ P7] [_ [P8 P9]]].
+        rewrite <- P8.
+        rewrite <- (inv_ran f).
+        apply fval_ran.
+        ++apply inv_function.
+          apply P7.
+        ++rewrite inv_dom.
+          rewrite P9.
+          apply P4.
+      * destruct P1 as [[_ P7] [_ [P8 P9]]].
+        rewrite <- P8.
+        rewrite <- (inv_ran f).
+        apply fval_ran.
+        ++apply inv_function.
+          apply P7.
+        ++rewrite inv_dom.
+          rewrite P9.
+          apply P5.
+      * destruct P1 as [P7 [_ [_ P8]]].
+        rewrite <- P8 in P4.
+        rewrite <- P8 in P5.
+        rewrite (inv_function_exist_2 _ P7 _ P4).
+        rewrite (inv_function_exist_2 _ P7 _ P5).
+        apply P6.
+    - intros x y P4 P5 P6.
+      assert ((inv f)[x] ∈ A) as Q1.
+      { destruct P1 as [P7 [_ [P8 P9]]].
+        rewrite <- P8.
+        rewrite <- inv_ran.
+        apply ran_intro.
+        exists x.
+        apply fval_elim.
+        + reflexivity.
+        + apply inv_function.
+          destruct P7 as [_ P7].
+          apply P7.
+        + rewrite inv_dom.
+          rewrite P9. 
+          apply P4. }
+      assert ((inv f)[y] ∈ A) as Q2.
+      { destruct P1 as [P7 [_ [P8 P9]]].
+        rewrite <- P8.
+        rewrite <- inv_ran.
+        apply ran_intro.
+        exists y.
+        apply fval_elim.
+        + reflexivity.
+        + apply inv_function.
+          destruct P7 as [_ P7].
+          apply P7.
+        + rewrite inv_dom.
+          rewrite P9. 
+          apply P5. }
+      pose (P2 _ _ Q1 Q2 P6) as Q3.
+      destruct P1 as [P7 [_ [_ P8]]].
+      rewrite <- P8 in P4.
+      rewrite <- P8 in P5.
+      rewrite (inv_function_exist_2 _ P7 _ P4) in Q3.
+      rewrite (inv_function_exist_2 _ P7 _ P5) in Q3.
+      apply Q3.
+Qed.

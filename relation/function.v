@@ -510,6 +510,13 @@ Proof.
       * rewrite <- P4. 
         apply inv_ran.
 Qed.
+
+Lemma inv_bijection_function: forall F A B, bijection F A B -> function (inv F).
+Proof.
+  intros F A B P1.
+  destruct (inv_bijection _ _ _ P1) as [[P2 _] _].
+  apply P2.
+Qed.
 (*----------------------------------------------------------------------------*)
 
 (* Composition *)
