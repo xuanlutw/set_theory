@@ -666,6 +666,26 @@ Proof.
   apply (dom_intro_2 _ _ y P3).
 Qed.
 
+Lemma comp_coin_dom: forall F G, ran(F) = dom(G) -> dom(G ∘ F) = dom(F).
+Proof.
+  intros F G P1.
+  apply subset_asym.
+  split.
+  + apply comp_dom.
+  + intros x P2.
+    destruct (dom_elim _ _ P2) as [y P3].
+    pose (ran_intro_2 _ _ _ P3) as P4.
+    rewrite P1 in P4.
+    destruct (dom_elim _ _ P4) as [z P5].
+    apply dom_intro.
+    exists z.
+    apply comp_intro.
+    exists y.
+    split.
+    - apply P3.
+    - apply P5.
+Qed.
+
 Lemma comp_dom_elim: forall F G x, function F -> function G -> 
   x ∈ dom(G ∘ F) -> F[x] ∈ dom(G).
 Proof.

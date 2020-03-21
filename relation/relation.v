@@ -210,8 +210,10 @@ Qed.
 (* Special Property *)
 Definition r_refl   (R: set) (A: set) := forall x, x ∈ A -> ⟨x, x⟩ ∈ R.
 Definition r_irrefl (R: set) (A: set) := forall x, x ∈ A -> ⟨x, x⟩ ∉ R.
-Definition r_sym    (R: set) := forall x y, ⟨x, y⟩ ∈ R -> ⟨y, x⟩ ∈ R.
-Definition r_trans  (R: set) := forall x y z, ⟨x, y⟩ ∈ R -> ⟨y, z⟩ ∈ R -> ⟨x, z⟩ ∈ R.
+Definition r_sym    (R: set) (A: set) := forall x y, x ∈ A -> y ∈ A -> 
+  ⟨x, y⟩ ∈ R -> ⟨y, x⟩ ∈ R.
+Definition r_trans  (R: set) (A: set) := forall x y z, x ∈ A -> y ∈ A -> 
+  z ∈ A -> ⟨x, y⟩ ∈ R -> ⟨y, z⟩ ∈ R -> ⟨x, z⟩ ∈ R.
 
 (* Domain *)
 Definition in_dom (x: set) (R: set) :=

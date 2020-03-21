@@ -6,10 +6,10 @@ Require Import relation.function.
 
 (* Equivalence Relation *)
 Definition equiv_rel (R: set) (A:set) := 
-  (rover R A) /\ (r_refl R A) /\ (r_sym R) /\ (r_trans R).
+  (rover R A) /\ (r_refl R A) /\ (r_sym R A) /\ (r_trans R A).
 
-Lemma sym_trans_equive: forall R, rel R -> r_sym R -> r_trans R -> 
-  equiv_rel R (fld(R)).
+Lemma sym_trans_equive: forall R, rel R -> r_sym R (fld(R)) -> 
+  r_trans R (fld(R)) -> equiv_rel R (fld(R)).
 Proof.
   intros R P1 P2 P3.
   split. 
@@ -24,9 +24,11 @@ Proof.
     - intros x P4.
       destruct (fld_elim _ _ P4) as [P5|P5].
       * destruct (dom_elim _ _ P5) as [y P6].
-        apply (P3 _ _ _ P6 (P2 _ _ P6)).
+        pose (fld_intro_ran _ _ (ran_intro_2 _ _ _ P6)) as P7.
+        apply (P3 _ _ _ P4 P7 P4 P6 (P2 _ _ P4 P7 P6)).
       * destruct (ran_elim _ _ P5) as [y P6].
-        apply (P3 _ _ _ (P2 _ _ P6) P6).
+        pose (fld_intro_dom _ _ (dom_intro_2 _ _ _ P6)) as P7.
+        apply (P3 _ _ _ P4 P7 P4 (P2 _ _ P7 P4 P6) P6).
     - split.
       * apply P2.
       * apply P3.
@@ -65,14 +67,14 @@ Proof.
       * apply P2.
 Qed.
 
-Lemma equiv_class_intro_2: forall R A x y, equiv_rel R A -> ⟨y, x⟩ ∈ R -> 
-  y ∈ A[R, x].
+Lemma equiv_class_intro_2: forall R A x y, equiv_rel R A -> x ∈ A -> y ∈ A -> 
+  ⟨y, x⟩ ∈ R -> y ∈ A[R, x].
 Proof.
-  intros R A x y P1 P2.
+  intros R A x y P1 P2 P3 P4.
   apply equiv_class_intro_1.
   + apply P1.
   + destruct P1 as [_ [_ [P1 _]]].
-    apply (P1 _ _ P2).
+    apply (P1 _ _ P3 P2 P4).
 Qed.
 
 Lemma equiv_class_intro_self: forall R A x, equiv_rel R A -> x ∈ A -> 
@@ -92,18 +94,19 @@ Proof.
   apply P2.
 Qed.
 
-Lemma equiv_class_elim_2: forall R A x y, y ∈ A[R, x] -> ⟨y, x⟩ ∈ R.
-Proof.
-  intros R A x y P1.
-  destruct (subset_elim _ _ _ P1) as [_ [_ [[_ [_ [P3 _]]] P2]]].
-  apply (P3 _ _ P2).
-Qed.
-
 Lemma equiv_class_elim_3: forall R A x y, y ∈ A[R, x] -> y ∈ A.
 Proof.
   intros R A x y P1.
   destruct (subset_elim _ _ _ P1) as [P2 _].
   apply P2.
+Qed.
+
+Lemma equiv_class_elim_2: forall R A x y, x ∈ A -> y ∈ A[R, x] -> 
+  ⟨y, x⟩ ∈ R.
+Proof.
+  intros R A x y P1 P2.
+  destruct (subset_elim _ _ _ P2) as [_ [_ [[_ [_ [P5 _]]] P4]]].
+  apply (P5 _ _ P1 (equiv_class_elim_3 _ _ _ _ P2) P4).
 Qed.
 
 Lemma equiv_class_elim_4: forall R A x y, y ∈ A[R, x] -> equiv_rel R A.
@@ -113,12 +116,15 @@ Proof.
   apply P2.
 Qed.
 
-Lemma equiv_class_swap: forall R A x y, y ∈ A[R, x] -> x ∈ A[R, y].
+Lemma equiv_class_swap: forall R A x y, x ∈ A -> y ∈ A[R, x] -> 
+  x ∈ A[R, y].
 Proof.
-  intros R A x y P1.
+  intros R A x y P1 P2.
   apply equiv_class_intro_2.
-  + apply (equiv_class_elim_4 _ _ _ _ P1).
-  + apply (equiv_class_elim_1 _ _ _ _ P1).
+  + apply (equiv_class_elim_4 _ _ _ _ P2).
+  + apply (equiv_class_elim_3 _ _ _ _ P2).
+  + apply P1.
+  + apply (equiv_class_elim_1 _ _ _ _ P2).
 Qed.
 
 Lemma equiv_class_eq: forall R A x y, equiv_rel R A -> x ∈ A -> y ∈ A ->
@@ -135,43 +141,48 @@ Proof.
     intros r.
     split.
     - intro P5.
-      apply (equiv_class_intro_2 _ _ _ _ P1).
-      pose (equiv_class_elim_2 _ _ _ _ P5) as P6.
+      pose (equiv_class_elim_3 _ _ _ _ P5) as P6.
+      apply (equiv_class_intro_2 _ _ _ _ P1 P3 P6).
+      pose (equiv_class_elim_2 _ _ _ _ P2 P5) as P7.
       destruct P1 as [_ [_ [_ P1]]].
-      apply (P1 _ _ _ P6 P4).
+      apply (P1 _ _ _ P6 P2 P3 P7 P4).
     - intro P5.
       apply (equiv_class_intro_1 _ _ _ _ P1).
       pose (equiv_class_elim_1 _ _ _ _ P5) as P6.
       destruct P1 as [_ [_ [_ P1]]].
-      apply (P1 _ _ _ P4 P6).
+      pose (equiv_class_elim_3 _ _ _ _ P5) as P7.
+      apply (P1 _ _ _ P2 P3 P7 P4 P6).
 Qed.
 
-Lemma equiv_class_eq_intro: forall R A x y, y ∈ A[R, x] -> A[R, x] = A[R, y].
+Lemma equiv_class_eq_intro: forall R A x y, x ∈ A -> y ∈ A[R, x] -> 
+  A[R, x] = A[R, y].
 Proof.
-  intros R A x y P1.
+  intros R A x y Q1 P1.
   apply subset_asym.
   split.
   + intros a P2.
     apply equiv_class_intro_1.
     - apply (equiv_class_elim_4 _ _ _ _ P1).
     - destruct (equiv_class_elim_4 _ _ _ _ P1) as [_ [_ [_ P3]]].
-      apply (P3 _ _ _ (equiv_class_elim_2 _ _ _ _ P1) 
+      apply (P3 _ _ _ (equiv_class_elim_3 _ _ _ _ P1) Q1 
+      (equiv_class_elim_3 _ _ _ _ P2) (equiv_class_elim_2 _ _ _ _ Q1 P1) 
         (equiv_class_elim_1 _ _ _ _ P2)).
   + intros a P2.
     apply equiv_class_intro_1.
     - apply (equiv_class_elim_4 _ _ _ _ P1).
     - destruct (equiv_class_elim_4 _ _ _ _ P1) as [_ [_ [_ P3]]].
-      apply (P3 _ _ _ (equiv_class_elim_1 _ _ _ _ P1) 
+      apply (P3 _ _ _  Q1 (equiv_class_elim_3 _ _ _ _ P1) 
+      (equiv_class_elim_3 _ _ _ _ P2) (equiv_class_elim_1 _ _ _ _ P1) 
         (equiv_class_elim_1 _ _ _ _ P2)).
 Qed.
 
-Lemma equiv_class_eq_elim: forall R A x y, equiv_rel R A -> x ∈ A -> 
+Lemma equiv_class_eq_elim: forall R A x y, equiv_rel R A -> x ∈ A -> y ∈ A ->
   A[R, x] = A[R, y] -> ⟨x, y⟩ ∈ R.
 Proof.
-  intros R A x y P1 P2 P3.
+  intros R A x y P1 P2 Q1 P3.
   pose (equiv_class_intro_self _ _ _ P1 P2) as P4.
   rewrite P3 in P4.
-  apply (equiv_class_elim_2 _ _ _ _ P4).
+  apply (equiv_class_elim_2 _ _ _ _ Q1 P4).
 Qed.
 
 Lemma equiv_class_subset: forall R A x, equiv_rel R A -> x ∈ A -> 
@@ -234,11 +245,11 @@ Proof.
       destruct (equiv_part_elim_1 _ _ _ P2) as [b1 [Q2 Q3]].
       rewrite Q3 in Q1.
       rewrite Q3.
-      rewrite (equiv_class_eq_intro _ _ _ _ Q1).
+      rewrite (equiv_class_eq_intro _ _ _ _ Q2 Q1).
       destruct (equiv_part_elim_1 _ _ _ P3) as [b2 [R2 R3]].
       rewrite R3 in R1.
       rewrite R3.
-      rewrite (equiv_class_eq_intro _ _ _ _ R1).
+      rewrite (equiv_class_eq_intro _ _ _ _ R2 R1).
       reflexivity.
   + apply ax_exten.
     intros a.
