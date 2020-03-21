@@ -221,6 +221,17 @@ Proof.
   apply (restr_intro _ _ _ _ P1 P2).
 Qed.
 
+Lemma image_intro_2: forall x F A, function F -> x ∈ dom(F) -> x ∈ A -> 
+  F[x] ∈ F[|A|].
+Proof.
+  intros x F A P1 P2 P3.
+  apply image_intro.
+  exists x.
+  split.
+  + apply (fval_intro_2 _ _ P1 P2).
+  + apply P3.
+Qed.
+
 Lemma image_elim: forall y F A, y ∈ F[|A|] -> (exists x, ⟨x, y⟩ ∈ F /\ x ∈ A).
 Proof.
   intros y F A P1.
@@ -299,6 +310,31 @@ Proof.
       * apply image_intro.
         exists x.
         apply (conj P4 P6).
+Qed.
+
+Lemma image_ran: forall F A, F[|A|] ⊆ ran(F).
+Proof.
+  intros F A y P1.
+  destruct (image_elim _ _ _ P1) as [x [P2 P3]].
+  apply (ran_intro_2 _ _ _ P2).
+Qed.
+
+Lemma image_fonto: forall F A B, fonto F A B -> F[|A|] = B.
+Proof.
+  intros F A B [P1 [P2 P3]].
+  apply subset_asym.
+  split.
+  + rewrite <- P3.
+    apply image_ran.
+  + intros y P4.
+    rewrite <- P3 in P4.
+    destruct (ran_elim _ _ P4) as [x P5].
+    apply image_intro.
+    exists x.
+    split.
+    - apply P5.
+    - rewrite <- P2.
+      apply (dom_intro_2 _ _ _ P5).
 Qed.
 (*----------------------------------------------------------------------------*)
 
@@ -516,6 +552,13 @@ Proof.
   intros F A B P1.
   destruct (inv_bijection _ _ _ P1) as [[P2 _] _].
   apply P2.
+Qed.
+
+Lemma inv_image_ran: forall F A, (inv F)[|A|] ⊆ dom(F).
+Proof. 
+  intros F A.
+  rewrite <- (inv_ran F).
+  apply (image_ran).
 Qed.
 (*----------------------------------------------------------------------------*)
 
