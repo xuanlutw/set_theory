@@ -96,17 +96,17 @@ Lemma subset_reduce: forall P: set -> Prop, forall A,
   (forall x, (P x) -> x ∈ A) -> (exists B, forall y, y ∈ B <-> (P y)).
 Proof.
   intros P A P1.
-  pose (z := extract_set (ax_subset P A)).
+  pose (subset_ctor P A) as z.
   exists z.
   intros x.
-  destruct (extract_set_property (ax_subset P A) x) as [P3 P4].
+  destruct (ax_descr _ (ax_subset P A) x) as [P2 P3].
   split.
-  + apply P3.
-  + intros P5.
-    apply P4.
+  + apply P2.
+  + intros P4.
+    apply P3.
     split.
-    - apply (P1 x P5).
-    - apply P5.
+    - apply (P1 x P4).
+    - apply P4.
 Qed.
 
 Lemma subset_intro: forall P: set -> Prop, forall A x, x ∈ A -> (P x) -> 
