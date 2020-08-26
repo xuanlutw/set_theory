@@ -26,3 +26,14 @@ Reserved Notation "𝒫( x )"        (at level 60, no associativity).
 Reserved Notation "{ x : A | P }" (at level 0, x at level 99, no associativity).
 Reserved Notation "A ∩ B"         (at level 64, no associativity).
 Reserved Notation "A \ B"         (at level 60, no associativity).
+Reserved Notation "⟨ A , B ⟩"     (at level 60).
+Reserved Notation "A ⨉ B"         (at level 60, no associativity).
+
+Reserved Notation "dom( A )"  (at level 60, no associativity).
+Reserved Notation "ran( A )"  (at level 60, no associativity).
+Reserved Notation "fld( A )"  (at level 60, no associativity).
+
+Reserved Notation "F [ x ]" (at level 60).
+Reserved Notation "F ↾ A"   (at level 60, no associativity).
+Reserved Notation "F ⟦ A ⟧" (at level 60, no associativity).
+Reserved Notation "A ∘ B"   (at level 60, no associativity).

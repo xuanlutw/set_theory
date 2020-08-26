@@ -1,9 +1,12 @@
 make clean
 rm -f _CoqProject
 rm -f Makefile
+rm -f Makefile.conf
 echo '-arg -noinit' >  _CoqProject
 echo '-R . zfc'     >> _CoqProject
 echo Init/*.v       >> _CoqProject
+echo Relation/Relation.v   >> _CoqProject
+echo Relation/Function.v   >> _CoqProject
 #echo axiom/*.v     >> _CoqProject
 #echo axiom/*.v     >> _CoqProject
 #echo operation/*.v >> _CoqProject

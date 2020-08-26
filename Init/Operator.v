@@ -35,7 +35,14 @@ Definition inter2_c (A B: J) := ({x: A| x ∈ B}).
 Notation   "A ∩ B"           := (inter2_c A B).
 
 Definition complement (A B : J) := ({x: A| x ∉ B}).
-Notation   "A \ B" := (complement A B).
+Notation   "A \ B"              := (complement A B).
+
+Definition opair (A B: J) := J{J{A}, J{A, B}}.
+Notation  "⟨ A , B ⟩"     := (opair A B).
+
+Definition in_cp (x A B: J) := ∃ a, ∃ b, a ∈ A ∧ b ∈ B ∧ x = ⟨a, b⟩.
+Definition cp (A B: J)      := {x: 𝒫(𝒫(A ∪ B))| in_cp x A B}.
+Notation   "A ⨉ B"          := (cp A B).
 (*----------------------------------------------------------------------------*)
 
 (* Basic Properties *)
@@ -634,5 +641,136 @@ Proof.
   intros A B P1.
   apply ex_nempty.
   apply (compl_psub_ex _ _ P1).
+Qed.
+(*----------------------------------------------------------------------------*)
+
+(* Order Pairs *)
+Lemma opair_e: ∀ A, ∀ B, ∀ x, x ∈ ⟨A, B⟩ → x = J{A} ∨ x = J{A, B}.
+Proof.
+  intros A B x P1.
+  apply (pair_e _ _ _ P1).
+Qed.
+
+(* 3A *)
+Theorem opair_eq_i: ∀ A, ∀ B, ∀ C, ∀ D, (A = C) → (B = D) → ⟨A, B⟩ = ⟨C, D⟩.
+Proof.
+  intros A B C D P1 P2.
+  apply (eq_c (λ x, ⟨A, B⟩ = ⟨x, D⟩) P1).
+  apply (eq_c (λ x, ⟨A, B⟩ = ⟨A, x⟩) P2).
+  apply eq_r.
+Qed.
+
+Theorem opair_eq_e: ∀ A, ∀ B, ∀ C, ∀ D, ⟨A, B⟩ = ⟨C, D⟩ → (A = C) ∧ (B = D).
+Proof.
+  intros A B C D P1.
+  destruct (pair_eql _ _ _ _ P1) as [P2 | P2].
+  + destruct (pair_eqr _ _ _ _ (eq_s P1)) as [P3 | P3].
+    - split.
+      * apply (sing_eq _ _ P2).
+      * destruct (pair_eqr _ _ _ _ P1) as [P4 | P4].
+        ++apply (eq_c _ (sing_pair_eq2 _ _ _ (eq_s P3))).
+          apply (eq_s (sing_pair_eq3 _ _ _ (eq_s P4))).
+        ++destruct (pair_eqr _ _ _ _ P4) as [P5 | P5].
+          --apply (eq_t P5). 
+            apply (sing_pair_eq3 _ _ _ (eq_s P3)).
+          --apply P5.
+    - split.
+      * apply (sing_eq _ _ P2).
+      * destruct (pair_eqr _ _ _ _ P3) as [P4 | P4].
+        ++destruct (pair_eqr _ _ _ _ (eq_s P3)) as [P5 | P5].
+          --apply (eq_t P5).
+            apply (eq_t (sing_eq _ _ (eq_s P2))).
+            apply (eq_s P4).
+          --apply P5.
+        ++apply (eq_s P4).
+  + split.
+    - apply (sing_pair_eq1 _ _ _ P2).
+    - destruct (pair_eqr _ _ _ _ P1) as [P3 | P3].
+      * apply (eq_t (eq_s (sing_pair_eq3 _ _ _ (eq_s P3)))).
+        apply (sing_pair_eq2 _ _ _ P2).
+      * destruct (pair_eqr _ _ _ _ P3) as [P4 | P4].
+        ++apply(eq_t P4).
+          apply (sing_pair_eq3 _ _ _ P2).
+        ++apply P4.
+Qed.
+
+Theorem opair_eq_el: ∀ A, ∀ B, ∀ C, ∀ D, ⟨A, B⟩ = ⟨C, D⟩ → A = C.
+Proof.
+  intros A B C D P1.
+  destruct (opair_eq_e _ _ _ _ P1) as [P2 _].
+  apply P2.
+Qed.
+
+Theorem opair_eq_er: ∀ A, ∀ B, ∀ C, ∀ D, ⟨A, B⟩ = ⟨C, D⟩ → B = D.
+Proof.
+  intros A B C D P1.
+  destruct (opair_eq_e _ _ _ _ P1) as [_ P2].
+  apply P2.
+Qed.
+
+Lemma opair_superset: ∀ A, ∀ B, ∀ C, A ∈ C → B ∈ C → ⟨A, B⟩ ∈ 𝒫(𝒫(C)).
+Proof.
+  intros A B C P1 P2.
+  apply power_i.
+  intros x P3.
+  apply power_i.
+  intros y P4.
+  destruct (pair_e _ _ _ P3) as [P5 | P5].
+  + apply (eq_c (λ x, x ∈ C) (sing_e _ _ (eq_c _ P5 P4))).
+    apply P1.
+  + destruct (pair_e _ _ _ (eq_c (λ x, y ∈ x) P5 P4)) as [P6 | P6].
+    - apply (eq_c (λ x, x ∈ C) (eq_s P6)).
+      apply P1.
+    - apply (eq_c (λ x, x ∈ C) (eq_s P6)).
+      apply P2.
+Qed.
+
+Lemma opair_eq_swap: ∀ a, ∀ b, ∀ c, ∀ d, ⟨a, b⟩ = ⟨c, d⟩ → ⟨b, a⟩ = ⟨d, c⟩.
+Proof.
+  intros a b c d P1.
+  apply (eq_c (λ x, ⟨b, a⟩ = ⟨d, x⟩) (opair_eq_el _ _ _ _ P1)).
+  apply (eq_c (λ x, ⟨b, a⟩ = ⟨x, a⟩) (opair_eq_er _ _ _ _ P1)).
+  apply eq_r.
+Qed.
+(*----------------------------------------------------------------------------*)
+
+(* Cartesion Product *)
+Lemma cp_i: ∀ A, ∀ B, ∀ x, ∀ y, x ∈ A → y ∈ B → ⟨x, y⟩ ∈ A ⨉ B.
+Proof.
+  intros A B x y P1 P2.
+  apply sub_i.
+  + apply opair_superset.
+    - apply (union2_il _ _ _ P1).
+    - apply (union2_ir _ _ _ P2).
+  + exists x.
+    exists y.
+    split.
+    - apply P1.
+    - split.
+      * apply P2.
+      * apply eq_r.
+Qed.
+
+Lemma cp_e: ∀ A, ∀ B, ∀ x, x ∈ A ⨉ B → in_cp x A B.
+  intros A B x P1.
+  apply (sub_e _ _ _ P1).
+Qed.
+
+Lemma cp_e2: ∀ x, ∀ y, ∀ A, ∀ B, ⟨x, y⟩ ∈ A ⨉ B → x ∈ A ∧ y ∈ B.
+Proof.
+  intros x y A B P1.
+  destruct (cp_e _ _ _ P1) as [a [b [P2 [P3 P4]]]].
+  split.
+  + apply (eq_c (λ x, x ∈ A) (eq_s (opair_eq_el _ _ _ _ P4))).
+    apply P2.
+  + apply (eq_c (λ x, x ∈ B) (eq_s (opair_eq_er _ _ _ _ P4))).
+    apply P3.
+Qed.
+
+Lemma cp_swap: ∀ A, ∀ B, ∀ x, ∀ y, ⟨x, y⟩ ∈ cp A B → ⟨y, x⟩ ∈ B ⨉ A.
+Proof.
+  intros A B x y P1.
+  destruct (cp_e2 _ _ _ _ P1) as [P2 P3]. 
+  apply (cp_i _ _ _ _ P3 P2).
 Qed.
 (*----------------------------------------------------------------------------*)
