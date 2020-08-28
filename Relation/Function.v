@@ -40,15 +40,16 @@ Definition fspace (A B: J) := {s: 𝒫(A ⨉ B)| fnm s A B}.
       (*apply subset_refl.*)
 (*Qed.*)
 
-(*Lemma fonto_intro: forall F, function F -> fonto F (dom(F)) (ran(F)).*)
-(*Proof.*)
-  (*intros F P1.*)
-  (*split.*)
-  (*+ apply P1.*)
-  (*+ split.*)
-    (*- reflexivity.*)
-    (*- reflexivity.*)
-(*Qed.*)
+Lemma surj_i: ∀ F, fn F → surj F (dom(F)) (ran(F)).
+Proof.
+  intros F P1.
+  split. split.
+  + apply P1.
+  + split.
+    - apply eq_r.
+    - apply sub_r.
+  + apply eq_r.
+Qed.
 
 Lemma bij_e: ∀ F, ∀ A, ∀ B, bij F A B → surj F A B ∧ inj F A B.
 Proof.
@@ -104,7 +105,7 @@ Lemma fval_e: ∀ F, ∀ x, ∀y, y = F[x] → fn F → x ∈ dom(F) →
   ⟨x, y⟩ ∈ F ∧ (∀ y2, ⟨x, y2⟩ ∈ F → y = y2).
 Proof.
   intros F x y P1.
-  apply (eq_c 
+  apply (eq_cl 
     (λ y, fn F → x ∈ dom( F) → ⟨ x, y ⟩ ∈ F ∧ (∀ y2, ⟨ x, y2 ⟩ ∈ F → y = y2))   
     (eq_s P1)).
   apply (ex_outr (fval_exist F x)).
@@ -137,7 +138,7 @@ Lemma fval_i2: ∀ F, ∀ x, fn F → x ∈ dom(F) → ⟨x, F[x]⟩ ∈ F.
 Proof.
   intros F x P1 P2.
   destruct (dom_e _ _ P2) as [y P3].
-  apply (eq_c (λ y, ⟨x, y⟩ ∈ F) (fval_i _ _ _ P1 P3)).
+  apply (eq_cl (λ y, ⟨x, y⟩ ∈ F) (fval_i _ _ _ P1 P3)).
   apply P3.
 Qed.
 
@@ -145,7 +146,7 @@ Lemma fval_i_fnm: ∀ F, ∀ A, ∀ B, ∀ x, fnm F A B → x ∈ A → ⟨x, F[
 Proof. 
   intros F A B x [P1 [P2 _]] P3.
   apply (fval_i2 _ _ P1).
-  apply (eq_c _ (eq_s P2)).
+  apply (eq_cl _ (eq_s P2)).
   apply P3.
 Qed.
 
@@ -168,7 +169,7 @@ Proof.
   intros F A B x [P1 [P2 P3]] P4.
   apply P3.
   apply (fval_ran _ _ P1).
-  apply (eq_c (λ y, x ∈ y) (eq_s P2)).
+  apply (eq_cr (λ y, x ∈ y) P2).
   apply P4.
 Qed.
 
@@ -184,7 +185,7 @@ Proof.
   intros F A B x y [[P1 _] P2] P3 P4 P5.
   apply (P2 x y (F[x])).
   + apply (fval_i2 _ _ P1 P3).
-  + apply (eq_c (λ x, ⟨y, x⟩ ∈ F) (eq_s P5)).
+  + apply (eq_cr (λ x, ⟨y, x⟩ ∈ F) P5).
     apply (fval_i2 _ _ P1 P4).
 Qed. 
 (*----------------------------------------------------------------------------*)
@@ -207,7 +208,7 @@ Proof.
   destruct (sub_e _ _ _ P1) as [P2 [a [b [_ [P3 P4]]]]].
   split.
   + apply P2.
-  + apply (eq_c (λ x, x ∈ A) (eq_s (opair_eq_el _ _ _ _ P3))).
+  + apply (eq_cr (λ x, x ∈ A) (opair_eq_el _ _ _ _ P3)).
     apply P4.
 Qed.
 (*----------------------------------------------------------------------------*)
@@ -334,15 +335,15 @@ Proof.
   intros F A B [[_ [P1 _]] P2].
   apply sub_a.
   split.
-  + apply (eq_c _ P2).
+  + apply (eq_cl _ P2).
     apply image_ran.
   + intros y P3.
-    destruct (ran_e _ _ (eq_c _ (eq_s P2) P3)) as [x P4].
+    destruct (ran_e _ _ (eq_cr _ P2 P3)) as [x P4].
     apply image_i.
     exists x.
     split.
     - apply P4.
-    - apply (eq_c _ P1).
+    - apply (eq_cl _ P1).
       apply (dom_i2 _ _ _ P4).
 Qed.
 (*----------------------------------------------------------------------------*)
@@ -352,7 +353,7 @@ Theorem inv_superset: ∀ x, ∀ R, in_inv x R → x ∈ (ran(R)) ⨉ (dom(R)).
 Proof.
   intros x R P1.
   destruct P1 as [a [b [P1 P2]]].
-  apply (eq_c (λ x, x ∈ (ran(R)) ⨉ (dom(R))) (eq_s P2)).
+  apply (eq_cr (λ x, x ∈ (ran(R)) ⨉ (dom(R))) P2).
   apply cp_i.
   + apply (ran_i2 _ _ _ P1).
   + apply (dom_i2 _ _ _ P1).
@@ -376,8 +377,8 @@ Lemma inv_e: ∀ x, ∀ y, ∀ R, ⟨x, y⟩ ∈ inv R → ⟨y, x⟩ ∈ R.
 Proof.
   intros x y R P1.
   destruct (sub_e _ _ _ P1) as [_ [a [b [P2 P3]]]].
-  apply (eq_c (λ x, ⟨y, x⟩ ∈ R) (eq_s (opair_eq_el _ _ _ _ P3))).
-  apply (eq_c (λ y, ⟨y, b⟩ ∈ R) (eq_s (opair_eq_er _ _ _ _ P3))).
+  apply (eq_cr (λ x, ⟨y, x⟩ ∈ R) (opair_eq_el _ _ _ _ P3)).
+  apply (eq_cr (λ y, ⟨y, b⟩ ∈ R) (opair_eq_er _ _ _ _ P3)).
   apply P2.
 Qed.
 
@@ -457,17 +458,17 @@ Proof.
   split.
   + intros x P2.
     destruct ((inv_rel (inv F)) x P2) as [a [b P3]].
-    apply (eq_c (λ x, x ∈ F) (eq_s P3)).
+    apply (eq_cr (λ x, x ∈ F) P3).
     apply inv_e.
     apply inv_e.
-    apply (eq_c (λ x, x ∈ inv(inv F)) P3).
+    apply (eq_cl (λ x, x ∈ inv(inv F)) P3).
     apply P2.
   + intros x P2.
     destruct (P1 x P2) as [a [b P3]].
-    apply (eq_c (λ x, x ∈ inv(inv F)) (eq_s P3)).
+    apply (eq_cr (λ x, x ∈ inv(inv F)) P3).
     apply inv_i.
     apply inv_i.
-    apply (eq_c (λ x, x ∈ F) P3).
+    apply (eq_cl (λ x, x ∈ F) P3).
     apply P2.
 Qed.
 
@@ -526,7 +527,7 @@ Proof.
   + apply inv_e.
     destruct (inv_fn F) as [P4 _].
     apply (fval_i2 _ _ (P4 P2)).
-    apply (eq_c _ (eq_s (inv_dom F))).
+    apply (eq_cr _ (inv_dom F)).
     apply P3.
 Qed.
 
@@ -536,12 +537,12 @@ Proof.
   repeat split.
   + apply inv_rel.
   + apply (inv_sing_rot _ P5).
-  + apply (eq_c (λ x, x = B) (eq_s (inv_dom F))).
+  + apply (eq_cr (λ x, x = B) (inv_dom F)).
     apply P4.
-  + apply (eq_c (λ x, ran(inv F) ⊆ x) P3).
-    apply (eq_c (λ x, ran(inv F) ⊆ x) (inv_ran F)).
+  + apply (eq_cl (λ x, ran(inv F) ⊆ x) P3).
+    apply (eq_cl (λ x, ran(inv F) ⊆ x) (inv_ran F)).
     apply (sub_r).
-  + apply (eq_c (λ x, x = A) (eq_s (inv_ran F))).
+  + apply (eq_cr (λ x, x = A) (inv_ran F)).
     apply P3.
   + apply (inv_sing_val _ P2).
 Qed.
@@ -556,7 +557,7 @@ Qed.
 Lemma inv_image_ran: ∀ F, ∀ A, (inv F)⟦A⟧ ⊆ dom(F).
 Proof. 
   intros F A.
-  apply (eq_c _ (inv_ran F)).
+  apply (eq_cl _ (inv_ran F)).
   apply (image_ran).
 Qed.
 (*----------------------------------------------------------------------------*)
@@ -566,7 +567,7 @@ Qed.
 Theorem comp_superset: ∀ x, ∀ F, ∀ G, in_comp x F G → x ∈ dom(F) ⨉ ran(G).
 Proof.
   intros x F G [a [b [c [P1 [P2 P3]]]]].
-  apply (eq_c (λ y, y ∈ dom(F) ⨉ ran(G)) (eq_s P3)).
+  apply (eq_cr (λ y, y ∈ dom(F) ⨉ ran(G)) P3).
   apply cp_i.
   + apply (dom_i2 _ _ _ P1).
   + apply (ran_i2 _ _ _ P2).
@@ -595,9 +596,9 @@ Proof.
   destruct (sub_e _ _ _ P1) as [_ [a [b [c [P2 [P3 P4]]]]]].
   exists b.
   split.
-  + apply (eq_c (λ x, ⟨x, b⟩ ∈ F) (eq_s (opair_eq_el _ _ _ _ P4))).
+  + apply (eq_cr (λ x, ⟨x, b⟩ ∈ F) (opair_eq_el _ _ _ _ P4)).
     apply P2.
-  + apply (eq_c (λ z, ⟨b, z⟩ ∈ G) (eq_s (opair_eq_er _ _ _ _ P4))).
+  + apply (eq_cr (λ z, ⟨b, z⟩ ∈ G) (opair_eq_er _ _ _ _ P4)).
     apply P3.
 Qed.
 
@@ -614,7 +615,7 @@ Lemma comp_e2: ∀ s, ∀ F, ∀ G, s ∈ G ∘ F →
 Proof. 
   intros s F G P1.
   destruct (comp_rel _ _ _ P1) as [x [z P2]].
-  destruct (comp_e _ _ _ _ (eq_c (λ s, s ∈ G ∘ F) P2 P1)) as [y P3].
+  destruct (comp_e _ _ _ _ (eq_cl (λ s, s ∈ G ∘ F) P2 P1)) as [y P3].
   exists x.
   exists y.
   exists z.
@@ -628,7 +629,7 @@ Proof.
   destruct (comp_e _ _ _ _ P3) as [e1 [P5 P6]].
   destruct (comp_e _ _ _ _ P4) as [e2 [P7 P8]].
   apply (P2 _ _ _ P6).
-  apply (eq_c (λ x, ⟨x, b2⟩ ∈ G) (eq_s (P1 _ _ _ P5 P7))).
+  apply (eq_cr (λ x, ⟨x, b2⟩ ∈ G) (P1 _ _ _ P5 P7)).
   apply P8.
 Qed.
 
@@ -638,7 +639,7 @@ Proof.
   destruct (comp_e _ _ _ _ P3) as [e1 [P5 P6]].
   destruct (comp_e _ _ _ _ P4) as [e2 [P7 P8]].
   apply (P1 _ _ _ P5).
-  apply (eq_c (λ x, ⟨a2, x⟩ ∈ F) (eq_s (P2 _ _ _ P6 P8))).
+  apply (eq_cr (λ x, ⟨a2, x⟩ ∈ F) (P2 _ _ _ P6 P8)).
   apply P7.
 Qed.
 
@@ -666,7 +667,7 @@ Proof.
   + apply comp_dom.
   + intros x P2.
     destruct (dom_e _ _ P2) as [y P3].
-    pose (eq_c _ P1 (ran_i2 _ _ _ P3)) as P4.
+    pose (eq_cl _ P1 (ran_i2 _ _ _ P3)) as P4.
     destruct (dom_e _ _ P4) as [z P5].
     apply dom_i.
     exists z.
@@ -699,7 +700,7 @@ Proof.
   destruct (comp_e _ _ _ _ P4) as [y [P5 P6]].
   apply dom_i.
   exists z.
-  apply (eq_c (λ x, ⟨x, z⟩ ∈ G) (fval_i _ _ _ P1 P5)).
+  apply (eq_cl (λ x, ⟨x, z⟩ ∈ G) (fval_i _ _ _ P1 P5)).
   apply P6.
 Qed.
 
@@ -740,9 +741,9 @@ Proof.
   split.
   + apply (comp_fn _ _ P1 P4).
   + split.
-    - apply (eq_c _ P2). 
+    - apply (eq_cl _ P2). 
       apply comp_coin_dom_weak.
-      apply (eq_c _ (eq_s P5)).
+      apply (eq_cr _ P5).
       apply P3.
     - apply (sub_t _ (ran(G)) _).
       * apply comp_ran.
@@ -779,10 +780,10 @@ Proof.
   split.
   + apply (comp_fnm _ _ _ _ _ P1 P3).
   + destruct P3 as [_ [P3 _]].
-    apply (eq_c (λ x, x  = C) (eq_s (comp_ran2 F G))).
-    apply (eq_c (λ x, G⟦x⟧ = C) (eq_s P2)).
-    apply (eq_c (λ x, G⟦x⟧ = C) P3).
-    apply (eq_c (λ x, G⟦dom(G)⟧ = x) P4).
+    apply (eq_cr (λ x, x  = C) (comp_ran2 F G)).
+    apply (eq_cr (λ x, G⟦x⟧ = C) P2).
+    apply (eq_cl (λ x, G⟦x⟧ = C) P3).
+    apply (eq_cl (λ x, G⟦dom(G)⟧ = x) P4).
     apply image_dom.
 Qed.
 
@@ -805,9 +806,9 @@ Proof.
   split.
   + intros r P1.
     destruct (inv_rel _ r P1) as [x [z P2]].
-    destruct (comp_e _ _ _ _ (inv_e _ _ _ (eq_c (λ r, r ∈ inv (G ∘ F)) P2 P1)))
+    destruct (comp_e _ _ _ _ (inv_e _ _ _ (eq_cl (λ r, r ∈ inv (G ∘ F)) P2 P1)))
       as [y [P3 P4]].
-    apply (eq_c (λ r, r ∈ inv F ∘ inv G) (eq_s P2)).
+    apply (eq_cr (λ r, r ∈ inv F ∘ inv G) P2).
     apply comp_i.
     exists y.
     split.
@@ -815,8 +816,8 @@ Proof.
     - apply (inv_i _ _ _ P3).
   + intros r P1.
     destruct (comp_rel _ _ r P1) as [x [z P2]].
-    apply (eq_c (λ r, r ∈ inv (G ∘ F)) (eq_s P2)).
-    destruct (comp_e _ _ _ _ (eq_c (λ r, r ∈ inv F ∘ inv G) P2 P1))
+    apply (eq_cr (λ r, r ∈ inv (G ∘ F)) P2).
+    destruct (comp_e _ _ _ _ (eq_cl (λ r, r ∈ inv F ∘ inv G) P2 P1))
       as [y [P3 P4]] .
     apply inv_i.
     apply comp_i.
@@ -834,12 +835,12 @@ Proof.
   apply power_i.
   intros x P4.
   destruct (P1 x P4) as [a [b P5]].
-  apply (eq_c (λ x, x ∈ A ⨉ B) (eq_s P5)).
+  apply (eq_cr (λ x, x ∈ A ⨉ B) P5).
   apply cp_i.
-  + apply (eq_c _ P2).
-    apply (dom_i2 _ _ _ (eq_c (λ x, x ∈ F) P5 P4)).
+  + apply (eq_cl _ P2).
+    apply (dom_i2 _ _ _ (eq_cl (λ x, x ∈ F) P5 P4)).
   + apply P3.
-    apply (ran_i2 _ _ _ (eq_c (λ x, x ∈ F) P5 P4)).
+    apply (ran_i2 _ _ _ (eq_cl (λ x, x ∈ F) P5 P4)).
 Qed.
 
 Lemma fspace_i: ∀ F, ∀ A, ∀ B, fnm F A B → (F ∈ (fspace A B)).
@@ -943,10 +944,10 @@ Proof.
   destruct (inter2_e _ _ _ P4) as [P5 P6].
   destruct (P1 _ P5) as [a1 [b1 P7]].
   apply (empty_i a1).
-  apply (eq_c _ P3).
+  apply (eq_cl _ P3).
   apply inter2_i.
-  + apply (dom_i2 _ _ _ (eq_c (λ s, s ∈ F) P7 P5)).
-  + apply (dom_i2 _ _ _ (eq_c (λ s, s ∈ G) P7 P6)).
+  + apply (dom_i2 _ _ _ (eq_cl (λ s, s ∈ F) P7 P5)).
+  + apply (dom_i2 _ _ _ (eq_cl (λ s, s ∈ G) P7 P6)).
 Qed.
 
 (* union2_function *)
@@ -964,7 +965,7 @@ Proof.
       * apply (P3 _ _ _ P8 P10).
       * apply bot_e. 
         apply (empty_i a).
-        apply (eq_c _ P5).
+        apply (eq_cl _ P5).
         apply inter2_i.
         ++apply (dom_i2 _ _ _ P8).
         ++apply (dom_i2 _ _ _ P10).
@@ -972,7 +973,7 @@ Proof.
         as [[P10 P11] | [P10 P11]].
       * apply bot_e.
         apply (empty_i a).
-        apply (eq_c _ P5).
+        apply (eq_cl _ P5).
         apply inter2_i.
         ++apply (dom_i2 _ _ _ P10).
         ++apply (dom_i2 _ _ _ P8).
@@ -984,7 +985,7 @@ Lemma union_fval: ∀ f, ∀ H, ∀ x, f ∈ H → fn f → fn (∪(H)) → x �
 Proof.
   intros f H x P1 P2 P3 P4.
   destruct (dom_e _ _ P4) as [y P5].
-  apply (eq_c (λ y, y = (∪ H)[x]) (fval_i _ _ _ P2 P5)).
+  apply (eq_cl (λ y, y = (∪ H)[x]) (fval_i _ _ _ P2 P5)).
   apply fval_i.
   + apply P3.
   + apply union_i.
@@ -999,7 +1000,7 @@ Lemma union2_fvall: ∀ F, ∀ G, ∀ x, fn F → fn (F ∪ G) → x ∈ dom(F)
 Proof. 
   intros F G x P1 P2 P3.
   destruct (dom_e _ _ P3) as [y P4].
-  apply (eq_c (λ y, y = (F ∪ G)[x]) (fval_i _ _ _ P1 P4)).
+  apply (eq_cl (λ y, y = (F ∪ G)[x]) (fval_i _ _ _ P1 P4)).
   apply fval_i.
   + apply P2.
   + apply union2_il.
@@ -1010,8 +1011,8 @@ Lemma union2_fvalr: ∀ F, ∀ G, ∀ x, fn G → fn (F ∪ G) → x ∈ dom(G)
   → G[x] = (F ∪ G)[x].
 Proof. 
   intros F G x P1 P2 P3.
-  apply (eq_c (λ y, G[x] = y[x]) (union2_s G F)).
-  pose (eq_c (λ y, fn y) (union2_s F G) P2) as P4.
+  apply (eq_cl (λ y, G[x] = y[x]) (union2_s G F)).
+  pose (eq_cl (λ y, fn y) (union2_s F G) P2) as P4.
   apply (union2_fvall G F x P1 P4 P3).
 Qed.
 (*----------------------------------------------------------------------------*)

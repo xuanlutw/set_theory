@@ -45,6 +45,13 @@ Section Logic.
     intros [].
   Qed.
 
+  Lemma explo_: Q → ~Q → P.
+  Proof.
+    intros P1 P2.
+    apply bot_e.
+    apply (P2 P1).
+  Qed.
+
   Lemma and_i: P → Q → P ∧ Q.
   Proof.
     intros P1 P2.
@@ -172,7 +179,13 @@ Section Equality.
     apply refl.
   Qed.
 
-  Theorem eq_c : forall P : J → Prop, A = B → P A → P B.
+  Theorem eq_cl : forall P : J → Prop, A = B → P A → P B.
+  Proof.
+    intros P [x] H1.
+    apply H1.
+  Qed.
+
+  Theorem eq_cr : forall P : J → Prop, A = B → P B → P A.
   Proof.
     intros P [x] H1.
     apply H1.
@@ -201,7 +214,7 @@ Inductive ex (P: J → Prop): Prop :=
 (*Notation "'exists' x , p" := (ex (fun x => p)) (at level 200, right associativity).*)
 Notation "∃  A , P" := (ex (fun A => P)).
 Notation "∀  A , P" := (forall A: J, P).
-Notation "∀ₚ A , P" := (forall A : (J → Prop), P).
+Notation "∀ₚ A , P" := (forall A: (J → Prop), P).
 Notation "'λ' x , P" := (fun x => P).
 
 Section Exist.

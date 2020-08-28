@@ -3,6 +3,12 @@ Require Import Init.Logic.
 Require Import Init.Classical.
 Require Import Init.Axiom.
 
+Lemma AA: ∀ s, ∀ k, s ∈ k → s ∈ k.
+Proof.
+  intros s k P1.
+  apply P1.
+Qed.
+
 (* Operators *)
 Definition subset (A B: J) := (∀ x, x ∈ A → x ∈ B).
 Notation   "x ⊆ y"         := (subset x y).
@@ -73,14 +79,14 @@ Qed.
 Lemma sub_i_eq: ∀ A, ∀ B, A = B → A ⊆ B.
 Proof.
   intros A B P1.
-  apply (eq_c _ P1).
+  apply (eq_cl _ P1).
   apply sub_r.
 Qed.
 
 Lemma ax_exten_reverse: ∀ A, ∀ B, A = B → (∀ x, x ∈  A ↔ x ∈  B).
 Proof.
   intros A B P1 x.
-  apply (eq_c (λ s, x ∈ A ↔ x ∈ s) P1).
+  apply (eq_cl (λ s, x ∈ A ↔ x ∈ s) P1).
   apply iff_r.
 Qed.
 
@@ -143,7 +149,7 @@ Qed.
 Lemma neq_i: ∀ A, ∀ B, ∀ x, x ∈ A → x ∉  B → A ≠ B.
 Proof.
   intros A B x P1 P2 P3.
-  apply (P2 (eq_c _ P3 P1)).
+  apply (P2 (eq_cl _ P3 P1)).
 Qed.
 (*----------------------------------------------------------------------------*)
 
@@ -225,14 +231,14 @@ Lemma ex_nempty: ∀ A, (∃ x, x ∈ A) → A ≠ ∅.
 Proof.
   intros A [x P1] P2.
   apply (empty_i x).
-  apply (eq_c _ P2 P1).
+  apply (eq_cl _ P2 P1).
 Qed.
 
 Lemma sub_empty: ∀ₚ P, ∀ A, ∀ t, {y: A| P y} = ∅ → t ∈ A → ~(P t).
 Proof.
   intros P A t P1 P2 P3.
   apply (empty_i t).
-  apply (eq_c _ P1).
+  apply (eq_cl _ P1).
   apply (sub_i _ _ _ P2 P3).
 Qed.
 (*----------------------------------------------------------------------------*)
@@ -309,15 +315,15 @@ Proof.
   split.
   + intros x P1.
     destruct (pair_e _ _ _ P1) as [P2 | P2].
-    - apply (eq_c (λ y, y ∈ J{B, A}) (eq_s P2)).
+    - apply (eq_cr (λ y, y ∈ J{B, A}) P2).
       apply pair_ir.
-    - apply (eq_c (λ y, y ∈ J{B, A}) (eq_s P2)).
+    - apply (eq_cr (λ y, y ∈ J{B, A}) P2).
       apply pair_il.
   + intros x P1.
     destruct (pair_e _ _ _ P1) as [P2 | P2].
-    - apply (eq_c (λ y, y ∈ J{A, B}) (eq_s P2)).
+    - apply (eq_cr (λ y, y ∈ J{A, B}) P2).
       apply pair_ir.
-    - apply (eq_c (λ y, y ∈ J{A, B}) (eq_s P2)).
+    - apply (eq_cr (λ y, y ∈ J{A, B}) P2).
       apply pair_il.
 Qed.
 
@@ -325,7 +331,7 @@ Lemma pair_eql: ∀ A, ∀ B, ∀ C, ∀ D, J{A, B} = J{C, D} → A = C ∨ A = 
 Proof.
   intros A B C D P1.
   pose (pair_il A B) as P2.
-  pose (eq_c _ P1 P2) as P3.
+  pose (eq_cl _ P1 P2) as P3.
   apply (pair_e _ _ _ P3). 
 Qed.
 
@@ -333,7 +339,7 @@ Lemma pair_eqr: ∀ A, ∀ B, ∀ C, ∀ D, J{A, B} = J{C, D} → B = C ∨ B = 
 Proof.
   intros A B C D P1.
   pose (pair_ir A B) as P2.
-  pose (eq_c _ P1 P2) as P3.
+  pose (eq_cl _ P1 P2) as P3.
   apply (pair_e _ _ _ P3). 
 Qed.
 
@@ -368,7 +374,7 @@ Lemma sing_pair_eq1: ∀ A, ∀ B, ∀ C, J{A} = J{B, C} → A = B.
 Proof.
   intros A B C P1.
   apply sing_e.
-  apply (eq_c _ (eq_s P1)).
+  apply (eq_cr _ P1).
   apply pair_il.
 Qed.
 
@@ -391,7 +397,7 @@ Lemma sing_eq: ∀ A, ∀ B, J{A} = J{B} → A = B.
 Proof.
   intros A B P1.
   apply sing_e.
-  apply (eq_c _ (eq_s P1)).
+  apply (eq_cr _ P1).
   apply sing_i.
 Qed.
 (*----------------------------------------------------------------------------*)
@@ -515,7 +521,7 @@ Qed.
 Lemma inter2_sub_r: ∀ A, ∀ B, A ∩ B ⊆ B.
 Proof.
   intros A B.
-  apply (eq_c (λ x, x ⊆ B) (inter2_s B A)).
+  apply (eq_cl (λ x, x ⊆ B) (inter2_s B A)).
   apply inter2_sub_l.
 Qed.
 
@@ -537,7 +543,7 @@ Qed.
 Lemma sub_inter2_er: ∀ A, ∀ B, ∀ C, C ⊆ A ∩ B → C ⊆ B.
 Proof.
   intros A B C.
-  apply (eq_c (λ x, C ⊆ x → C ⊆ B) (inter2_s B A)).
+  apply (eq_cl (λ x, C ⊆ x → C ⊆ B) (inter2_s B A)).
   apply sub_inter2_el.
 Qed.
 
@@ -552,7 +558,7 @@ Proof.
     - intros P4.
       apply bot_e.
       apply (empty_i x).
-      apply (eq_c _ P1).
+      apply (eq_cl _ P1).
       apply (inter2_i _ _ _ P3 P4).
   + right.
     split.
@@ -560,7 +566,7 @@ Proof.
     - intros P4.
       apply bot_e.
       apply (empty_i x).
-      apply (eq_c _ P1).
+      apply (eq_cl _ P1).
       apply (inter2_i _ _ _ P4 P3).
 Qed.
 (*----------------------------------------------------------------------------*)
@@ -655,8 +661,8 @@ Qed.
 Theorem opair_eq_i: ∀ A, ∀ B, ∀ C, ∀ D, (A = C) → (B = D) → ⟨A, B⟩ = ⟨C, D⟩.
 Proof.
   intros A B C D P1 P2.
-  apply (eq_c (λ x, ⟨A, B⟩ = ⟨x, D⟩) P1).
-  apply (eq_c (λ x, ⟨A, B⟩ = ⟨A, x⟩) P2).
+  apply (eq_cl (λ x, ⟨A, B⟩ = ⟨x, D⟩) P1).
+  apply (eq_cl (λ x, ⟨A, B⟩ = ⟨A, x⟩) P2).
   apply eq_r.
 Qed.
 
@@ -668,7 +674,7 @@ Proof.
     - split.
       * apply (sing_eq _ _ P2).
       * destruct (pair_eqr _ _ _ _ P1) as [P4 | P4].
-        ++apply (eq_c _ (sing_pair_eq2 _ _ _ (eq_s P3))).
+        ++apply (eq_cl _ (sing_pair_eq2 _ _ _ (eq_s P3))).
           apply (eq_s (sing_pair_eq3 _ _ _ (eq_s P4))).
         ++destruct (pair_eqr _ _ _ _ P4) as [P5 | P5].
           --apply (eq_t P5). 
@@ -716,20 +722,20 @@ Proof.
   apply power_i.
   intros y P4.
   destruct (pair_e _ _ _ P3) as [P5 | P5].
-  + apply (eq_c (λ x, x ∈ C) (sing_e _ _ (eq_c _ P5 P4))).
+  + apply (eq_cl (λ x, x ∈ C) (sing_e _ _ (eq_cl _ P5 P4))).
     apply P1.
-  + destruct (pair_e _ _ _ (eq_c (λ x, y ∈ x) P5 P4)) as [P6 | P6].
-    - apply (eq_c (λ x, x ∈ C) (eq_s P6)).
+  + destruct (pair_e _ _ _ (eq_cl (λ x, y ∈ x) P5 P4)) as [P6 | P6].
+    - apply (eq_cr (λ x, x ∈ C) P6).
       apply P1.
-    - apply (eq_c (λ x, x ∈ C) (eq_s P6)).
+    - apply (eq_cr (λ x, x ∈ C) P6).
       apply P2.
 Qed.
 
 Lemma opair_eq_swap: ∀ a, ∀ b, ∀ c, ∀ d, ⟨a, b⟩ = ⟨c, d⟩ → ⟨b, a⟩ = ⟨d, c⟩.
 Proof.
   intros a b c d P1.
-  apply (eq_c (λ x, ⟨b, a⟩ = ⟨d, x⟩) (opair_eq_el _ _ _ _ P1)).
-  apply (eq_c (λ x, ⟨b, a⟩ = ⟨x, a⟩) (opair_eq_er _ _ _ _ P1)).
+  apply (eq_cl (λ x, ⟨b, a⟩ = ⟨d, x⟩) (opair_eq_el _ _ _ _ P1)).
+  apply (eq_cl (λ x, ⟨b, a⟩ = ⟨x, a⟩) (opair_eq_er _ _ _ _ P1)).
   apply eq_r.
 Qed.
 (*----------------------------------------------------------------------------*)
@@ -761,9 +767,9 @@ Proof.
   intros x y A B P1.
   destruct (cp_e _ _ _ P1) as [a [b [P2 [P3 P4]]]].
   split.
-  + apply (eq_c (λ x, x ∈ A) (eq_s (opair_eq_el _ _ _ _ P4))).
+  + apply (eq_cr (λ x, x ∈ A) (opair_eq_el _ _ _ _ P4)).
     apply P2.
-  + apply (eq_c (λ x, x ∈ B) (eq_s (opair_eq_er _ _ _ _ P4))).
+  + apply (eq_cr (λ x, x ∈ B) (opair_eq_er _ _ _ _ P4)).
     apply P3.
 Qed.
 

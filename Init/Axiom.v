@@ -30,10 +30,10 @@ Proof.
     destruct (P1 X ) as [P7 _].
     destruct (P7 P5) as [P8 | P8].
     - left. 
-      apply (eq_c _ P8).
+      apply (eq_cl _ P8).
       apply P6.
     - right.
-      apply (eq_c _ P8).
+      apply (eq_cl _ P8).
       apply P6.
   + intro P4.
     apply (P2 x).
