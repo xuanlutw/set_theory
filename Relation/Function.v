@@ -29,25 +29,21 @@ Notation   "A ∘ B"            := (comp B A).
 
 Definition fspace (A B: J) := {s: 𝒫(A ⨉ B)| fnm s A B}.
 
-(*Theorem surj_fnm: ∀ F, ∀ A, ∀ B, surj F A B → fnm F A B.*)
-(*Proof. *)
-  (*intros F A B [P1 [P2 P3]].*)
-  (*split.*)
-  (*+ apply P1.*)
-  (*+ split. *)
-    (*- apply P2.*)
-    (*- rewrite P3.*)
-      (*apply subset_refl.*)
-(*Qed.*)
-
-Lemma surj_i: ∀ F, fn F → surj F (dom(F)) (ran(F)).
+Lemma fnm_i: ∀ F, fn F → fnm F (dom(F)) (ran(F)).
 Proof.
   intros F P1.
-  split. split.
+  split.
   + apply P1.
   + split.
     - apply eq_r.
     - apply sub_r.
+Qed.
+
+Lemma surj_i: ∀ F, fn F → surj F (dom(F)) (ran(F)).
+Proof.
+  intros F P1.
+  split.
+  + apply (fnm_i _ P1).
   + apply eq_r.
 Qed.
 

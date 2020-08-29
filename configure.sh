@@ -7,6 +7,7 @@ echo '-R . zfc'     >> _CoqProject
 echo Init/*.v       >> _CoqProject
 echo Relation/Relation.v   >> _CoqProject
 echo Relation/Function.v   >> _CoqProject
+echo Relation/Utils.v      >> _CoqProject
 #echo axiom/*.v     >> _CoqProject
 #echo axiom/*.v     >> _CoqProject
 #echo operation/*.v >> _CoqProject

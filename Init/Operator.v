@@ -352,6 +352,13 @@ Proof.
   apply eq_r.
 Qed.
 
+Lemma sing_i2: ∀ A, ∀ B, A = B → A ∈ J{B}.
+Proof.
+  intros A B P1.
+  apply (eq_cl (λ x, A ∈ J{x}) P1).
+  apply sing_i.
+Qed.
+
 Lemma sing_e: ∀ A, ∀ B, B ∈ J{A} → A = B.
 Proof.
   intros A B P1.
