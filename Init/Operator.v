@@ -377,6 +377,20 @@ Proof.
   apply sing_e.
 Qed.
 
+Lemma sing_sub_i: ∀ A, ∀ B, A ∈ B → J{A} ⊆ B.
+Proof.
+  intros A B P1 x P2.
+  apply (eq_cl (λ x, x ∈ B) (sing_e _ _ P2)).
+  apply P1.
+Qed.
+
+Lemma sing_sub_e: ∀ A, ∀ B, J{A} ⊆ B → A ∈ B.
+Proof.
+  intros A B P1.
+  apply P1.
+  apply sing_i.
+Qed.
+
 Lemma sing_pair_eq1: ∀ A, ∀ B, ∀ C, J{A} = J{B, C} → A = B.
 Proof.
   intros A B C P1.
@@ -448,6 +462,14 @@ Proof.
     destruct (union2_e _ _ _ P1) as [P2 | P2].
     - apply (union2_ir _ _ _ P2).
     - apply (union2_il _ _ _ P2).
+Qed.
+
+Lemma union2_sub: ∀ A, ∀ B, ∀ C, A ⊆ C → B ⊆ C → A ∪ B ⊆ C.
+Proof.
+  intros A B C P1 P2 x P3.
+  destruct (union2_e _ _ _ P3) as [P4 | P4].
+  + apply (P1 _ P4).
+  + apply (P2 _ P4).
 Qed.
 
 Lemma union2_sub_absorb_l: ∀ A, ∀ B, A ⊆ B → A ∪ B = B.
@@ -530,6 +552,20 @@ Proof.
   intros A B.
   apply (eq_cl (λ x, x ⊆ B) (inter2_s B A)).
   apply inter2_sub_l.
+Qed.
+
+Lemma inter2_empty: ∀ A, ∀ B, (∀ x, x ∈ A → x ∉ B) → A ∩ B = ∅.
+Proof.
+  intros A B P1.
+  apply sub_a.
+  split.
+  + intros x P2.
+    destruct (inter2_e _ _ _ P2) as [P3 P4].
+    apply bot_e.
+    apply (P1 _ P3 P4).
+  + intros x P2.
+    apply bot_e.
+    apply (empty_i _ P2).
 Qed.
 
 Lemma sub_inter2: ∀ A, ∀ B, ∀ C, C ⊆ A → C ⊆ B → C ⊆ A ∩ B.

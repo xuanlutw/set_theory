@@ -1,5 +1,5 @@
 Require Import Init.Init.
-Require Import Relation.Relation.
+Require Import Relation.Relation_.
 Require Import Relation.Function.
 
 Definition id (A: J)      := {s: A ⨉ A| ∃ x, s = ⟨x, x⟩}.
@@ -148,7 +148,7 @@ Qed.
 (*----------------------------------------------------------------------------*)
 
 (* Single Pair Function *)
-Lemma sing_pair_is_fu: ∀ x, ∀ y, fn J{⟨x, y⟩}.
+Lemma sing_pair_is_fn: ∀ x, ∀ y, fn J{⟨x, y⟩}.
 Proof.
   intros x y.
   split.

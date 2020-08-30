@@ -37,3 +37,9 @@ Reserved Notation "F [ x ]" (at level 60).
 Reserved Notation "F ↾ A"   (at level 60, no associativity).
 Reserved Notation "F ⟦ A ⟧" (at level 60, no associativity).
 Reserved Notation "A ∘ B"   (at level 60, no associativity).
+
+Reserved Notation "S( x )"  (at level 60, no associativity).
+
+Reserved Notation "m +ₙ n" (at level 65, no associativity).
+Reserved Notation "m ×ₙ n" (at level 64, no associativity).
+Reserved Notation "m ^ₙ n" (at level 65, no associativity).

@@ -1,5 +1,5 @@
 Require Import Init.Init.
-Require Import Relation.Relation.
+Require Import Relation.Relation_.
 
 (* Function *)
 Definition sing_val (R: J) := ∀ a, ∀ b1, ∀ b2, ⟨a, b1⟩ ∈ R → ⟨a, b2⟩ ∈ R 
