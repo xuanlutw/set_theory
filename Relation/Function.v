@@ -184,6 +184,42 @@ Proof.
   + apply (eq_cr (λ x, ⟨y, x⟩ ∈ F) P5).
     apply (fval_i2 _ _ P1 P4).
 Qed. 
+
+Lemma fval_sub: ∀ F, ∀ G, ∀ x, fn F → fn G → F ⊆ G → x ∈ dom(F) → F[x] = G[x].
+Proof.
+  intros F G x P1 P2 P3 P4.
+  destruct (dom_e _ _ P4) as [y P5].
+  apply (eq_cl (λ y, y = G[x]) (fval_i _ _ _ P1 P5)).
+  apply (eq_cl (λ x, y = x) (fval_i _ _ _ P2 (P3 _ P5))).
+  apply eq_r.
+Qed.
+
+Lemma fn_eq: ∀ F, ∀ G, fn F → fn G → dom(F) = dom(G) 
+  → (∀ x, x ∈ dom(F) → F[x] = G[x]) → F = G.
+Proof.
+  intros F G [P1 P2] [P3 P4] P5 P6.
+  apply sub_a.
+  split.
+  + intros s P7.
+    destruct (P1 _ P7) as [x [y P8]].
+    apply (eq_cr (λ s, s ∈ G) P8).
+    pose (eq_cl (λ s, s ∈ F) P8 P7) as P9.
+    apply (eq_cr (λ y, ⟨x, y⟩ ∈ G) (fval_i _ _ _ (and_i P1 P2) P9)).
+    apply (eq_cr (λ y, ⟨x, y⟩ ∈ G) (P6 _ (dom_i2 _ _ _ P9))). 
+    apply (fval_i2 _ _ (and_i P3 P4)).
+    apply (eq_cl (λ y, x ∈ y) P5).
+    apply (dom_i2 _ _ _ P9).
+  + intros s P7.
+    destruct (P3 _ P7) as [x [y P8]].
+    apply (eq_cr (λ s, s ∈ F) P8).
+    pose (eq_cl (λ s, s ∈ G) P8 P7) as P9.
+    apply (eq_cr (λ y, ⟨x, y⟩ ∈ F) (fval_i _ _ _ (and_i P3 P4) P9)).
+    apply (eq_cl (λ y, ⟨x, y⟩ ∈ F) 
+      (P6 _ (eq_cr (λ y, x ∈ y) P5 (dom_i2 _ _ _ P9)))).
+    apply (fval_i2 _ _ (and_i P1 P2)).
+    apply (eq_cr (λ y, x ∈ y) P5).
+    apply (dom_i2 _ _ _ P9).
+Qed.
 (*----------------------------------------------------------------------------*)
 
 (* Restriction *)
@@ -206,6 +242,63 @@ Proof.
   + apply P2.
   + apply (eq_cr (λ x, x ∈ A) (opair_eq_el _ _ _ _ P3)).
     apply P4.
+Qed.
+
+Lemma restr_e2: ∀ s, ∀ F, ∀ A, s ∈ F↾A 
+  → ∃ x, ∃ y, ⟨x, y⟩ ∈ F ∧ s = ⟨x, y⟩ ∧x ∈ A.
+Proof.
+  intros s F A P1.
+  destruct (sub_e _ _ _ P1) as [_ P2].
+  apply P2.
+Qed.
+
+Lemma restr_rel: ∀ F, ∀ A, rel (F↾A).
+Proof.
+  intros F A r P1.
+  destruct (sub_e _ _ _ P1) as [_ [a [b [_ [P2 _]]]]].
+  exists a.
+  exists b.
+  apply P2.
+Qed.
+
+Lemma sub_restr_eq: ∀ F, ∀ G, ∀ R, fn F → fn G → F ⊆ G → R ⊆ dom(F) → F↾R = G↾R.
+Proof.
+  intros F G R P1 P2 P3 P4.
+  apply sub_a.
+  split.
+  + intros s P5.
+    destruct (restr_e2 _ _ _ P5) as [x [y [P6 [P7 P8]]]].
+    apply (eq_cr (λ s, s ∈ G↾R) P7).
+    apply (restr_i).
+    - apply (P3 _ P6).
+    - apply P8.
+  + intros s P5.
+    destruct (restr_e2 _ _ _ P5) as [x [y [P6 [P7 P8]]]].
+    apply (eq_cr (λ s, s ∈ F↾R) P7).
+    apply (restr_i).
+    - apply (eq_cr (λ y, ⟨x, y⟩ ∈ F) (fval_i _ _ _ P2 P6)). 
+      apply (eq_cl (λ y, ⟨x, y⟩ ∈ F) (fval_sub _ _ _ P1 P2 P3 (P4 _ P8))).
+      apply (fval_i2 _ _ P1 (P4 _ P8)). 
+    - apply P8.
+Qed.
+
+Lemma restr_over: ∀ F, ∀ R, rel F → dom(F) ⊆ R → F↾R = F.
+Proof.
+  intros F R P1 P2.
+  apply sub_a.
+  split.
+  + intros s P3.
+    destruct (restr_e2 _ _ _ P3) as [x [y [P4 [P5 P6]]]].
+    apply (eq_cr (λ x, x ∈ F) P5).
+    apply P4.
+  + intros s P3.
+    destruct (P1 _ P3) as [x [y P4]].
+    apply (eq_cr (λ x, x ∈ F↾R) P4).
+    apply restr_i.
+    - apply (eq_cl (λ x, x ∈ F) P4).
+      apply P3.
+    - pose (dom_i2 _ _ _ (eq_cl (λ x, x ∈ F) P4 P3)) as P5.
+      apply (P2 _ P5).
 Qed.
 (*----------------------------------------------------------------------------*)
 
@@ -885,6 +978,45 @@ Proof.
   apply (P1 s P3 r P4).
 Qed.
 
+Lemma rel_exten: ∀ F, ∀ x, ∀ y, rel F → rel (F ∪ J{⟨x, y⟩}).
+Proof.
+  intros F x y P1.
+  apply union2_rel.
+  + apply P1.
+  + intros s P2.
+    exists x.
+    exists y.
+    apply (eq_s (sing_e _ _ P2)).
+Qed.
+
+Lemma sing_val_exten: ∀ F, ∀ x, ∀ y, sing_val F → x ∉ dom(F)
+  → sing_val (F ∪ J{⟨x, y⟩}).
+Proof.
+  intros F x y P1 P2 xx y1 y2 P3 P4.
+  destruct (union2_e _ _ _ P3) as [P5 | P5].
+  - destruct (union2_e _ _ _ P4) as [P6 | P6].
+    * apply (P1 _ _ _ P5 P6).
+    * apply bot_e.
+      apply P2.
+      apply (eq_cr (λ x, x ∈ dom(F)) (opair_eq_el _ _ _ _ (sing_e _ _ P6))).
+      apply (dom_i2 _ _ _ P5).
+  - destruct (union2_e _ _ _ P4) as [P6 | P6].
+    * apply bot_e.
+      apply P2.
+      apply (eq_cr (λ x, x ∈ dom(F)) (opair_eq_el _ _ _ _ (sing_e _ _ P5))).
+      apply (dom_i2 _ _ _ P6).
+    * apply (eq_cl (λ x, x = y2) (opair_eq_er _ _ _ _ (sing_e _ _ P5))).
+      apply (opair_eq_er _ _ _ _ (sing_e _ _ P6)).
+Qed.
+
+Lemma fn_exten: ∀ F, ∀ x, ∀ y, fn F → x ∉ dom(F) → fn (F ∪ J{⟨x, y⟩}).
+Proof.
+  intros F x y [P1 P2] P3.
+  split.
+  + apply (rel_exten _ _ _ P1).
+  + apply (sing_val_exten _ _ _ P2 P3).
+Qed.
+
 Lemma union2_dom: ∀ F, ∀ G, dom(F ∪ G) = dom(F) ∪ dom(G).
 Proof.
   intros F G.
@@ -906,6 +1038,30 @@ Proof.
     - destruct (dom_e _ _ P2) as [f P3]. 
       exists f.
       apply (union2_ir _ _ _ P3).
+Qed.
+
+Lemma union_dom_e: ∀ H, ∀ x, x ∈ dom(∪H) → ∃ f, x ∈ dom(f) ∧ f ∈ H.
+Proof.
+  intros H x P1.
+  destruct (dom_e _ _ P1) as [y P2].
+  destruct (union_e _ _ P2) as [f [P3 P4]].
+  exists f.
+  split.
+  + apply (dom_i2 _ _ _ P4).
+  + apply P3.
+Qed.
+
+Lemma union_dom_i: ∀ H, ∀ f, ∀ x, x ∈ dom(f) → f ∈ H → x ∈ dom(∪H).
+Proof.
+  intros H f x P1 P2.
+  destruct (dom_e _ _ P1) as [y P3].
+  apply dom_i.
+  exists y.
+  apply union_i.
+  exists f.
+  split.
+  + apply P2.
+  + apply P3.
 Qed.
 
 Lemma union2_ran: ∀ F, ∀ G, ran(F ∪ G) = ran(F) ∪ ran(G).

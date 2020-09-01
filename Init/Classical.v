@@ -22,6 +22,33 @@ Section LEM.
     + apply (bot_e _ (P1 P2)).
   Qed.
 
+  Lemma imp_e: (P → Q) → ~P ∨ Q.
+  Proof.
+    intros P1.
+    destruct (LEM P) as [P2 | P2].
+    + right.
+      apply (P1 P2).
+    + left.
+      apply P2.
+  Qed.
+
+  Lemma nimp_e: ~(P → Q) → P ∧ ~Q.
+  Proof.
+    intros P1.
+    split.
+    + destruct (LEM P) as [P2 | P2].
+      - apply P2.
+      - apply bot_e.
+        apply P1.
+        intros P3.
+        apply bot_e.
+        apply (P2 P3).
+    + intros P2.
+      apply P1.
+      intros _.
+      apply P2.
+  Qed.
+    
   Lemma contraposition1: (P → Q) → (~Q → ~P).
   Proof.
     intros P1 P2 P3.
@@ -91,18 +118,18 @@ Section LEM.
   Qed.
 End LEM.
 
-Lemma not_ex_all_not: ∀ x, ∀ₚ P, ~(∃ x, P x) → (∀ x, ~(P x)).
+Lemma not_ex_all_not: ∀ₚ P, ~(∃ x, P x) → (∀ x, ~(P x)).
 Proof.
-  intros x P P1 A P2.
+  intros P P1 A P2.
   apply (P1 (ex_i P A P2)).
 Qed.
 
-Lemma not_all_ex_not: ∀ x, ∀ₚ P, ~(∀ x, P x) → (∃ x, ~(P x)).
+Lemma not_all_ex_not: ∀ₚ P, ~(∀ x, P x) → (∃ x, ~(P x)).
 Proof.
-  intros x P.
+  intros P.
   apply contraposition2.
   intros P1 A.
   apply nn_e.
-  apply (not_ex_all_not x _ P1 A).
+  apply (not_ex_all_not _ P1 A).
 Qed.
 

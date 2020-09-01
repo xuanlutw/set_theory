@@ -14,6 +14,7 @@ Reserved Notation "x ∉ y" (at level 65, no associativity).
 Reserved Notation "∃  A , P" (at level 200, right associativity, P at level 200).
 Reserved Notation "∀  A , P" (at level 200, right associativity, P at level 200).
 Reserved Notation "∀ₚ A , P" (at level 200, right associativity, P at level 200).
+Reserved Notation "∀ₚₚ A , P" (at level 200, right associativity, P at level 200).
 Reserved Notation "'λ' x , P" (at level 200, right associativity).
 
 Reserved Notation "x ⊆ y"         (at level 65, no associativity).
@@ -43,3 +44,8 @@ Reserved Notation "S( x )"  (at level 60, no associativity).
 Reserved Notation "m +ₙ n" (at level 65, no associativity).
 Reserved Notation "m ×ₙ n" (at level 64, no associativity).
 Reserved Notation "m ^ₙ n" (at level 65, no associativity).
+
+Reserved Notation " x <[ R ] y" (at level 65, right associativity).
+Reserved Notation " x ≮[ R ] y" (at level 65, right associativity).
+Reserved Notation " x ≤[ R ] y" (at level 65, right associativity).
+Reserved Notation " x ≰[ R ] y" (at level 65, right associativity).

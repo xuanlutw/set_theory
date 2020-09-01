@@ -193,6 +193,15 @@ Proof.
     apply (eq_cr (λ y, ⟨x, s⟩ = ⟨x, y⟩) (sing_e _ _ P1)).
     apply eq_r.
 Qed.
+
+Lemma sing_pair_fval: ∀ x, ∀ y, J{⟨x, y⟩}[x] = y.
+Proof.
+  intros x y.
+  apply eq_s.
+  apply fval_i.
+  + apply sing_pair_is_fn.
+  + apply sing_i.
+Qed.
 (*----------------------------------------------------------------------------*)
 
 (* Identify Function *)

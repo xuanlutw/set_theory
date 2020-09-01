@@ -212,9 +212,10 @@ Inductive ex (P: J → Prop): Prop :=
   | ex_i: forall x: J, P x → ex P.
 
 (*Notation "'exists' x , p" := (ex (fun x => p)) (at level 200, right associativity).*)
-Notation "∃  A , P" := (ex (fun A => P)).
-Notation "∀  A , P" := (forall A: J, P).
-Notation "∀ₚ A , P" := (forall A: (J → Prop), P).
+Notation "∃   A , P" := (ex (fun A => P)).
+Notation "∀   A , P" := (forall A: J, P).
+Notation "∀ₚ  A , P" := (forall A: (J → Prop), P).
+Notation "∀ₚₚ A , P" := (forall A: (J → J → Prop), P).
 Notation "'λ' x , P" := (fun x => P).
 
 Section Exist.

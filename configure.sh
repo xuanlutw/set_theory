@@ -6,10 +6,9 @@ echo '-arg -noinit' >  _CoqProject
 echo '-R . zfc'     >> _CoqProject
 echo Init/*.v       >> _CoqProject
 echo Relation/*.v   >> _CoqProject
-echo Nat/Inductive.v       >> _CoqProject
-echo Nat/Nature.v       >> _CoqProject
-echo Nat/Recursion.v       >> _CoqProject
-echo Nat/Nat_arith.v       >> _CoqProject
+echo Nat/*.v        >> _CoqProject
+echo Ordinal/Order.v        >> _CoqProject
+echo Ordinal/Transfinite.v        >> _CoqProject
 #echo int/*.v       >> _CoqProject
 #echo rat/*.v       >> _CoqProject
 #echo real/*.v      >> _CoqProject

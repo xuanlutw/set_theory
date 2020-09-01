@@ -4,3 +4,4 @@ Require Export Init.Classical.
 Require Export Init.Axiom.
 Require Export Init.Operator.
 Require Export Init.Axiom_infinity.
+Require Export Init.Axiom_replace.

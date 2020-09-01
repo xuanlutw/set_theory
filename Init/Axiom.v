@@ -2,17 +2,17 @@ Require Import Init.Logic.
 Require Import Init.Classical.
 
 (* Axiom of Extensionality *)
-Axiom ax_exten:  ∀ A, ∀ B, (∀ x, x ∈ A ↔ x ∈ B) → A = B.
+Axiom ax_exten:   ∀ A, ∀ B, (∀ x, x ∈ A ↔ x ∈ B) → A = B.
 (* Axiom of Empty Set *)
-Axiom ax_empty:  ∃ A, ∀ x, x ∉ A.
+Axiom ax_empty:   ∃ A, ∀ x, x ∉ A.
 (* Axiom of Pairing *)
-Axiom ax_pair:   ∀ A, ∀ B, ∃ C, ∀ x, x ∈ C ↔ (x = A ∨ x = B).
+Axiom ax_pair:    ∀ A, ∀ B, ∃ C, ∀ x, x ∈ C ↔ (x = A ∨ x = B).
 (* Axiom of Union *)
-Axiom ax_union:  ∀ A, ∃ B, ∀ x, x ∈ B ↔ (∃ a, a ∈ A ∧ x ∈ a).
+Axiom ax_union:   ∀ A, ∃ B, ∀ x, x ∈ B ↔ (∃ a, a ∈ A ∧ x ∈ a).
 (* Axiom of Power Set *)
-Axiom ax_power:  ∀ A, ∃ B, ∀ x, x ∈ B ↔ (∀ y, y ∈ x → y ∈ A). 
+Axiom ax_power:   ∀ A, ∃ B, ∀ x, x ∈ B ↔ (∀ y, y ∈ x → y ∈ A). 
 (* Axiom Schema of Subset *)
-Axiom ax_subset: ∀ₚ P, ∀ A, ∃ B, ∀ x, x ∈ B ↔ x ∈ A ∧ P x.
+Axiom ax_subset:  ∀ₚ P, ∀ A, ∃ B, ∀ x, x ∈ B ↔ x ∈ A ∧ P x.
 
 (* Some non axiom but useful theorem *)
 (* Existence of the Union of Two *)

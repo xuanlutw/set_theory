@@ -135,12 +135,12 @@ Proof.
   apply sub_a.
   split.
   + intros x P2. 
-    destruct (not_or_and (not_ex_all_not x _ P1 x)) as [P3 _].
+    destruct (not_or_and (not_ex_all_not _ P1 x)) as [P3 _].
     destruct (not_and_or P3) as [P4 | P4].
     - apply (bot_e _ (P4 P2)).
     - apply (nn_e P4). 
   + intros x P2.
-    destruct (not_or_and (not_ex_all_not x _ P1 x)) as [_ P3].
+    destruct (not_or_and (not_ex_all_not _ P1 x)) as [_ P3].
     destruct (not_and_or P3) as [P4 | P4].
     - apply (bot_e _ (P4 P2)).
     - apply (nn_e P4). 
@@ -223,7 +223,7 @@ Proof.
   apply contraposition2.
   intro P1.
   apply empty_unique.
-  apply (not_ex_all_not A).
+  apply not_ex_all_not.
   apply P1. 
 Qed.
 
@@ -279,6 +279,14 @@ Proof.
   intros A x P1.
   destruct (ex_outr (ax_union A) x) as [_ P2].
   apply (P2 P1).
+Qed.
+
+Lemma union_i2: ∀ A, ∀ x, x ∈ A → x ⊆ ∪A.
+Proof.
+  intros A x P1 s P2.
+  apply union_i.
+  exists x.
+  apply (and_i P1 P2).
 Qed.
 (*----------------------------------------------------------------------------*)
 
@@ -511,6 +519,20 @@ Proof.
   intros A.
   apply (eq_t (union2_s A ∅)).
   apply union2_empty_absorb_l.
+Qed.
+
+Lemma union2_sub_weak_l: ∀ A, ∀ B, ∀ C, C ⊆ A → C ⊆ (A ∪ B).
+Proof.
+  intros A B C P1 x P2.
+  apply union2_il.
+  apply (P1 _ P2).
+Qed.
+
+Lemma union2_sub_weak_r: ∀ A, ∀ B, ∀ C, C ⊆ B → C ⊆ (A ∪ B).
+Proof.
+  intros A B C P1 x P2.
+  apply union2_ir.
+  apply (P1 _ P2).
 Qed.
 (*----------------------------------------------------------------------------*)
 
