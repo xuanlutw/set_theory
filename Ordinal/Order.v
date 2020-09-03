@@ -2,9 +2,10 @@ Require Import Init.Init.
 Require Import Relation.Relation.
 Require Import Nat.Nat.
 
-Notation " x <[ R ] y" := (⟨x, y⟩ ∈ R).
-Notation " x ≮[ R ] y" := (⟨x, y⟩ ∉ R).
-Notation " x ≤[ R ] y" := (⟨x, y⟩ ∈ R ∨ x = y).
+Definition less (x y R: J) := (⟨x, y⟩ ∈ R).
+Notation " x <[ R ] y" := (less x y R).
+Notation " x ≮[ R ] y" := (~(less x y R)).
+Notation " x ≤[ R ] y" := ((x <[R] y) ∨ x = y).
 Notation " x ≰[ R ] y" := (~(x ≤[R] y)).
 
 Definition tricho (R A: J) := ∀ x, ∀ y, x ∈ A → y ∈ A 
@@ -24,6 +25,10 @@ Definition least_bound (R A: J)   := ∃ x, x ∈ A ∧ least R A x.
 Definition least_prop  (R A: J)   := ∀ S, S ⊆ A → S ≠ ∅ → least_bound R S.
 
 Definition wo (R A: J) := lo R A ∧ least_prop R A.
+
+Definition isom (R A S B: J) :=  ∃ f, bij f A B ∧ 
+  (∀ x, ∀ y, x ∈ A → y ∈ A → ⟨x, y⟩ ∈ R → ⟨f[x], f[y]⟩ ∈ S) ∧
+  (∀ x, ∀ y, x ∈ A → y ∈ A → ⟨f[x], f[y]⟩ ∈ S → ⟨x, y⟩ ∈ R).
 
 (* Trichotomy *)
 Lemma tricho_to_weak: ∀ R, ∀ A, tricho R A → tricho_weak R A.
@@ -493,3 +498,273 @@ Proof.
     - apply (eq_cl (λ x, x ∈ {x0: A| x0 ≤[R] t}) (sing_e _ _ P2)).
       apply (sub_i _ _ _ P0 (or_ir _ (eq_r _))).
 Qed.
+(*----------------------------------------------------------------------------*)
+
+(* Isomorphrism *)
+Lemma isom_r: ∀ R, ∀ A, isom R A R A.
+Proof.
+  intros R A.
+  exists (id A).
+  split.
+  + apply id_is_bij.
+  + split.
+    - intros x y P1 P2 P3.
+      apply (eq_cr (λ s, ⟨s, id A[y]⟩ ∈ R) (id_fval _ _ P1)).
+      apply (eq_cr (λ s, ⟨x, s⟩ ∈ R) (id_fval _ _ P2)).
+      apply P3.
+    - intros x y P1 P2 P3.
+      apply (eq_cl (λ s, ⟨s, y⟩ ∈ R) (id_fval _ _ P1)).
+      apply (eq_cl (λ s, ⟨id A[x], s⟩ ∈ R) (id_fval _ _ P2)).
+      apply P3.
+Qed.
+
+Lemma isom_s: ∀ R, ∀ A, ∀ S, ∀ B, isom R A S B → isom S B R A.
+Proof.
+  intros R A S B [f [P1 [P2 P3]]].
+  destruct (inv_bij _ _ _ P1) as [P4 _].
+  exists (inv f).
+  split.
+  + apply (inv_bij _ _ _ P1).
+  + split.
+    - intros x y P5 P6 P7.
+      apply P3.
+      * apply (fval_codom _ _ _ _ P4 P5).
+      * apply (fval_codom _ _ _ _ P4 P6).
+      * destruct (bij_e _ _ _ P1) as [_ P8].
+        destruct P1 as [_ [P1 _]].
+        pose (eq_cr (λ s, x ∈ s) P1 P5) as P9.
+        pose (eq_cr (λ s, y ∈ s) P1 P6) as P10.
+        apply (eq_cr (λ s, ⟨s, f[inv f[y]]⟩ ∈ S) (inv_fn_ex2 _ _ _ _ P8 P9)).
+        apply (eq_cr (λ s, ⟨x, s⟩ ∈ S) (inv_fn_ex2 _ _ _ _ P8 P10)).
+        apply P7.
+    - intros x y P5 P6 P7.
+      destruct (bij_e _ _ _ P1) as [_ P8].
+      destruct P1 as [_ [P1 _]].
+      pose (eq_cr (λ s, x ∈ s) P1 P5) as P9.
+      pose (eq_cr (λ s, y ∈ s) P1 P6) as P10.
+      apply (eq_cl (λ s, ⟨s, y⟩ ∈ S) (inv_fn_ex2 _ _ _ _ P8 P9)).
+      apply (eq_cl (λ s, ⟨f[inv f[x]], s⟩ ∈ S) (inv_fn_ex2 _ _ _ _ P8 P10)).
+      apply P2.
+      * apply (fval_codom _ _ _ _ P4 P5).
+      * apply (fval_codom _ _ _ _ P4 P6).
+      * apply P7.
+Qed.
+
+Lemma isom_t: ∀ R, ∀ A, ∀ S, ∀ B, ∀ T, ∀ C, isom R A S B → isom S B T C 
+  → isom R A T C.
+Proof.
+  intros R A S B T C [f [P1 [P2 P3]]] [g [P4 [P5 P6]]].
+  exists (g ∘ f).
+  split.
+  + apply (comp_bij _ _ _ _ _ P1 P4).
+  + split.
+    - intros x y Q1 Q2 Q3.
+      destruct P1 as [P1 _].
+      destruct P4 as [P4 _].
+      pose (comp_dom_fnm _ _ _ _ _ P1 P4) as Q4.
+      pose (eq_cr (λ s, x ∈ s) Q4 Q1) as Q5.
+      pose (eq_cr (λ s, y ∈ s) Q4 Q2) as Q6.
+      pose (fval_codom _ _ _ _ P1 Q1) as Q7.
+      pose (fval_codom _ _ _ _ P1 Q2) as Q8.
+      apply (eq_cl (λ s, ⟨s, (g ∘ f)[y]⟩ ∈ T)
+        (comp_fval _ _ _ (and_el P1) (and_el P4) Q5)).
+      apply (eq_cl (λ s, ⟨g[f[x]], s⟩ ∈ T)
+        (comp_fval _ _ _ (and_el P1) (and_el P4) Q6)).
+      apply (P5 _ _ Q7 Q8).
+      apply (P2 _ _ Q1 Q2 Q3).
+    - intros x y Q1 Q2 Q3.
+      destruct P1 as [P1 _].
+      destruct P4 as [P4 _].
+      pose (comp_dom_fnm _ _ _ _ _ P1 P4) as Q4.
+      pose (eq_cr (λ s, x ∈ s) Q4 Q1) as Q5.
+      pose (eq_cr (λ s, y ∈ s) Q4 Q2) as Q6.
+      pose (fval_codom _ _ _ _ P1 Q1) as Q7.
+      pose (fval_codom _ _ _ _ P1 Q2) as Q8.
+      apply (P3 _ _ Q1 Q2).
+      apply (P6 _ _ Q7 Q8).
+      apply (eq_cr (λ s, ⟨s, g[f[y]]⟩ ∈ T)
+        (comp_fval _ _ _ (and_el P1) (and_el P4) Q5)).
+      apply (eq_cr (λ s, ⟨(g ∘ f)[x], s⟩ ∈ T)
+        (comp_fval _ _ _ (and_el P1) (and_el P4) Q6)).
+      apply Q3.
+Qed.
+(* Skip 7F *)
+
+Lemma isom_r_irrefl: ∀ R, ∀ A, ∀ S, ∀ B, r_irrefl R A → isom R A S B 
+  → r_irrefl S B.
+Proof.
+  intros R A S B P1 [f [P2 [P3 P4]]] x P5 P6.
+  assert ((inv f)[x] ∈ A) as Q1.
+  { destruct P2 as [[Q1 [Q2 _]] [Q3 Q4]].
+    apply (eq_cl (λ s, (inv f)[x] ∈ s) Q2).
+    apply (eq_cl (λ s, (inv f)[x] ∈ s) (inv_ran f)).
+    apply fval_ran.
+    + apply inv_fn.
+      apply Q4.
+    + apply (eq_cr (λ s, x ∈ s) (inv_dom f)).
+      apply (eq_cr (λ s, x ∈ s) Q3).
+      apply P5. }
+  destruct (bij_e _ _ _ P2) as [_ P7].
+  destruct P2 as [_ [P2 _]].
+  pose (eq_cr (λ s, x ∈ s) P2 P5) as P8.
+  pose (eq_cr (λ s, ⟨s, s⟩ ∈ S) (inv_fn_ex2 _ _ _ _ P7 P8) P6) as P9.
+  apply (P1 ((inv f)[x])).
+  + apply Q1.
+  + apply (P4 _ _ Q1 Q1).
+    apply P9.
+Qed.
+
+Lemma isom_r_trans: ∀ R, ∀ A, ∀ S, ∀ B, r_trans R A → isom R A S B 
+  → r_trans S B.
+Proof.
+  intros R A S B P1 P2 x y z Q1 Q2 Q3 P3 P4.
+  destruct (isom_s _ _ _ _ P2) as [f [P5 [P6 P7]]].
+  pose (P6 _ _ Q1 Q2 P3) as P8.
+  pose (P6 _ _ Q2 Q3 P4) as P9.
+  destruct P5 as [P5 _].
+  pose (P1 _ _ _ (fval_codom _ _ _ _ P5 Q1) (fval_codom _ _ _ _ P5 Q2)
+    (fval_codom _ _ _ _ P5 Q3) P8 P9) as P10.
+  apply (P7 _ _ Q1 Q3 P10).
+Qed.
+
+Lemma isom_tricho: ∀ R, ∀ A, ∀ S, ∀ B, tricho R A → isom R A S B → 
+  tricho S B.
+Proof.
+  intros R A S B P1 P2 x y Q1 Q2.
+  destruct (isom_s _ _ _ _ P2) as [f [[P5 [P8 P9]] [P6 P7]]].
+  destruct (P1 _ _ (fval_codom _ _ _ _ P5 Q1) (fval_codom _ _ _ _ P5 Q2))
+    as [[S1 [S2 S3]]|[[S1 [S2 S3]]|[S1 [S2 S3]]]].
+  + left.
+    repeat split.
+    - apply (P7 _ _ Q1 Q2 S1).
+    - intros P10.
+      apply S2.
+      apply (eq_cr (λ x, f[x] = f[y]) P10).
+      apply eq_r.
+    - intros P10.
+      apply S3.
+      apply (P6 _ _ Q2 Q1 P10).
+  + right. left.
+    repeat split.
+    - intros P10.
+      apply S1.
+      apply (P6 _ _ Q1 Q2 P10).
+    - destruct P5 as [P5 [P10 _]].
+      apply (P9 _ _ (f[x])).
+      * apply (fval_i2 _ _ P5).
+        apply (eq_cr (λ s, x ∈ s) P10).
+        apply Q1.
+      * apply (eq_cr (λ s, ⟨y, s⟩ ∈ f) S2).
+        apply (fval_i2 _ _ P5).
+        apply (eq_cr (λ s, y ∈ s) P10).
+        apply Q2.
+    - intros P11.
+      apply bot_e.
+      apply S3.
+      apply (P6 _ _ Q2 Q1 P11).
+  + right. right.
+    repeat split.
+    - intros P10.
+      apply S1.
+      apply (P6 _ _ Q1 Q2 P10).
+    - intros P10.
+      apply S2.
+      apply (eq_cr (λ x, f[x] = f[y]) P10).
+      apply eq_r.
+    - apply (P7 _ _ Q2 Q1 S3).
+Qed.
+
+Lemma isom_least_prop: ∀ R, ∀ A, ∀ S, ∀ B, least_prop R A → isom R A S B 
+  → least_prop S B.
+Proof.
+  intros R A S B P1 P2 C P3 P4.
+  destruct P2 as [f [[[P5 [P6 _]] [P7 P8]] [P9 P10]]].
+  assert (inj f A B) as P11.
+  { repeat split.
+    + apply (and_el P5).
+    + apply (and_er P5).
+    + apply P6.
+    + apply (eq_cr (λ x, x ⊆ B) P7).
+      apply sub_r.
+    + apply P8. }
+  assert ((inv f)⟦C⟧ ⊆ A) as Q1.
+  { apply (eq_cl (λ x, (inv f)⟦C⟧ ⊆ x) P6).
+    apply (inv_image_ran). }
+  assert ((inv f)⟦C⟧ ≠ ∅) as Q2.
+  { destruct (nempty_ex _ P4) as [x Q2].
+    apply ex_nempty.
+    exists ((inv f)[x]).
+    apply image_i.
+    exists x.
+    split.
+    + apply fval_i2.
+      - apply inv_fn.
+        apply P8.
+      - apply (eq_cr (λ y, x ∈ y) (inv_dom f)).
+        apply (eq_cr (λ y, x ∈ y) P7).
+        apply (P3 _ Q2).
+    + apply Q2. }
+  destruct (P1 _ Q1 Q2) as [x [Q3 Q4]].
+  exists (f[x]).
+  split.
+  + destruct (image_e _ _ _ Q3) as [y [Q5 Q6]].
+    apply (eq_cl (λ x, x ∈ C) (fval_i _ _ _ P5 (inv_e _ _ _ Q5))).
+    apply Q6.
+  + intros y P12.
+    assert ((inv f)[y] ∈ (inv f)⟦C⟧) as P13.
+    { apply image_i2.
+      + apply inv_fn.
+        apply P8.
+      + apply (eq_cr (λ x, y ∈ x) (inv_dom f)).
+        apply (eq_cr (λ x, y ∈ x) P7).
+        apply (P3 _ P12).
+      + apply P12. }
+    destruct (Q4 _ P13) as [Q5 | Q5].
+    - left.
+      assert (y ∈ ran(f)) as Q6.
+      { apply (eq_cr (λ x, y ∈ x) P7).
+        apply (P3 _ P12). }
+      apply (eq_cl (λ y, f[x] <[S] y) (inv_fn_ex2 _ _ _ _ P11 Q6)).
+      apply (P9).
+      * apply (eq_cl (λ y, x ∈ y) P6).
+        destruct (image_e _ _ _ Q3) as [s [Q8 _]].
+        apply (dom_i2 _ _ _ (inv_e _ _ _ Q8)).
+      * apply (eq_cl (λ x, (inv f)[y] ∈ x) P6).
+        apply (eq_cl (λ x, (inv f)[y] ∈ x) (inv_ran f)).
+        apply fval_ran.
+        ++apply inv_fn.
+          apply P8.
+        ++apply (eq_cr (λ x, y ∈ x) (inv_dom f)).
+          apply Q6.
+      * apply Q5.
+    - right.
+      apply (eq_cr (λ x, f[x] = y) Q5).
+      apply (inv_fn_ex2 _ _ _ _ P11).
+      apply (eq_cr (λ x, y ∈ x) P7).
+      apply (P3 _ P12).
+Qed.
+
+Lemma isom_po: ∀ R, ∀ A, ∀ S, ∀ B, po R A → isom R A S B → po S B.
+Proof.
+  intros R A S B [P1 P2] P3.
+  split.
+  + apply (isom_r_trans _ _ _ _ P1 P3).
+  + apply (isom_r_irrefl _ _ _ _ P2 P3).
+Qed.
+
+Lemma isom_lo: ∀ R, ∀ A, ∀ S, ∀ B, lo R A → isom R A S B → lo S B.
+Proof.
+  intros R A S B [P1 P2] P3.
+  split.
+  + apply (isom_r_trans _ _ _ _ P1 P3).
+  + apply (isom_tricho _ _ _ _ P2 P3).
+Qed.
+
+Lemma isom_wo: ∀ R, ∀ A, ∀ S, ∀ B, wo R A → isom R A S B → wo S B.
+Proof.
+  intros R A S B [P1 P2] P3.
+  split.
+  + apply (isom_lo _ _ _ _ P1 P3).
+  + apply (isom_least_prop _ _ _ _ P2 P3).
+Qed.
+(*----------------------------------------------------------------------------*)

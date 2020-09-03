@@ -782,6 +782,16 @@ Proof.
     apply (and_i P3 P5).
 Qed.
 
+Lemma comp_dom_fnm: ∀ F, ∀ G, ∀ A, ∀ B, ∀ C, fnm F A B → fnm G B C 
+  → dom (G ∘ F) = A.
+Proof.
+  intros F G A B C [_ [P1 P2]] [_ [P3 _]].
+  apply (eq_cl (λ x, dom(G ∘ F) = x) P1).
+  apply comp_coin_dom_weak.
+  apply (eq_cr (λ x, ran(F) ⊆ x) P3).
+  apply P2.
+Qed.
+  
 Lemma comp_dom_e: ∀ F, ∀ G, ∀ x, fn F → fn G → x ∈ dom(G ∘ F) → F[x] ∈ dom(G).
 Proof.
   intros F G x P1 P2 P3.

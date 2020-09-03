@@ -6,9 +6,12 @@ Require Import Nat.Recursion.
 
 (*Require dpdgraph.dpdgraph.*)
 
-Notation "'〇ₙ'" := ∅.
-Notation "'一ₙ'" := (S(〇ₙ)).
-Notation "'二ₙ'" := (S(一ₙ)).
+Definition nat0 := (∅).
+Definition nat1 := (S(nat0)).
+Definition nat2 := (S(nat1)).
+Notation "'〇ₙ'" := (nat0).
+Notation "'一ₙ'" := (nat1).
+Notation "'二ₙ'" := (nat2).
 
 Notation σ := {x: ω ⨉ ω| ∃ y, x = ⟨y, S(y)⟩}.
 
