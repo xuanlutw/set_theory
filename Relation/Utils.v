@@ -225,6 +225,19 @@ Proof.
   + apply P3.
 Qed.
 
+Lemma id_e2: ∀ A, ∀ x, ∀ y, ⟨x, y⟩ ∈ id A → x = y ∧ x ∈ A ∧ y ∈ A.
+Proof.
+  intros A x y P1.
+  destruct (id_e _ _ P1) as [a [P2 P3]].
+  repeat split.
+  + apply (eq_cr (λ y, x = y) (opair_eq_er _ _ _ _ P3)).
+    apply (opair_eq_el _ _ _ _ P3).
+  + apply (eq_cr (λ x, x ∈ A) (opair_eq_el _ _ _ _ P3)).
+    apply P2.
+  + apply (eq_cr (λ y, y ∈ A) (opair_eq_er _ _ _ _ P3)).
+    apply P2.
+Qed.
+
 Lemma id_is_rel: ∀ A, rel (id A).
 Proof.
   intros A x P1.
@@ -355,6 +368,23 @@ Proof.
     apply (eq_cr (λ x, x ∈ id A) P2).
     apply (eq_cr (λ x, x ∈ id A) (opair_eq_swap _ _ _ _ P5)).
     apply (id_i _ _ P4).
+Qed.
+
+Lemma id_image: ∀ A, (id A)⟦A⟧ = A.
+Proof.
+  intros A.
+  apply sub_a.
+  split.
+  intros y P1.
+  + destruct (image_e _ _ _ P1) as [x [P2 P3]].
+    destruct (id_e2 _ _ _ P2) as [_ [_ P4]].
+    apply P4.
+  + intros x P1.
+    apply image_i.
+    exists x.
+    split.
+    - apply (id_i _ _ P1).
+    - apply P1.
 Qed.
 (*----------------------------------------------------------------------------*)
     

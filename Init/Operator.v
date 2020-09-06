@@ -126,6 +126,31 @@ Proof.
 Qed.
 (*----------------------------------------------------------------------------*)
 
+(* Russel *)
+Lemma no_universe: ~(∃ A, ∀ x, x ∈ A).
+Proof.
+  intros [A P1].
+  pose ({x: A| x ∉ x}) as R.
+  assert (R ∉ R) as P2.
+  { intros P2.
+    destruct (sub_e _ _ _ P2) as [_ P3].
+    apply bot_e.
+    apply (P3 P2). }
+  assert (R ∈ R) as P3.
+  { apply sub_i.
+    + apply P1.
+    + apply P2. }
+  apply bot_e.
+  apply (P2 P3).
+Qed.
+
+Lemma ex_extra: ∀ A, ∃ x, x ∉ A.
+Proof.
+  intros A.
+  apply not_all_ex_not.
+  apply (@not_ex_all_not (λ A, ∀ x, x ∈ A) no_universe).
+Qed.
+
 (* Non Equality *)
 Lemma neq_e: ∀ A, ∀ B, A ≠ B → ∃ x, (x ∈ A ∧ x ∉  B) ∨ (x ∈ B ∧ x ∉  A).
 Proof.
@@ -457,6 +482,18 @@ Proof.
   apply P1.
 Qed.
 
+Lemma union2_en: ∀ A, ∀ B, ∀ x, x ∉ A ∪ B → x ∉ A ∧ x ∉ B.
+Proof.
+  intros A B x P1.
+  split.
+  + intros P2.
+    apply P1.
+    apply (union2_il _ _ _ P2).
+  + intros P2.
+    apply P1.
+    apply (union2_ir _ _ _ P2).
+Qed.
+
 Lemma union2_s: ∀ A, ∀ B, A ∪ B = B ∪ A.
 Proof.
   intros A B.
@@ -574,6 +611,27 @@ Proof.
   intros A B.
   apply (eq_cl (λ x, x ⊆ B) (inter2_s B A)).
   apply inter2_sub_l.
+Qed.
+
+Lemma inter2_absorb_l: ∀ A, ∀ B, A ⊆ B → A ∩ B = A.
+Proof.
+  intros A B P1.
+  apply sub_a.
+  split.
+  + intros x P2.
+    destruct (inter2_e _ _ _ P2) as [P3 _].
+    apply P3.
+  + intros x P2.
+    apply inter2_i.
+    - apply P2.
+    - apply (P1 _ P2).
+Qed.
+
+Lemma inter2_absorb_r: ∀ A, ∀ B, B ⊆ A → A ∩ B = B.
+Proof.
+  intros A B P1.
+  apply (eq_cr (λ x, x = B) (inter2_s _ _)).
+  apply (inter2_absorb_l _ _ P1).
 Qed.
 
 Lemma inter2_empty: ∀ A, ∀ B, (∀ x, x ∈ A → x ∉ B) → A ∩ B = ∅.
@@ -697,6 +755,17 @@ Proof.
   apply P2.
 Qed.
 
+Lemma compl_sub_reverse: ∀ A, ∀ B1, ∀ B2, B1 ⊆ B2 → A \ B2 ⊆ A \ B1.
+Proof.
+  intros A B1 B2 P1 x P2.
+  destruct (compl_e _ _ _ P2) as [P3 P4].
+  apply compl_i.
+  + apply P3.
+  + intros P5.
+    apply P4.
+    apply (P1 _ P5).
+Qed.
+
 Lemma compl_psub_ex: ∀ A, ∀ B, A ⊂ B → ∃ x, x ∈ B \ A.
 Proof.
   intros A B [P1 P2].
@@ -712,6 +781,16 @@ Proof.
   intros A B P1.
   apply ex_nempty.
   apply (compl_psub_ex _ _ P1).
+Qed.
+
+Lemma compl_empty: ∀ A, ∀ B, A \ B = ∅ → A ⊆ B.
+Proof.
+  intros A B P1 x P2.
+  apply nn_e.
+  intros P3.
+  apply (empty_i x).
+  apply (eq_cl (λ s, x ∈ s) P1).
+  apply (compl_i _ _ _ P2 P3).
 Qed.
 (*----------------------------------------------------------------------------*)
 
@@ -843,5 +922,15 @@ Proof.
   intros A B x y P1.
   destruct (cp_e2 _ _ _ _ P1) as [P2 P3]. 
   apply (cp_i _ _ _ _ P3 P2).
+Qed.
+
+Lemma cp_sub: ∀ A, ∀ B, ∀ C, ∀ D, A ⊆ C → B ⊆ D → A ⨉ B ⊆ C ⨉ D.
+Proof.
+  intros A B C D P1 P2 r P3.
+  destruct (cp_e _ _ _ P3) as [x [y [P4 [P5 P6]]]].
+  apply (eq_cr (λ r, r ∈ C ⨉ D) P6).
+  apply cp_i.
+  + apply (P1 _ P4).
+  + apply (P2 _ P5).
 Qed.
 (*----------------------------------------------------------------------------*)

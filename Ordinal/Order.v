@@ -141,6 +141,12 @@ Proof.
   apply (tricho_to_weak _ _ (lo_tricho _ _ P1)).
 Qed.
 
+Lemma lo_sandwich: ∀ R, ∀ A, ∀ x, ∀ y, lo R A → x ∈ A → y ∈ A → x ≤[R] y 
+  → y ≤[R] x → x = y.
+  intros R A x y P1.
+  apply (po_sandwich _ _ _ _ (lo_is_po _ _ P1)).
+Qed.
+
 Lemma lo_neq_e: ∀ R, ∀ A, ∀ x, ∀ y, lo R A → x ∈ A → y ∈ A → x ≠ y 
   → (x <[R] y) ∨ (y <[R] x).
 Proof.
@@ -282,6 +288,12 @@ Proof.
   apply (wo_is_lo _ _ P1).
 Qed.
 
+Lemma wo_sandwich: ∀ R, ∀ A, ∀ x, ∀ y, wo R A → x ∈ A → y ∈ A → x ≤[R] y 
+  → y ≤[R] x → x = y.
+  intros R A x y P1.
+  apply (lo_sandwich _ _ _ _ (wo_is_lo _ _ P1)).
+Qed.
+
 Lemma wo_neq_e: ∀ R, ∀ A, ∀ x, ∀ y, wo R A → x ∈ A → y ∈ A → x ≠ y 
   → (x <[R] y) ∨ (y <[R] x).
 Proof.
@@ -386,6 +398,101 @@ Proof.
     apply (sub_i _ _ _ P9 P10).
 Qed.
 (*----------------------------------------------------------------------------*)
+
+(* Relation exten *)
+
+Lemma rel_eq1: ∀ R1, ∀ R2, ∀ A, ∀ x, ∀ y, R1 ∩ (A ⨉ A) = R2 ∩ (A ⨉ A) → x ∈ A 
+  → y ∈ A → x <[R1] y → x <[R2] y.
+Proof.
+  intros R1 R2 A x y P1 P2 P3 P4.
+  assert (⟨x, y⟩ ∈ (R1 ∩ (A ⨉ A))) as P5.
+  { apply inter2_i.
+    + apply P4.
+    + apply (cp_i _ _ _ _ P2 P3). }
+  pose (eq_cl (λ s, ⟨x, y⟩ ∈ s) P1 P5) as P6.
+  destruct (inter2_e _ _ _ P6) as [P7 _].
+  apply P7.
+Qed.
+
+Lemma rel_eq2: ∀ R1, ∀ R2, ∀ A, ∀ x, ∀ y, R1 ∩ (A ⨉ A) = R2 ∩ (A ⨉ A) → x ∈ A
+  → y ∈ A → x ≮[R1] y → x ≮[R2] y.
+Proof.
+  intros R1 R2 A x y P1 P2 P3 P4 P5.
+  apply P4.
+  apply (rel_eq1 _ _ _ _ _ (eq_s P1) P2 P3 P5).
+Qed.
+
+Lemma rel_eq3: ∀ R1, ∀ R2, ∀ A, ∀ x, ∀ y, R1 ∩ (A ⨉ A) = R2 ∩ (A ⨉ A) → x ∈ A
+  → y ∈ A → x ≤[R1] y → x ≤[R2] y.
+Proof.
+  intros R1 R2 A x y P1 P2 P3 [P4 | P4].
+  + left.
+    apply (rel_eq1 _ _ _ _ _ P1 P2 P3 P4).
+  + right.
+    apply P4.
+Qed.
+
+Lemma trans_rel_exten: ∀ R1, ∀ R2, ∀ A, R1 ∩ (A ⨉ A) = R2 ∩ (A ⨉ A) 
+  → r_trans R1 A → r_trans R2 A.
+Proof.
+  intros R1 R2 A P1 P2 x y z P3 P4 P5 P6 P7.
+  apply (rel_eq1 _ _ _ _ _ P1 P3 P5).
+  apply (P2 _ _ _ P3 P4 P5).
+  + apply (rel_eq1 _ _ _ _ _ (eq_s P1) P3 P4 P6).
+  + apply (rel_eq1 _ _ _ _ _ (eq_s P1) P4 P5 P7).
+Qed.
+
+Lemma tricho_rel_exten: ∀ R1, ∀ R2, ∀ A, R1 ∩ (A ⨉ A) = R2 ∩ (A ⨉ A)
+  → tricho R1 A → tricho R2 A.
+Proof.
+  intros R1 R2 A P1 P2 x y P3 P4.
+  destruct (P2 _ _ P3 P4) as [[P5 [P6 P7]] | [[P5 [P6 P7]] | [P5 [P6 P7]]]].
+  + left.
+    repeat split.
+    - apply (rel_eq1 _ _ _ _ _ P1 P3 P4 P5).
+    - apply P6.
+    - apply (rel_eq2 _ _ _ _ _ P1 P4 P3 P7).
+  + right. left.
+    repeat split.
+    - apply (rel_eq2 _ _ _ _ _ P1 P3 P4 P5).
+    - apply P6.
+    - apply (rel_eq2 _ _ _ _ _ P1 P4 P3 P7).
+  + right. right.
+    repeat split.
+    - apply (rel_eq2 _ _ _ _ _ P1 P3 P4 P5).
+    - apply P6.
+    - apply (rel_eq1 _ _ _ _ _ P1 P4 P3 P7).
+Qed.
+
+Lemma least_prop_rel_exten: ∀ R1, ∀ R2, ∀ A, R1 ∩ (A ⨉ A) = R2 ∩ (A ⨉ A)
+  → least_prop R1 A → least_prop R2 A.
+Proof.
+  intros R1 R2 A P1 P2 A' P3 P4.
+  destruct (P2 _ P3 P4) as [x [P5 P6]].
+  exists x.
+  split.
+  + apply P5.
+  + intros x' P7.
+    apply (rel_eq3 _ _ _ _ _ P1 (P3 _ P5) (P3 _ P7) (P6 _ P7)).
+Qed.
+    
+Lemma lo_rel_exten: ∀ R1, ∀ R2, ∀ A, R1 ∩ (A ⨉ A) = R2 ∩ (A ⨉ A) → lo R1 A
+  → lo R2 A.
+Proof.
+  intros R1 R2 A P1 [P2 P3].
+  split.
+  + apply (trans_rel_exten _ _ _ P1 P2).
+  + apply (tricho_rel_exten _ _ _ P1 P3).
+Qed.
+
+Lemma wo_rel_exten: ∀ R1, ∀ R2, ∀ A, R1 ∩ (A ⨉ A) = R2 ∩ (A ⨉ A) → wo R1 A
+  → wo R2 A.
+Proof.
+  intros R1 R2 A P1 [P2 P3].
+  split.
+  + apply (lo_rel_exten _ _ _ P1 P2).
+  + apply (least_prop_rel_exten _ _ _ P1 P3).
+Qed.
 
 (* Subset *)
 Lemma sub_r_irrefl: ∀ R, ∀ A, ∀ B, r_irrefl R A → B ⊆ A → r_irrefl R B.

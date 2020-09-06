@@ -133,3 +133,16 @@ Proof.
   apply (not_ex_all_not _ P1 A).
 Qed.
 
+Lemma all_not_not_ex: ∀ₚ P, (∀ x, ~(P x)) → ~(∃ x, P x).
+Proof.
+  intros P P1 [x P2].
+  apply (P1 x).
+  apply P2.
+Qed.
+
+Lemma ex_not_not_all: ∀ₚ P, (∃ x, ~(P x)) → ~(∀ x, P x).
+Proof.
+  intros P [x P1] P2.
+  apply P1.
+  apply P2.
+Qed.

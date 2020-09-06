@@ -68,6 +68,21 @@ Proof.
     - apply P2.
     - apply P3.
 Qed.
+
+Lemma bij_i2: ∀ F, ∀ A, ∀ B, fn F → dom(F) = A → ran(F) = B → sing_rot F
+  → bij F A B.
+Proof.
+  intros F A B P1 P2 P3 P4.
+  split. split.
+  + apply P1.
+  + split.
+    - apply P2.
+    - apply (eq_cr (λ x, x ⊆ B) P3).
+      apply sub_r.
+  + split.
+    - apply P3.
+    - apply P4.
+Qed.
 (*----------------------------------------------------------------------------*)
 
 (* Function Value *)
@@ -252,6 +267,16 @@ Proof.
   apply P2.
 Qed.
 
+Lemma restr_sub: ∀ F, ∀ A, ∀ B, A ⊆ B → F↾A ⊆ F↾B.
+Proof.
+  intros F A B P1 s P2.
+  destruct (restr_e2 _ _ _ P2) as [x [y [P3 [P4 P5]]]].
+  apply (eq_cr (λ x, x ∈ F↾B) P4).
+  apply restr_i.
+  + apply P3.
+  + apply (P1 _ P5).
+Qed.
+
 Lemma restr_rel: ∀ F, ∀ A, rel (F↾A).
 Proof.
   intros F A r P1.
@@ -259,6 +284,51 @@ Proof.
   exists a.
   exists b.
   apply P2.
+Qed.
+
+Lemma restr_sing_val: ∀ F, ∀ A, sing_val F → sing_val (F↾A).
+Proof.
+  intros F A P1 x y1 y2 P2 P3.
+  destruct (restr_e _ _ _ _ P2) as [P4 _].
+  destruct (restr_e _ _ _ _ P3) as [P5 _].
+  apply (P1 _ _ _ P4 P5).
+Qed.
+
+Lemma restr_sing_rot: ∀ F, ∀ A, sing_rot F → sing_rot (F↾A).
+Proof.
+  intros F A P1 x y1 y2 P2 P3.
+  destruct (restr_e _ _ _ _ P2) as [P4 _].
+  destruct (restr_e _ _ _ _ P3) as [P5 _].
+  apply (P1 _ _ _ P4 P5).
+Qed.
+
+Lemma restr_fn: ∀ F, ∀ A, fn F → fn (F↾A).
+Proof.
+  intros F A [_ P1].
+  split.
+  + apply restr_rel.
+  + apply (restr_sing_val _ _ P1).
+Qed.
+
+Lemma restr_dom: ∀ F, ∀ A, dom(F↾A) = dom(F) ∩ A.
+Proof.
+  intros F A.
+  apply sub_a.
+  split.
+  + intros x P1.
+    destruct (dom_e _ _ P1) as [y P2].
+    destruct (restr_e _ _ _ _ P2) as [P3 P4].
+    apply inter2_i.
+    - apply (dom_i2 _ _ _ P3).
+    - apply P4.
+  + intros x P1.
+    destruct (inter2_e _ _ _ P1) as [P2 P3].
+    destruct (dom_e _ _ P2) as [y P4].
+    apply dom_i.
+    exists y.
+    apply restr_i.
+    - apply P4.
+    - apply P3.
 Qed.
 
 Lemma sub_restr_eq: ∀ F, ∀ G, ∀ R, fn F → fn G → F ⊆ G → R ⊆ dom(F) → F↾R = G↾R.
@@ -330,6 +400,17 @@ Proof.
   split.
   + apply P3.
   + apply P4.
+Qed.
+
+Lemma image_sub: ∀ F, ∀ A, ∀ B, A ⊆ B → F⟦A⟧ ⊆ F⟦B⟧.
+Proof.
+  intros F A B P1 y P2.
+  destruct (image_e _ _ _ P2) as [x [P3 P4]].
+  apply image_i.
+  exists x.
+  split.
+  + apply P3.
+  + apply (P1 _ P4).
 Qed.
 
 (* 3K *)
@@ -419,6 +500,31 @@ Proof.
     - apply (dom_i2 _ _ _ P2).
 Qed.
 
+Lemma image_sub_dom_eq: ∀ F, ∀ G, ∀ A, fn G → F ⊆ G → A ⊆ dom(F) 
+  → F⟦A⟧ = G⟦A⟧.
+Proof.
+  intros F G A P2 P3 P4.
+  apply sub_a.
+  split.
+  + intros y P5.
+    destruct (image_e _ _ _ P5) as [x [P6 P7]].
+    apply image_i.
+    exists x.
+    split.
+    - apply (P3 _ P6).
+    - apply P7.
+  + intros y P5.
+    destruct (image_e _ _ _ P5) as [x [P6 P7]].
+    apply image_i.
+    exists x.
+    split.
+    - destruct (dom_e _ _ (P4 _ P7)) as [y' P8].
+      destruct P2 as [_ P2].
+      apply (eq_cr (λ y, ⟨x, y⟩ ∈ F) (P2 _ _ _ P6 (P3 _ P8))).
+      apply P8.
+    - apply P7.
+Qed.
+    
 Lemma image_surj: ∀ F, ∀ A, ∀ B, surj F A B → F⟦A⟧ = B.
 Proof.
   intros F A B [[_ [P1 _]] P2].

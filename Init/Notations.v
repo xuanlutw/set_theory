@@ -52,4 +52,4 @@ Reserved Notation " x ≰[ R ] y" (at level 65, right associativity).
 
 Reserved Notation "E( R , A )"  (at level 55, no associativity).
 Reserved Notation "EI( R , A )"  (at level 55, no associativity).
-Reserved Notation "ER( R , A )"  (at level 55, no associativity).
+Reserved Notation "ER( R )"  (at level 55, no associativity).

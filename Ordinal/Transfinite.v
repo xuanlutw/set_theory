@@ -31,6 +31,46 @@ Proof.
   apply P4.
 Qed.
 
+Lemma seg_sub: ∀ R, ∀ A, ∀ t, t ∈ A → seg R A t ⊆ A.
+Proof.
+  intros R A t P1 x P2.
+  apply (seg_e1 _ _ _ _ P1 P2).
+Qed.
+
+Lemma seg_seg: ∀ R, ∀ A, ∀ t1, ∀ t2, r_trans R A → t1 ∈ A → t2 ∈ A → t1 <[R] t2 
+  → seg R A t1 = seg R (seg R A t2) t1.
+Proof.
+  intros R A t1 t2 P0 P1 P2 P3.
+  apply sub_a.
+  split.
+  + intros x P4.
+    pose (seg_e1 _ _ _ _ P1 P4) as P5.
+    pose (seg_e2 _ _ _ _ P1 P4) as P6.
+    apply seg_i.
+    - apply seg_i.
+      * apply P5.
+      * apply (l_l_t _ _ _ _ _ P0 P5 P1 P2 P6 P3).
+    - apply P6.
+  + intros x P4.
+    pose (seg_i _ _ _ _ P1 P3) as P5.
+    pose (seg_e1 _ _ _ _ P5 P4) as P6.
+    pose (seg_e2 _ _ _ _ P5 P4) as P7.
+    apply seg_i.
+    - apply (seg_e1 _ _ _ _ P2 P6).
+    - apply P7.
+Qed.
+    
+Lemma seg_less_sub: ∀ R, ∀ A, ∀ t1, ∀ t2, r_trans R A → t1 ∈ A → t2 ∈ A
+  → t1 <[R] t2 → seg R A t1 ⊆ seg R A t2.
+Proof.
+  intros R A t1 t2 P1 P2 P3 P4 s P5.
+  pose (seg_e1 _ _ _ _ P2 P5) as P6.
+  pose (seg_e2 _ _ _ _ P2 P5) as P7.
+  apply seg_i.
+  + apply P6.
+  + apply (l_l_t _ _ _ _ _ P1 P6 P2 P3 P7 P4).
+Qed.
+
 Lemma seg_image_e: ∀ R, ∀ A, ∀ f, ∀ t, ∀ y, t ∈ A → y ∈ f⟦seg R A t⟧ 
   → ∃ x, x ∈ dom(f) ∧ x ∈ A ∧ ⟨x, y⟩ ∈ f ∧ x <[R] t.
 Proof.
@@ -57,6 +97,28 @@ Proof.
   + apply seg_i.
     - apply P1.
     - apply P3.
+Qed.
+
+Lemma wo_prop_seg: ∀ₚ P, ∀ R, ∀ A, ∀ x0, wo R A → x0 ∈ A → P x0
+  → ∃ x, x ∈ A ∧ P x ∧ (∀ y, y ∈ seg R A x → ~ P y).
+Proof.
+  intros P R A x0 P1 P2 P3.
+  destruct (wo_prop_least _ _ _ _ P1 P2 P3) as [x [Q1 [Q2 Q3]]].
+  exists x.
+  repeat split.
+  + apply Q1.
+  + apply Q2.
+  + intros y Q4 Q5.
+    pose (seg_e1 _ _ _ _ Q1 Q4) as Q6.
+    apply (wo_nle_i _ _ _ _ P1 Q6 Q1 (seg_e2 _ _ _ _ Q1 Q4)).
+    apply (Q3 _ Q6 Q5).
+Qed.
+
+Lemma wo_seg: ∀ R, ∀ A, ∀ t, wo R A → t ∈ A → wo R (seg R A t).
+Proof.
+  intros R A x P1 P2.
+  apply (sub_wo _ _ _ P1).
+  apply sub_e1.
 Qed.
 (*----------------------------------------------------------------------------*)
 
