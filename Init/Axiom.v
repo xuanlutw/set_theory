@@ -13,6 +13,8 @@ Axiom ax_union:   ∀ A, ∃ B, ∀ x, x ∈ B ↔ (∃ a, a ∈ A ∧ x ∈ a).
 Axiom ax_power:   ∀ A, ∃ B, ∀ x, x ∈ B ↔ (∀ y, y ∈ x → y ∈ A). 
 (* Axiom Schema of Subset *)
 Axiom ax_subset:  ∀ₚ P, ∀ A, ∃ B, ∀ x, x ∈ B ↔ x ∈ A ∧ P x.
+(* Axiom of Regularity *)
+Axiom ax_regular: ∀ A, ∃ m, (∃ x, x ∈ A) → m ∈ A ∧ (~∃ x, x ∈ A ∧ x ∈ m).
 
 (* Some non axiom but useful theorem *)
 (* Existence of the Union of Two *)

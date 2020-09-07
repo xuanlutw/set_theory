@@ -126,31 +126,6 @@ Proof.
 Qed.
 (*----------------------------------------------------------------------------*)
 
-(* Russel *)
-Lemma no_universe: ~(∃ A, ∀ x, x ∈ A).
-Proof.
-  intros [A P1].
-  pose ({x: A| x ∉ x}) as R.
-  assert (R ∉ R) as P2.
-  { intros P2.
-    destruct (sub_e _ _ _ P2) as [_ P3].
-    apply bot_e.
-    apply (P3 P2). }
-  assert (R ∈ R) as P3.
-  { apply sub_i.
-    + apply P1.
-    + apply P2. }
-  apply bot_e.
-  apply (P2 P3).
-Qed.
-
-Lemma ex_extra: ∀ A, ∃ x, x ∉ A.
-Proof.
-  intros A.
-  apply not_all_ex_not.
-  apply (@not_ex_all_not (λ A, ∀ x, x ∈ A) no_universe).
-Qed.
-
 (* Non Equality *)
 Lemma neq_e: ∀ A, ∀ B, A ≠ B → ∃ x, (x ∈ A ∧ x ∉  B) ∨ (x ∈ B ∧ x ∉  A).
 Proof.
@@ -204,6 +179,17 @@ Lemma psub_e1: ∀ A, ∀ B, A ⊂ B → A ≠ B.
 Proof.
   intros A B [_ P1].
   apply P1.
+Qed.
+
+Lemma psub_e2: ∀ A, ∀ B, A ⊂ B → ∃ x, x ∉ A ∧ x ∈ B.
+Proof.
+  intros A B [P1 P2].
+  destruct (neq_e _ _ P2) as [x [[P3 P4] | [P3 P4]]].
+  + apply bot_e.
+    apply P4.
+    apply (P1 _ P3).
+  + exists x.
+    apply (and_i P4 P3).
 Qed.
 
 Lemma sub_e2: ∀ A, ∀ B, A ⊆ B → A ⊂ B ∨ A = B.
@@ -571,6 +557,29 @@ Proof.
   apply union2_ir.
   apply (P1 _ P2).
 Qed.
+
+Lemma union2_sing_e: ∀ A, ∀ a, ∀ x, x ∈ A ∪ J{a} → x ∈ A ∨ x = a.
+Proof.
+  intros A a x P1.
+  destruct (union2_e _ _ _ P1) as [P2 | P2].
+  + left.
+    apply P2.
+  + right.
+    apply (eq_s (sing_e _ _ P2)).
+Qed.
+
+Lemma union2_sing_il: ∀ A, ∀ a, ∀ x, x ∈ A → x ∈ A ∪ J{a}.
+Proof.
+  intros A a x.
+  apply union2_il.
+Qed.
+
+Lemma union2_sing_ir: ∀ A, ∀ a, a ∈ A ∪ J{a}.
+Proof.
+  intros A a.
+  apply union2_ir.
+  apply sing_i.
+Qed.
 (*----------------------------------------------------------------------------*)
 
 (* Intersection of Two *)
@@ -934,3 +943,69 @@ Proof.
   + apply (P2 _ P5).
 Qed.
 (*----------------------------------------------------------------------------*)
+
+(* Russell *)
+Lemma no_universe: ~(∃ A, ∀ x, x ∈ A).
+Proof.
+  intros [A P1].
+  pose ({x: A| x ∉ x}) as R.
+  assert (R ∉ R) as P2.
+  { intros P2.
+    destruct (sub_e _ _ _ P2) as [_ P3].
+    apply bot_e.
+    apply (P3 P2). }
+  assert (R ∈ R) as P3.
+  { apply sub_i.
+    + apply P1.
+    + apply P2. }
+  apply bot_e.
+  apply (P2 P3).
+Qed.
+
+Lemma ex_extra: ∀ A, ∃ x, x ∉ A.
+Proof.
+  intros A.
+  apply not_all_ex_not.
+  apply (@not_ex_all_not (λ A, ∀ x, x ∈ A) no_universe).
+Qed.
+
+(* Axiom of Regularity *)
+Lemma nin_self: ∀ A, A ∉ A.
+Proof.
+  intros A P1.
+  assert (∃ x, x ∈ J{A}) as P2.
+  { exists A.
+    apply sing_i. }
+  destruct (ax_regular J{A}) as [m P3].
+  destruct (P3 P2) as [P4 P5].
+  apply P5.
+  exists A.
+  split.
+  + apply sing_i.
+  + apply (eq_cl (λ x, A ∈ x) (sing_e _ _ P4)).
+    apply P1.
+Qed.
+
+Lemma no_mutual_in: ∀ A, ∀ B, ~(A ∈ B ∧ B ∈ A).
+Proof.
+  intros A B [P1 P2].
+  assert (∃ x, x ∈ J{A, B}) as P3.
+  { exists A.
+    apply pair_il. }
+  destruct (ax_regular J{A, B}) as [m P4].
+  destruct (P4 P3) as [P5 P6].
+  apply P6.
+  destruct (pair_e _ _ _ P5) as [P7 | P7].
+  + exists B.
+    split.
+    - apply pair_ir.
+    - apply (eq_cr (λ x, B ∈ x) P7).
+      apply P2.
+  + exists A.
+    split.
+    - apply pair_il.
+    - apply (eq_cr (λ x, A ∈ x) P7).
+      apply P1.
+Qed.
+(*----------------------------------------------------------------------------*)
+
