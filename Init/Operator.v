@@ -269,6 +269,18 @@ Proof.
   apply (eq_cl _ P1).
   apply (sub_i _ _ _ P2 P3).
 Qed.
+
+Lemma sub_empty_empty: ∀ S, S ⊆ ∅ → S = ∅.
+Proof.
+  intros S P1.
+  apply sub_a.
+  split.
+  + intros x P2.
+    apply (P1 _ P2).
+  + intros x P2.
+    apply bot_e.
+    apply (empty_i _ P2).
+Qed.
 (*----------------------------------------------------------------------------*)
 
 (* Power set *)
@@ -608,9 +620,9 @@ Qed.
 (*----------------------------------------------------------------------------*)
 
 (* Intersection *)
-Lemma inter_e: ∀ A, ∀ a, ∀ x, x ∈ ∩A → a ∈ A → x ∈ a.
+Lemma inter_e: ∀ A, ∀ x, x ∈ ∩A → (∀ a, a ∈ A → x ∈ a).
 Proof.
-  intros A a x P1 P2.
+  intros A x P1 a P2.
   destruct (sub_e _ _ _ P1) as [_ P3].
   apply (P3 _ P2).
 Qed.
@@ -626,6 +638,12 @@ Proof.
     - apply P3.
     - apply (P2 _ P3).
   + apply P2.
+Qed.
+
+Lemma inter_sub: ∀ A, ∀ a, a ∈ A → ∩A ⊆ a.
+Proof.
+  intros A a P1 x P2.
+  apply (inter_e _ _ P2 _ P1).
 Qed.
 (*----------------------------------------------------------------------------*)
 
