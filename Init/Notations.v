@@ -25,6 +25,7 @@ Reserved Notation "∪ A "          (at level 60, no associativity).
 Reserved Notation "A ∪ B"         (at level 64, no associativity).
 Reserved Notation "𝒫( x )"        (at level 60, no associativity).
 Reserved Notation "{ x : A | P }" (at level 0, x at level 99, no associativity).
+Reserved Notation "∩ A "          (at level 60, no associativity).
 Reserved Notation "A ∩ B"         (at level 64, no associativity).
 Reserved Notation "A \ B"         (at level 60, no associativity).
 Reserved Notation "⟨ A , B ⟩"     (at level 60).

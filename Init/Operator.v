@@ -28,7 +28,7 @@ Notation   "J{ x }"         := (singleton x).
 Definition union_c (A: J) := (ex_outl (ax_union A)).
 Notation   "∪ A "         := (union_c A).
 
-Definition union2_c (A B: J) := (ex_outl (thm_union2 A B)).
+Definition union2_c (A B: J) := (∪(J{A, B})).
 Notation   "A ∪ B"           := (union2_c A B).
 
 Definition power_c (A: J) := (ex_outl (ax_power A)).
@@ -36,6 +36,9 @@ Notation   "𝒫( x )"       := (power_c x).
 
 Definition sub_c (P: J → Prop) (x: J) := (ex_outl (ax_subset P x)).
 Notation   "{ x : A | P }"            := (sub_c (λ x, P) A).
+
+Definition inter_c (A: J) := ({x: ∪A| ∀ a, a ∈ A → x ∈ a}).
+Notation   "∩ A"          := (inter_c A).
 
 Definition inter2_c (A B: J) := ({x: A| x ∈ B}).
 Notation   "A ∩ B"           := (inter2_c A B).
@@ -460,26 +463,34 @@ Qed.
 Lemma union2_e: ∀ A, ∀ B, ∀ x, x ∈ A ∪ B → x ∈ A ∨ x ∈ B.
 Proof.
   intros A B x P1.
-  destruct (ex_outr (thm_union2 A B) x) as [P2 _].
-  apply (P2 P1).
+  destruct (union_e _ _ P1) as [a [P2 P3]].
+  destruct (pair_e _ _ _ P2) as [P4 | P4].
+  + left.
+    apply (eq_cl (λ y, x ∈ y) P4).
+    apply P3.
+  + right.
+    apply (eq_cl (λ y, x ∈ y) P4).
+    apply P3.
 Qed.
 
 Lemma union2_il: ∀ A, ∀ B, ∀ x, x ∈ A → x ∈ A ∪ B.
 Proof.
   intros A B x P1.
-  destruct (ex_outr (thm_union2 A B) x) as [_ P2].
-  apply P2.
-  left.
-  apply P1.
+  apply union_i.
+  exists A.
+  split.
+  + apply pair_il.
+  + apply P1.
 Qed.
 
 Lemma union2_ir: ∀ A, ∀ B, ∀ x, x ∈ B → x ∈ A ∪ B.
 Proof.
   intros A B x P1.
-  destruct (ex_outr (thm_union2 A B) x) as [_ P2].
-  apply P2.
-  right.
-  apply P1.
+  apply union_i.
+  exists B.
+  split.
+  + apply pair_ir.
+  + apply P1.
 Qed.
 
 Lemma union2_en: ∀ A, ∀ B, ∀ x, x ∉ A ∪ B → x ∉ A ∧ x ∉ B.
@@ -593,6 +604,28 @@ Proof.
   intros A a.
   apply union2_ir.
   apply sing_i.
+Qed.
+(*----------------------------------------------------------------------------*)
+
+(* Intersection *)
+Lemma inter_e: ∀ A, ∀ a, ∀ x, x ∈ ∩A → a ∈ A → x ∈ a.
+Proof.
+  intros A a x P1 P2.
+  destruct (sub_e _ _ _ P1) as [_ P3].
+  apply (P3 _ P2).
+Qed.
+
+Lemma inter_i: ∀ A, ∀ x, A ≠ ∅ → (∀ a, a ∈ A → x ∈ a) → x ∈ ∩A.
+Proof.
+  intros A x P1 P2.
+  apply sub_i.
+  + apply union_i.
+    destruct (nempty_ex _ P1) as [a P3].
+    exists a.
+    split.
+    - apply P3.
+    - apply (P2 _ P3).
+  + apply P2.
 Qed.
 (*----------------------------------------------------------------------------*)
 
