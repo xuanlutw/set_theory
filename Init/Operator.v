@@ -201,6 +201,20 @@ Proof.
   + left.
     apply (psub_i _ _ P1 P2).
 Qed.
+
+Lemma psub_t: ∀ A, ∀ B, ∀ C, A ⊂ B → B ⊂ C → A ⊂ C.
+Proof.
+  intros A B C P1 P2.
+  apply psub_i.
+  + intros x P3.
+    pose (psub_e _ _ P1 _ P3) as P4.
+    apply (psub_e _ _ P2 _ P4).
+  + destruct (psub_e2 _ _ P1) as [x [P3 P4]].
+    apply neq_s.
+    apply (neq_i _ _ x).
+    - apply (psub_e _ _ P2 _ P4).
+    - apply P3.
+Qed.
 (*----------------------------------------------------------------------------*)
 
 (* Empty Set *)
@@ -641,6 +655,22 @@ Proof.
   intros A B P1.
   apply (eq_cr (λ x, x = B) (inter2_s _ _)).
   apply (inter2_absorb_l _ _ P1).
+Qed.
+
+Lemma inter2_eq_sub_l: ∀ A, ∀ B, A ∩ B = A → A ⊆ B.
+Proof.
+  intros A B P1 x P2.
+  pose (eq_cr (λ y, x ∈ y) P1 P2) as P3.
+  destruct (inter2_e _ _ _ P3) as [_ P4].
+  apply P4.
+Qed.
+
+Lemma inter2_eq_sub_r: ∀ A, ∀ B, A ∩ B = B → B ⊆ A.
+Proof.
+  intros A B P1.
+  apply inter2_eq_sub_l.
+  apply (eq_cr (λ x, x = B) (inter2_s _ _)).
+  apply P1.
 Qed.
 
 Lemma inter2_empty: ∀ A, ∀ B, (∀ x, x ∈ A → x ∉ B) → A ∩ B = ∅.

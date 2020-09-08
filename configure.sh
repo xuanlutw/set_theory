@@ -7,12 +7,10 @@ echo '-R . zfc'     >> _CoqProject
 echo Init/*.v       >> _CoqProject
 echo Relation/*.v   >> _CoqProject
 echo Nat/*.v        >> _CoqProject
-echo Ordinal/Order.v        >> _CoqProject
-echo Ordinal/Transfinite.v        >> _CoqProject
+echo Ordinal/*.v    >> _CoqProject
 #echo int/*.v       >> _CoqProject
 #echo rat/*.v       >> _CoqProject
 #echo real/*.v      >> _CoqProject
-#echo order/*.v     >> _CoqProject
 coq_makefile -f _CoqProject -o Makefile
 make
 make gallinahtml

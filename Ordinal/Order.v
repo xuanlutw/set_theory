@@ -400,7 +400,6 @@ Qed.
 (*----------------------------------------------------------------------------*)
 
 (* Relation exten *)
-
 Lemma rel_eq1: ∀ R1, ∀ R2, ∀ A, ∀ x, ∀ y, R1 ∩ (A ⨉ A) = R2 ∩ (A ⨉ A) → x ∈ A 
   → y ∈ A → x <[R1] y → x <[R2] y.
 Proof.
@@ -493,6 +492,19 @@ Proof.
   + apply (lo_rel_exten _ _ _ P1 P2).
   + apply (least_prop_rel_exten _ _ _ P1 P3).
 Qed.
+(*----------------------------------------------------------------------------*)
+
+(* Add Largest Element *)
+(*Lemma trans_add_largest: ∀ R, ∀ A, ∀ a, a ∉ A → r_trans R A *)
+  (*→ r_trans (R ∪ (A ⨉ J{a})) (A ∪ J{a}).*)
+(*Proof.*)
+  (*intros R A a P1 P2 x y z P3 P4 P5 P6 P7.*)
+  (*destruct (union2_sing_e _ _ _ P3) as [P8 | P8].*)
+  (*+ destruct (union2_sing_e _ _ _ P4) as [P9 | P9].*)
+    (*- destruct (union2_sing_e _ _ _ P5) as [P10 | P10].*)
+      (** ...*)
+        (*do many many case analysis...*)
+(*----------------------------------------------------------------------------*)
 
 (* Subset *)
 Lemma sub_r_irrefl: ∀ R, ∀ A, ∀ B, r_irrefl R A → B ⊆ A → r_irrefl R B.

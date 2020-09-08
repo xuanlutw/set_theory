@@ -115,4 +115,17 @@ Proof.
   apply bot_e.
   apply (empty_i _ P2).
 Qed.
+
+Lemma suc_trans: ∀ A, trans A → trans (S(A)).
+Proof.
+  intros A P1.
+  apply trans_i2.
+  intros a P2 x P3.
+  destruct (suc_e _ _ P2) as [P4 | P4].
+  + apply suc_i2.
+    apply (eq_cl (λ s, x ∈ s) P4).
+    apply P3.
+  + apply suc_i2.
+    apply (P1 _ _ P3 P4).
+Qed.
 (*----------------------------------------------------------------------------*)
