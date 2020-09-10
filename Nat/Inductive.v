@@ -46,6 +46,28 @@ Proof.
   apply (eq_cr (λ y, x ∈ y) P1).
   apply suc_i1.
 Qed.
+
+Lemma suc_kick_self: ∀ A, S(A) \ J{A} = A.
+Proof.
+  intros A.
+  apply sub_a.
+  split.
+  + intros x P1.
+    destruct (compl_e _ _ _ P1) as [P2 P3].
+    destruct (suc_e _ _ P2) as [P4 | P4].
+    - apply bot_e.
+      apply P3.
+      apply (eq_cr (λ x, x ∈ J{A}) P4).
+      apply sing_i.
+    - apply P4.
+  + intros x P1.
+    apply compl_i.
+    - apply (suc_i2 _ _ P1).
+    - intros P2.
+      apply (nin_self A).
+      apply (eq_cr (λ x, x ∈ A) (sing_e _ _ P2)).
+      apply P1.
+Qed.
 (*----------------------------------------------------------------------------*)
 
 (* Transition *)

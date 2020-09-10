@@ -195,6 +195,13 @@ Proof.
     apply (and_i P4 P3).
 Qed.
 
+Lemma psub_ir: ∀ A, ~ A ⊂ A.
+Proof.
+  intros A P1.
+  apply (psub_e1 _ _ P1).
+  apply eq_r.
+Qed.
+
 Lemma sub_e2: ∀ A, ∀ B, A ⊆ B → A ⊂ B ∨ A = B.
 Proof.
   intros A B P1.
@@ -797,6 +804,29 @@ Proof.
   apply (sub_e _ _ _ P1).
 Qed.
 
+Lemma compl_exchange: ∀ A, ∀ B, ∀ C, A \ B \ C = A \ C \ B.
+Proof.
+  intros A B C.
+  apply sub_a.
+  split.
+  + intros x P1.
+    destruct (compl_e _ _ _ P1) as [P2 P3].
+    destruct (compl_e _ _ _ P2) as [P4 P5].
+    apply compl_i.
+    - apply compl_i.
+      * apply P4.
+      * apply P3.
+    - apply P5.
+  + intros x P1.
+    destruct (compl_e _ _ _ P1) as [P2 P3].
+    destruct (compl_e _ _ _ P2) as [P4 P5].
+    apply compl_i.
+    - apply compl_i.
+      * apply P4.
+      * apply P3.
+    - apply P5.
+Qed.
+
 Lemma compl_inter2: ∀ A, ∀ B, A ∩ (B \ A) = ∅.
 Proof.
   intros A B.
@@ -881,6 +911,26 @@ Proof.
   apply (empty_i x).
   apply (eq_cl (λ s, x ∈ s) P1).
   apply (compl_i _ _ _ P2 P3).
+Qed.
+
+Lemma compl_union2_annihilate: ∀ A, ∀ B, B ⊆ A → (A \ B) ∪ B = A.
+Proof.
+  intros A B P1.
+  apply sub_a.
+  split.
+  + intros x P2.
+    destruct (union2_e _ _ _ P2) as [P3 | P3].
+    - destruct (compl_e _ _ _ P3) as [P4 _].
+      apply P4.
+    - apply (P1 _ P3).
+  + intros x P2.
+    destruct (LEM (x ∈ B)) as [P3 | P3].
+    - apply union2_ir.
+      apply P3.
+    - apply union2_il.
+      apply compl_i.
+      * apply P2.
+      * apply P3.
 Qed.
 (*----------------------------------------------------------------------------*)
 
