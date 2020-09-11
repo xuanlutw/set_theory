@@ -45,6 +45,8 @@ Reserved Notation "S( x )"  (at level 60, no associativity).
 Reserved Notation "m +ₙ n" (at level 65, no associativity).
 Reserved Notation "m ×ₙ n" (at level 64, no associativity).
 Reserved Notation "m ^ₙ n" (at level 65, no associativity).
+Reserved Notation "m <ₙ n" (at level 65, no associativity).
+Reserved Notation "m ≤ₙ n" (at level 65, no associativity).
 
 Reserved Notation " x <[ R ] y" (at level 65, right associativity).
 Reserved Notation " x ≮[ R ] y" (at level 65, right associativity).
