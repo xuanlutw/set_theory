@@ -425,13 +425,22 @@ Proof.
     apply P3.
 Qed.
 
-Lemma nsing_e: ∀ A, ∀ B, A ≠ B → B ∉ J{A}.
+Lemma nsing_i: ∀ A, ∀ B, A ≠ B → B ∉ J{A}.
 Proof.
   intros A B.
   apply contraposition1.
   apply sing_e.
 Qed.
 
+Lemma nsing_e: ∀ A, ∀ B, B ∉ J{A} → A ≠ B.
+Proof.
+  intros A B.
+  apply contraposition1.
+  intros P1.
+  generalize (eq_s P1).
+  apply sing_i2.
+Qed.
+  
 Lemma sing_sub_i: ∀ A, ∀ B, A ∈ B → J{A} ⊆ B.
 Proof.
   intros A B P1 x P2.
@@ -443,6 +452,14 @@ Lemma sing_sub_e: ∀ A, ∀ B, J{A} ⊆ B → A ∈ B.
 Proof.
   intros A B P1.
   apply P1.
+  apply sing_i.
+Qed.
+
+Lemma sing_nempty: ∀ A, J{A} ≠ ∅.
+Proof.
+  intros A.
+  apply ex_nempty.
+  exists A.
   apply sing_i.
 Qed.
 
@@ -840,6 +857,21 @@ Proof.
     apply (bot_e _ (empty_i _ P1)). 
 Qed.
 
+Lemma compl_inter2_2: ∀ A, ∀ B, A ∩ (A \ B)= A \ B.
+Proof.
+  intros A B.
+  apply sub_a.
+  split.
+  + intros x P1.
+    destruct (inter2_e _ _ _ P1) as [_ P2].
+    apply P2.
+  + intros x P1.
+    destruct (compl_e _ _ _ P1) as [P2 _].
+    apply inter2_i.
+    - apply P2.
+    - apply P1.
+Qed.
+
 Lemma compl_dilemma: ∀ A, ∀ B, ∀ x, x ∈ A → x ∈ A ∩ B ∨ x ∈ A \ B.
 Proof.
   intros A B x P1.
@@ -873,6 +905,18 @@ Proof.
   intros A B x P1.
   destruct (compl_e _ _ _ P1) as [P2 _].
   apply P2.
+Qed.
+
+Lemma compl_psub: ∀ A, ∀ B, B ⊆ A → B ≠ ∅ → A \ B ⊂ A.
+Proof.
+  intros A B P1 P2.
+  apply psub_i.
+  + apply compl_sub.
+  + intros P3.
+    destruct (nempty_ex _ P2) as [x P4].
+    pose (eq_cr (λ y, x ∈ y) P3 (P1 _ P4)) as P5.
+    destruct (compl_e _ _ _ P5) as [_ P6].
+    apply (P6 P4).
 Qed.
 
 Lemma compl_sub_reverse: ∀ A, ∀ B1, ∀ B2, B1 ⊆ B2 → A \ B2 ⊆ A \ B1.

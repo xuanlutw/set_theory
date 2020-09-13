@@ -59,3 +59,5 @@ Reserved Notation "ER( R )"  (at level 55, no associativity).
 
 Reserved Notation "A ≈ B" (at level 65, no associativity).
 Reserved Notation "A ≉ B" (at level 65, no associativity).
+Reserved Notation "A ≼ B" (at level 65, no associativity).
+Reserved Notation "A ⋠ B" (at level 65, no associativity).

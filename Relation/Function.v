@@ -193,6 +193,15 @@ Proof.
   apply (fval_i2 F x P1 P2).
 Qed.
 
+Lemma fval_fnm_ran: ∀ F, ∀ A, ∀ B, ∀ x, fnm F A B → x ∈ A → F[x] ∈ B.
+Proof.
+  intros F A B x [P1 [P2 P3]] P4.
+  apply P3.
+  apply fval_ran.
+  + apply P1.
+  + apply (eq_cr (λ y, x ∈ y) P2 P4).
+Qed.
+
 Lemma fval_codom: ∀ F, ∀ A, ∀ B, ∀ x, fnm F A B → x ∈ A → F[x] ∈ B.
 Proof.
   intros F A B x [P1 [P2 P3]] P4.
@@ -275,6 +284,17 @@ Proof.
   + apply P2.
   + apply (eq_cr (λ x, x ∈ A) (opair_eq_el _ _ _ _ P3)).
     apply P4.
+Qed.
+
+Lemma restr_dom_e: ∀ x, ∀ F, ∀ A, x ∈ dom(F↾A) → x ∈ A ∧ ∃ y, ⟨x, y⟩ ∈ F.
+Proof.
+  intros x F A P1.
+  destruct (dom_e _ _ P1) as [y P2].
+  destruct (restr_e _ _ _ _ P2) as [P3 P4].
+  split.
+  + apply P4.
+  + exists y.
+    apply P3.
 Qed.
 
 Lemma restr_e2: ∀ s, ∀ F, ∀ A, s ∈ F↾A 
@@ -388,6 +408,41 @@ Proof.
     - pose (dom_i2 _ _ _ (eq_cl (λ x, x ∈ F) P4 P3)) as P5.
       apply (P2 _ P5).
 Qed.
+
+Lemma restr_bij: ∀ F, ∀ A, ∀ B, ∀ A', bij F A B → A' ⊆ A
+  → bij (F↾A') A' (F⟦A'⟧).
+Proof.
+  intros F A B A' P1 P2.
+  apply bij_i2.
+  + apply restr_fn.
+    apply P1.
+  + destruct P1 as [[_ [P1 _]] _].
+    apply (eq_cr (λ x, x = A') (restr_dom _ _)).
+    apply inter2_absorb_r.
+    apply (eq_cr (λ x, A' ⊆ x) P1 P2).
+  + apply eq_r.
+  + apply restr_sing_rot.
+    apply P1.
+Qed.
+
+Lemma restr_fval: ∀ F, ∀ A, ∀ x, fn F → x ∈ dom(F) → x ∈ A → F[x] = (F↾A)[x].
+Proof.
+  intros F A x P1 P2 P3.
+  apply fval_i.
+  + apply (restr_fn _ _ P1).
+  + apply restr_i.
+    - apply (fval_i2 _ _ P1 P2).
+    - apply P3.
+Qed.
+
+Lemma restr_fval2: ∀ F, ∀ A, ∀ x, fn F → x ∈ dom(F) → x ∈ A
+  → ⟨x, F[x]⟩ ∈ (F↾A).
+Proof.
+  intros F A x P1 P2 P3.
+  apply restr_i.
+  + apply (fval_i2 _ _ P1 P2).
+  + apply P3.
+Qed.
 (*----------------------------------------------------------------------------*)
 
 (* Image *)
@@ -420,6 +475,19 @@ Proof.
   + apply P4.
 Qed.
 
+Lemma image_e2: ∀ x, ∀ F, ∀ A, ∀ B, ∀ C, inj F A B → x ∈ dom(F) → F[x] ∈ F⟦C⟧
+  → x ∈ C.
+Proof.
+  intros x F A B C P1 P2 P3.
+  destruct (image_e _ _ _ P3) as [x' [P4 P5]].
+  assert (x = x') as P6.
+  { apply (fval_inj _ _ _ _ _ P1 P2 (dom_i2 _ _ _ P4)).
+    apply fval_i.
+    + apply P1.
+    + apply P4. }
+  apply (eq_cr (λ x, x ∈ C) P6 P5).
+Qed.
+
 Lemma image_sub: ∀ F, ∀ A, ∀ B, A ⊆ B → F⟦A⟧ ⊆ F⟦B⟧.
 Proof.
   intros F A B P1 y P2.
@@ -429,6 +497,15 @@ Proof.
   split.
   + apply P3.
   + apply (P1 _ P4).
+Qed.
+
+Lemma image_fnm: ∀ F, ∀ A, ∀ B, ∀ C, fnm F A B → F⟦C⟧ ⊆ B.
+Proof.
+  intros F A B C P1 y P2.
+  destruct (image_e _ _ _ P2) as [x [P3 P4]].
+  destruct P1 as [_ [_ P1]].
+  apply P1.
+  apply (ran_i2 _ _ _ P3).
 Qed.
 
 (* 3K *)
@@ -558,6 +635,38 @@ Proof.
     - apply P4.
     - apply (eq_cl _ P1).
       apply (dom_i2 _ _ _ P4).
+Qed.
+
+Lemma image_bij_psub: ∀ F, ∀ A, ∀ A', ∀ B, bij F A B → A' ⊂ A → F⟦A'⟧ ⊂ B.
+Proof.
+  intros F A A' B P1 P2.
+  apply psub_i.
+  + intros y P3.
+    destruct P1 as [_ [P1 _]].
+    destruct (image_e _ _ _ P3) as [x [P4 _]].
+    apply (eq_cl (λ x, y ∈ x) P1).
+    apply (ran_i2 _ _ _ P4).
+  + destruct (psub_e2 _ _ P2) as [x [P3 P4]].
+    apply neq_s.
+    apply (neq_i _ _ (F[x])).
+    - destruct P1 as [[Q2 [Q3 _]] [Q1 _]].
+      apply (eq_cl (λ y, F[x] ∈ y) Q1).
+      apply fval_ran.
+      * apply Q2.
+      * apply (eq_cr (λ y, x ∈ y) Q3 P4).
+    - intros P5.
+      destruct (image_e _ _ _ P5) as [x' [P6 P7]].
+      assert (x = x') as P8.
+      { destruct (bij_e _ _ _ P1) as [_ Q1].
+        destruct P1 as [[R2 [R1 _]] _].
+        apply (fval_inj _ _ _ _ _ Q1).
+        + apply (eq_cr (λ y, x ∈ y) R1 P4).
+        + apply (eq_cr (λ y, x' ∈ y) R1 (psub_e _ _ P2 _ P7)).
+        + apply fval_i.
+          - apply R2.
+          - apply P6. }
+      apply P3.
+      apply (eq_cr (λ x, x ∈ A') P8 P7).
 Qed.
 (*----------------------------------------------------------------------------*)
 
@@ -1021,6 +1130,71 @@ Proof.
   + apply (comp_inj _ _ _ _ _ P4 P6).
 Qed.
 
+Lemma comp_bij_weak: ∀ F, ∀ G, ∀ A, ∀ B1, ∀ B2, ∀ C, bij F A B1 → bij G B2 C 
+  → B1 ⊆ B2 → bij (G ∘ F) A (G⟦B1⟧).
+Proof.
+  intros F G A B1 B2 C P1 P2 P3.
+  apply bij_i2.
+  + apply comp_fn.
+    - apply P1.
+    - apply P2.
+  + apply sub_a.
+    split.
+    - destruct P1 as [[_ [P1 _]] _].
+      apply (eq_cl (λ x, dom(G ∘ F) ⊆ x) P1).
+      apply comp_dom.
+    - intros x P4.
+      apply dom_i.
+      exists (G[F[x]]).
+      apply comp_i.
+      exists (F[x]).
+      split.
+      * apply fval_i2.
+        ++apply P1.
+        ++destruct P1 as [[_ [P1 _]] _].
+          apply (eq_cr (λ y, x ∈ y) P1).
+          apply P4.
+      * apply fval_i2.
+        ++apply P2.
+        ++destruct P2 as [[_ [P2 _]] _].
+          apply (eq_cr (λ y, F[x] ∈ y) P2).
+          apply P3.
+          destruct P1 as [[P5 [P6 _]] [P7 _]].
+          apply (eq_cl (λ y, F[x] ∈ y) P7).
+          apply (fval_ran _ _ P5 (eq_cr (λ y, x ∈ y) P6 P4)).
+  + apply sub_a.
+    split.
+    - intros y P4.
+      destruct (ran_e _ _ P4) as [x P5].
+      destruct (comp_e _ _ _ _ P5) as [s [P6 P7]].
+      apply image_i.
+      exists s.
+      split.
+      * apply P7.
+      * destruct P1 as [_ [P1 _]].
+        apply (eq_cl (λ x, s ∈ x) P1).
+        apply (ran_i2 _ _ _ P6).
+    - intros y P4.
+      destruct (image_e _ _ _ P4) as [x [P5 P6]].
+      apply ran_i.
+      exists ((inv F)[x]).
+      apply comp_i.
+      exists x.
+      split.
+      * apply inv_e.
+        apply fval_i2.
+        ++apply inv_fn.
+          apply P1.
+        ++apply (eq_cr (λ y, x ∈ y) (inv_dom _)).
+          destruct P1 as [_ [P1 _]].
+          apply (eq_cr (λ s, x ∈ s) P1).
+          apply P6.
+      * apply P5.
+  + apply comp_sing_rot.
+    - apply P1.
+    - apply P2.
+Qed.
+
 (* 3I *)
 Theorem comp_inv: ∀ F, ∀ G, inv (G ∘ F) = (inv F) ∘ (inv G).
 Proof.
@@ -1227,6 +1401,53 @@ Proof.
       * apply (P4 _ _ _ P8 P10).
 Qed.
 
+Lemma union2_bij: ∀ F, ∀ G, ∀ A, ∀ B, ∀ C, ∀ D, bij F A B → bij G C D
+  → A ∩ C = ∅ → B ∩ D = ∅ → bij (F ∪ G) (A ∪ C) (B ∪ D).
+Proof.
+  intros F G A B C D P1 P2 P3 P4.
+  assert (ran(F) ∩ ran(G) = ∅) as P5.
+  { destruct P1 as [_ [P1 _]].
+    destruct P2 as [_ [P2 _]].
+    apply (eq_cr (λ x, x ∩ ran(G) = ∅) P1).
+    apply (eq_cr (λ x, B ∩ x = ∅) P2).
+    apply P4. }
+  apply bij_i2.
+  + apply piecewise_function.
+    - apply P1.
+    - apply P2.
+    - destruct P1 as [[_ [P1 _]] _].
+      destruct P2 as [[_ [P2 _]] _].
+      apply (eq_cr (λ x, x ∩ dom(G) = ∅) P1).
+      apply (eq_cr (λ x, A ∩ x = ∅) P2).
+      apply P3.
+  + destruct P1 as [[_ [P1 _]] _].
+    destruct P2 as [[_ [P2 _]] _].
+    apply (eq_cr (λ x, x = A ∪ C) (union2_dom _ _)).
+    apply (eq_cr (λ x, x ∪ dom(G) = A ∪ C) P1).
+    apply (eq_cr (λ x, A ∪ x = A ∪ C) P2).
+    apply eq_r.
+  + destruct P1 as [_ [P1 _]].
+    destruct P2 as [_ [P2 _]].
+    apply (eq_cr (λ x, x = B ∪ D) (union2_ran _ _)).
+    apply (eq_cr (λ x, x ∪ ran(G) = B ∪ D) P1).
+    apply (eq_cr (λ x, B ∪ x = B ∪ D) P2).
+    apply eq_r.
+  + intros x1 x2 yy P6 P7.
+    destruct (union2_e _ _ _ P6) as [P8 | P8].
+    - destruct (union2_e _ _ _ P7) as [P9 | P9].
+      * destruct P1 as [_ [_ P1]].
+        apply (P1 _ _ _ P8 P9).
+      * apply bot_e.
+        apply (eq_cr (λ x, yy ∉ x) P5 (empty_i _)).
+        apply (inter2_i _ _ _ (ran_i2 _ _ _ P8) (ran_i2 _ _ _ P9)).
+    - destruct (union2_e _ _ _ P7) as [P9 | P9].
+      * apply bot_e.
+        apply (eq_cr (λ x, yy ∉ x) P5 (empty_i _)).
+        apply (inter2_i _ _ _ (ran_i2 _ _ _ P9) (ran_i2 _ _ _ P8)).
+      * destruct P2 as [_ [_ P2]].
+        apply (P2 _ _ _ P8 P9).
+Qed.
+
 Lemma union_fval: ∀ f, ∀ H, ∀ x, f ∈ H → fn f → fn (∪(H)) → x ∈ dom(f) 
   → f[x] = (∪(H))[x].
 Proof.
@@ -1263,6 +1484,45 @@ Proof.
   apply (union2_fvall G F x P1 P4 P3).
 Qed.
 (*----------------------------------------------------------------------------*)
+
+(* Function Mix *)
+Lemma fnm_mix: ∀ F, ∀ G, ∀ A, ∀ B, ∀ A', fnm F A B → fnm G A B → A' ⊆ A
+  → fnm (F↾A' ∪ G↾(A \ A')) A B.
+Proof.
+  intros F G A B A' P1 P2 P3.
+  split.
+  + apply piecewise_function.
+    - apply restr_fn.
+      apply P1.
+    - apply restr_fn.
+      apply P2.
+    - apply empty_unique.
+      intros x P4.
+      destruct (inter2_e _ _ _ P4) as [P5 P6].
+      destruct (restr_dom_e _ _ _ P5) as [P7 _].
+      destruct (restr_dom_e _ _ _ P6) as [P8 _].
+      destruct (compl_e _ _ _ P8) as [_ P9].
+      apply (P9 P7).
+  + split.
+    - destruct P1 as [_ [P1 _]].
+      destruct P2 as [_ [P2 _]].
+      apply (eq_cr (λ x, x = A) (union2_dom _ _)).
+      apply (eq_cr (λ x, x ∪ dom(G↾(A \ A')) = A) (restr_dom _ _)).
+      apply (eq_cr (λ x, (x ∩ A') ∪ dom(G↾(A \ A')) = A) P1).
+      apply (eq_cr (λ x, (A ∩ A') ∪ x = A) (restr_dom _ _)).
+      apply (eq_cr (λ x, (A ∩ A') ∪ (x ∩ (A \ A')) = A) P2).
+      apply (eq_cr (λ x, (A ∩ A') ∪ x = A) (compl_inter2_2 _ _)).
+      apply (eq_cr (λ x, x ∪ (A \ A') = A) (inter2_absorb_r _ _ P3)).
+      apply (eq_cr (λ x, x = A) (union2_s _ _)).
+      apply (eq_cr (λ x, x = A) (compl_union2_annihilate _ _ P3)).
+      apply eq_r.
+    - destruct P1 as [_ [_ P1]].
+      destruct P2 as [_ [_ P2]].
+      apply (eq_cr (λ x, x ⊆ B) (union2_ran _ _)).
+      apply (union2_sub).
+      apply (sub_t _ _ _ (image_ran _ _) P1).
+      apply (sub_t _ _ _ (image_ran _ _) P2).
+Qed.
 
 (* Exten One Value *)
 Lemma rel_exten: ∀ F, ∀ x, ∀ y, rel F → rel (F ∪ J{⟨x, y⟩}).

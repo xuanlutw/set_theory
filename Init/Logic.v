@@ -119,6 +119,17 @@ Section Logic.
     apply (P2 (P1 P3)).
   Qed.
 
+  Lemma imp_i: ~P ∨ Q → (P → Q).
+  Proof.
+    intros [P1 | P1].
+    + intros P2.
+      destruct (P1 P2).
+    + intros _.
+      apply P1.
+  Qed.
+
+  (* imp_e in Classical *)
+  
   Lemma iff_r: P ↔ P.
   Proof.
     split.

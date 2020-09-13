@@ -202,6 +202,18 @@ Proof.
   + apply sing_pair_is_fn.
   + apply sing_i.
 Qed.
+
+Lemma sing_pair_bij: ∀ x, ∀ y, bij J{⟨x, y⟩} J{x} J{y}.
+Proof.
+  intros x y.
+  apply bij_i2.
+  + apply sing_pair_is_fn.
+  + apply sing_pair_dom.
+  + apply sing_pair_ran.
+  + intros x1 x2 yy P1 P2.
+    apply (eq_t (eq_s (opair_eq_el _ _ _ _ (sing_e _ _ P1))) 
+      (opair_eq_el _ _ _ _ (sing_e _ _ P2))).
+Qed.
 (*----------------------------------------------------------------------------*)
 
 (* Identify Function *)
