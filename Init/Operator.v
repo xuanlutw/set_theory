@@ -564,6 +564,20 @@ Proof.
   + apply (P2 _ P4).
 Qed.
 
+Lemma union2_sub_l: ∀ A, ∀ B, A ⊆ A ∪ B.
+Proof.
+  intros A B x P1.
+  apply union2_il.
+  apply P1.
+Qed.
+
+Lemma union2_sub_r: ∀ A, ∀ B, B ⊆ A ∪ B.
+Proof.
+  intros A B x P1.
+  apply union2_ir.
+  apply P1.
+Qed.
+
 Lemma union2_sub_absorb_l: ∀ A, ∀ B, A ⊆ B → A ∪ B = B.
 Proof.
   intros A B P1.
