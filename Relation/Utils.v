@@ -336,6 +336,14 @@ Proof.
   + apply id_is_sing_rot.
 Qed.
 
+Lemma id_inj_exten: ∀ A, ∀ B, A ⊆ B → inj (id A) A B.
+Proof.
+  intros A B P1.
+  apply (inj_ran_exten _ _ A).
+  + apply id_is_inj.
+  + apply P1.
+Qed.
+
 Lemma id_fval: ∀ A, ∀ x, x ∈ A → (id A)[x] = x.
 Proof.
   intros A x P1.

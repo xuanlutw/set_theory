@@ -84,6 +84,16 @@ Proof.
     - apply P4.
 Qed.
 
+Lemma inj_bij: ∀ F, ∀ A, ∀ B, inj F A B → bij F A (ran(F)).
+Proof.
+  intros F A B P1.
+  apply bij_i2.
+  + apply P1.
+  + apply P1.
+  + apply eq_r.
+  + apply P1.
+Qed.
+
 Lemma fnm_ran_exten: ∀ F, ∀ A, ∀ B, ∀ B', fnm F A B → B ⊆ B' → fnm F A B'.
 Proof.
   intros F A B B' [P1 [P2 P3]] P4.
@@ -193,15 +203,6 @@ Proof.
   apply (fval_i2 F x P1 P2).
 Qed.
 
-Lemma fval_fnm_ran: ∀ F, ∀ A, ∀ B, ∀ x, fnm F A B → x ∈ A → F[x] ∈ B.
-Proof.
-  intros F A B x [P1 [P2 P3]] P4.
-  apply P3.
-  apply fval_ran.
-  + apply P1.
-  + apply (eq_cr (λ y, x ∈ y) P2 P4).
-Qed.
-
 Lemma fval_codom: ∀ F, ∀ A, ∀ B, ∀ x, fnm F A B → x ∈ A → F[x] ∈ B.
 Proof.
   intros F A B x [P1 [P2 P3]] P4.
@@ -217,14 +218,16 @@ Qed.
   (*apply (fval_ran_fover F A B x (fonto_fover F A B P1) P2).*)
 (*Qed.*)
 
-Lemma fval_inj: ∀ F, ∀ A, ∀ B, ∀ x, ∀ y, inj F A B → x ∈ dom(F) → y ∈ dom(F)
-  → F[x] = F[y] → x = y.
+Lemma fval_inj: ∀ F, ∀ A, ∀ B, ∀ x, ∀ y, inj F A B → x ∈ A → y ∈ A → F[x] = F[y]
+  → x = y.
 Proof.
-  intros F A B x y [[P1 _] P2] P3 P4 P5.
+  intros F A B x y [[P1 [P6 _]] P2] P3 P4 P5.
   apply (P2 x y (F[x])).
-  + apply (fval_i2 _ _ P1 P3).
+  + apply (fval_i2 _ _ P1).
+    apply (eq_cr (λ z, x ∈ z) P6 P3).
   + apply (eq_cr (λ x, ⟨y, x⟩ ∈ F) P5).
-    apply (fval_i2 _ _ P1 P4).
+    apply (fval_i2 _ _ P1).
+    apply (eq_cr (λ z, y ∈ z) P6 P4).
 Qed. 
 
 Lemma fval_sub: ∀ F, ∀ G, ∀ x, fn F → fn G → F ⊆ G → x ∈ dom(F) → F[x] = G[x].
@@ -475,16 +478,19 @@ Proof.
   + apply P4.
 Qed.
 
-Lemma image_e2: ∀ x, ∀ F, ∀ A, ∀ B, ∀ C, inj F A B → x ∈ dom(F) → F[x] ∈ F⟦C⟧
+Lemma image_e2: ∀ x, ∀ F, ∀ A, ∀ B, ∀ C, inj F A B → x ∈ A → F[x] ∈ F⟦C⟧
   → x ∈ C.
 Proof.
   intros x F A B C P1 P2 P3.
   destruct (image_e _ _ _ P3) as [x' [P4 P5]].
   assert (x = x') as P6.
-  { apply (fval_inj _ _ _ _ _ P1 P2 (dom_i2 _ _ _ P4)).
-    apply fval_i.
-    + apply P1.
-    + apply P4. }
+  { apply (fval_inj _ _ _ _ _ P1 P2).
+    + destruct P1 as [[_ [P1 _]] _].
+      apply (eq_cl (λ x, x' ∈ x) P1).
+      apply (dom_i2 _ _ _ P4).
+    + apply fval_i.
+      - apply P1.
+      - apply P4. }
   apply (eq_cr (λ x, x ∈ C) P6 P5).
 Qed.
 
@@ -659,9 +665,7 @@ Proof.
       assert (x = x') as P8.
       { destruct (bij_e _ _ _ P1) as [_ Q1].
         destruct P1 as [[R2 [R1 _]] _].
-        apply (fval_inj _ _ _ _ _ Q1).
-        + apply (eq_cr (λ y, x ∈ y) R1 P4).
-        + apply (eq_cr (λ y, x' ∈ y) R1 (psub_e _ _ P2 _ P7)).
+        apply (fval_inj _ _ _ _ _ Q1 P4 (psub_e _ _ P2 _ P7)).
         + apply fval_i.
           - apply R2.
           - apply P6. }
@@ -1973,9 +1977,7 @@ Proof.
       apply (eq_cr (λ x, x1 ∈ x) P6 P2).
     + intros R3.
       apply P4.
-      apply (fval_inj _ _ _ _ _ P1).
-      - apply (eq_cr (λ x, x1 ∈ x) P6 P2).
-      - apply (eq_cr (λ x, x2 ∈ x) P6 P3).
+      apply (fval_inj _ _ _ _ _ P1 P2 P3).
       - apply (eq_t (sing_e _ _ R1) (eq_s (sing_e _ _ R3))). }
   pose (eq_cl (λ x, inj (F \ J{⟨x1, F[x1]⟩} \ J{⟨x2, F[x2]⟩} ∪ J{⟨x2, F[x1]⟩}) x (B \ J{F[x1]} \ J{F[x2]} ∪ J{F[x1]})) Q10 Q9) as Q12.
   pose (eq_cl (λ x, inj (F \ J{⟨x1, F[x1]⟩} \ J{⟨x2, F[x2]⟩} ∪ J{⟨x2, F[x1]⟩}) (A \ J{x1}) (x ∪ J{F[x1]})) (compl_exchange _ _ _) Q12) as Q13.

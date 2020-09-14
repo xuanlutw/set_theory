@@ -208,9 +208,7 @@ Lemma eps_in_e: ∀ R, ∀ A, ∀ x, ∀ y, wo R A → x ∈ A → y ∈ A
 Proof.
   intros R A x y P1 P2 P3 P4.
   destruct (eps_e2 _ _ _ _ P1 P3 P4) as [s [P5 [P6 P7]]].
-  pose (eq_cr (λ s, x ∈ s) (eps_dom _ _ P1) P2) as Q1.
-  pose (eq_cr (λ x, s ∈ x) (eps_dom _ _ P1) P6) as Q2.
-  apply (eq_cr (λ x, x <[R] y) (fval_inj _ _ _ _ _ (eps_inj _ _ P1) Q1 Q2 P5)).
+  apply (eq_cr (λ x, x <[R] y) (fval_inj _ _ _ _ _ (eps_inj _ _ P1) P2 P6 P5)).
   apply P7.
 Qed.
 (*----------------------------------------------------------------------------*)

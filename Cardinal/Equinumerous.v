@@ -3,6 +3,8 @@ Require Import Relation.Relation.
 Require Import Nat.Nat.
 Require Import Ordinal.Ordinal.
 
+Require dpdgraph.dpdgraph.
+
 Definition eqnum  (A B: J) := ∃ F, bij F A B.
 Notation   "A ≈ B"         := (eqnum A B).
 Definition neqnum (A B: J) := (~(A ≈ B)).
@@ -185,8 +187,7 @@ Proof.
       pose (eq_cl (λ y, f[x] ∈ y) (eq_t P10 (eq_s P7)) P11) as P12.
       destruct (image_e _ _ _ P12) as [x0 [P13 P14]].
       pose (fval_i _ _ _ P8 P13) as P15.
-      pose (fval_inj _ _ _ _ _ S0 (eq_cr (λ y, x ∈ y) P9 P6)
-        (eq_cr (λ y, x0 ∈ y) P9 (psub_e _ _ P3 _ P14)) P15) as P16.
+      pose (fval_inj _ _ _ _ _ S0 P6 (psub_e _ _ P3 _ P14) P15) as P16.
       apply P5.
       apply (eq_cr (λ x, x ∈ B) P16).
       apply P14.
@@ -420,7 +421,7 @@ Proof.
   apply id_is_inj.
 Qed.
 
-Lemma domim_t: ∀ A, ∀ B, ∀ C, A ≼ B → B ≼ C → A ≼ C.
+Lemma domin_t: ∀ A, ∀ B, ∀ C, A ≼ B → B ≼ C → A ≼ C.
 Proof.
   intros A B C [F P1] [G P2].
   exists (G ∘ F).
@@ -505,7 +506,7 @@ Proof.
           apply union_i.
           exists (M'[∅]).
           split.
-          ++apply (fval_fnm_ran _ ω).
+          ++apply (fval_codom _ ω).
             --destruct P6 as [P61 [P62 _]].
               apply (eq_cl (λ x, fnm M' x (ran(M'))) P62).
               apply (fnm_i _ P61).
@@ -571,7 +572,7 @@ Proof.
           --destruct P2 as [[_ [P2 _]] _].
             apply (eq_cr (λ x, y ∈ x) P2 Q1).
         ++apply compl_i.
-          --apply (fval_fnm_ran _ B).
+          --apply (fval_codom _ B).
             **apply P2.
             **apply Q1.
           --intros Q4.
@@ -599,29 +600,27 @@ Proof.
               apply (Q3 n').
               repeat split.
               { apply Q10. }
-              { apply (image_e2 _ _ _ _ _ P2).
-                + destruct P2 as [[_ [P2 _]] _].
-                  apply (eq_cr (λ x, y ∈ x) P2 Q1).
-                + assert (G⟦F⟦M'[n']⟧⟧ = M[M'[n']]) as R1.
-                  { apply fval_i.
-                    + apply P3.
-                    + apply sub_i.
-                      - apply cp_i.
-                        * apply (fval_fnm_ran _ _ _ _ P6 Q10).
-                        * apply power_i.
-                          apply (image_fnm _ B).
-                         apply P2.
-                      - exists (M'[n']).
-                        apply eq_r. }
-                  assert (m = M'[n]) as R2.
-                  { apply fval_i.
-                    + apply P6.
-                    + apply Q7. }
-                  apply (eq_cr (λ x, G[y] ∈ x) R1).
-                  apply (eq_cl (λ x, G[y] ∈ x) (P8 _ Q10)).
-                  apply (eq_cl (λ x, G[y] ∈ M'[x]) Q11).
-                  apply (eq_cl (λ x, G[y] ∈ x) R2).
-                  apply Q6. }
+              { apply (image_e2 _ _ _ _ _ P2 Q1).
+                assert (G⟦F⟦M'[n']⟧⟧ = M[M'[n']]) as R1.
+                { apply fval_i.
+                  + apply P3.
+                  + apply sub_i.
+                    - apply cp_i.
+                      * apply (fval_codom _ _ _ _ P6 Q10).
+                      * apply power_i.
+                        apply (image_fnm _ B).
+                       apply P2.
+                    - exists (M'[n']).
+                      apply eq_r. }
+                assert (m = M'[n]) as R2.
+                { apply fval_i.
+                  + apply P6.
+                  + apply Q7. }
+                apply (eq_cr (λ x, G[y] ∈ x) R1).
+                apply (eq_cl (λ x, G[y] ∈ x) (P8 _ Q10)).
+                apply (eq_cl (λ x, G[y] ∈ M'[x]) Q11).
+                apply (eq_cl (λ x, G[y] ∈ x) R2).
+                apply Q6. }
   + assert (∀ x1, ∀ x2, ∀ y, ⟨x1, y⟩ ∈ F↾C → ⟨x2, y⟩ ∈ (inv G)↾(A \ C) → x1 = x2)
       as Q0.
     { intros x1 x2 y Q1 Q2.

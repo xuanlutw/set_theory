@@ -886,4 +886,39 @@ Proof.
   + apply (isom_lo _ _ _ _ P1 P3).
   + apply (isom_least_prop _ _ _ _ P2 P3).
 Qed.
+
+Lemma isom_bij_ex_rel: ∀ R, ∀ A, ∀ B, ∀ F, bij F A B
+  → ∃ S, S ⊆ B ⨉ B ∧ isom R A S B.
+Proof.
+  intros R A B F P1.
+  pose ({x: B ⨉ B| ∃ a1, ∃ a2, a1 ∈ A ∧ a2 ∈ A ∧ ⟨a1, a2⟩ ∈ R ∧ 
+    x = ⟨F[a1], F[a2]⟩}) as S.
+  exists S.
+  split.
+  + apply sub_e1.
+  + exists F.
+    split.
+    - apply P1.
+    - split.
+      * intros x y Q1 Q2 Q3.
+        apply sub_i.
+        ++destruct P1 as [P1 _].
+          apply cp_i.
+          --apply (fval_codom _ _ _ _ P1 Q1).
+          --apply (fval_codom _ _ _ _ P1 Q2).
+        ++exists x.
+          exists y.
+          repeat split.
+          --apply Q1.
+          --apply Q2.
+          --apply Q3.
+      * intros x y Q1 Q2 Q3.
+        destruct (sub_e _ _ _ Q3) as [_ [x' [y' [Q4 [Q5 [Q6 Q7]]]]]].
+        destruct (bij_e _ _ _ P1) as [_ Q8].
+        apply (eq_cr (λ x, ⟨x, y⟩ ∈ R) 
+          (fval_inj _ _ _ _ _ Q8 Q1 Q4 (opair_eq_el _ _ _ _ Q7))).
+        apply (eq_cr (λ y, ⟨x', y⟩ ∈ R) 
+          (fval_inj _ _ _ _ _ Q8 Q2 Q5 (opair_eq_er _ _ _ _ Q7))).
+        apply Q6.
+Qed.
 (*----------------------------------------------------------------------------*)

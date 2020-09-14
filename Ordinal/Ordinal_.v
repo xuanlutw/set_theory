@@ -380,7 +380,6 @@ Proof.
 Qed.
 
 (* Burali-Forti *)
-
 Theorem no_ord_set: ~∃ A, ∀ a, Ord a ↔ a ∈ A.
 Proof.
   intros [A P1].
