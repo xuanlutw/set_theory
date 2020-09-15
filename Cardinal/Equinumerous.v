@@ -60,6 +60,13 @@ Proof.
   apply sub_e1.
 Qed.
 
+Lemma eqnum_eps_image: ∀ R, ∀ A, wo R A → A ≈ EI(R, A).
+Proof.
+  intros R A P1.
+  exists (E(R, A)).
+  apply (eps_bij _ _ P1).
+Qed.
+
 Definition finite   (A: J) := ∃ n, n ∈ ω ∧ A ≈ n.
 Definition infinite (A: J) := ~(finite A).
 

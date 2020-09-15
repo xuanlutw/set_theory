@@ -61,3 +61,9 @@ Reserved Notation "A ≈ B" (at level 65, no associativity).
 Reserved Notation "A ≉ B" (at level 65, no associativity).
 Reserved Notation "A ≼ B" (at level 65, no associativity).
 Reserved Notation "A ⋠ B" (at level 65, no associativity).
+
+Reserved Notation "| A |"  (at level 65, no associativity).
+Reserved Notation "m +c n" (at level 65, no associativity).
+Reserved Notation "m ×c n" (at level 64, no associativity).
+Reserved Notation "m ^c n" (at level 65, no associativity).
+
