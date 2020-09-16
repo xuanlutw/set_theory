@@ -3,12 +3,6 @@ Require Import Init.Logic.
 Require Import Init.Classical.
 Require Import Init.Axiom.
 
-Lemma AA: ∀ s, ∀ k, s ∈ k → s ∈ k.
-Proof.
-  intros s k P1.
-  apply P1.
-Qed.
-
 (* Operators *)
 Definition subset (A B: J) := (∀ x, x ∈ A → x ∈ B).
 Notation   "x ⊆ y"         := (subset x y).
@@ -631,6 +625,21 @@ Proof.
   intros A B C P1 x P2.
   apply union2_ir.
   apply (P1 _ P2).
+Qed.
+
+Lemma union2_sub_preserve_l: ∀ A, ∀ A', ∀ B, A ⊆ A' → A ∪ B ⊆ A' ∪ B.
+Proof.
+  intros A A' B P1 x P2.
+  destruct (union2_e _ _ _ P2) as [P3 | P3].
+  + apply (union2_il _ _ _ (P1 _ P3)).
+  + apply (union2_ir _ _ _ P3).
+Qed.
+
+Lemma union2_sub_preserve_r: ∀ A, ∀ B, ∀ B', B ⊆ B' → A ∪ B ⊆ A ∪ B'.
+  intros A A' B P1 x P2.
+  destruct (union2_e _ _ _ P2) as [P3 | P3].
+  + apply (union2_il _ _ _ P3).
+  + apply (union2_ir _ _ _ (P1 _ P3)).
 Qed.
 
 Lemma union2_sing_e: ∀ A, ∀ a, ∀ x, x ∈ A ∪ J{a} → x ∈ A ∨ x = a.

@@ -19,12 +19,12 @@ Reserved Notation "'λ' x , P" (at level 200, right associativity).
 
 Reserved Notation "x ⊆ y"         (at level 65, no associativity).
 Reserved Notation "x ⊂ y"         (at level 65, no associativity).
-Reserved Notation "J{ x , y }"    (at level 0, x at level 99, y at level 99).
+Reserved Notation "J{ x , y }"    (at level 0, x at level 99).
 Reserved Notation "J{ x }"        (at level 0, x at level 99).
 Reserved Notation "∪ A "          (at level 60, no associativity).
 Reserved Notation "A ∪ B"         (at level 64, no associativity).
 Reserved Notation "𝒫( x )"        (at level 60, no associativity).
-Reserved Notation "{ x : A | P }" (at level 0, x at level 99, no associativity).
+Reserved Notation "{ x : A | P }" (at level 0, x at level 99).
 Reserved Notation "∩ A "          (at level 60, no associativity).
 Reserved Notation "A ∩ B"         (at level 64, no associativity).
 Reserved Notation "A \ B"         (at level 60, no associativity).
@@ -67,3 +67,5 @@ Reserved Notation "m +c n" (at level 65, no associativity).
 Reserved Notation "m ×c n" (at level 64, no associativity).
 Reserved Notation "m ^c n" (at level 65, no associativity).
 
+Reserved Notation "[ A ]\ R"       (at level 60, no associativity).
+Reserved Notation "[ x ]( R , A )" (at level 60, no associativity).

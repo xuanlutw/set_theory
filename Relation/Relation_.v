@@ -13,6 +13,7 @@ Notation   "ran( A )"      := (ran A).
 Definition filed (R: J) := (dom(R) ∪ ran(R)).
 Notation   "fld( A )"   := (filed A).
 
+Definition r_over    (R A: J) := R ⊆ A ⨉ A.
 Definition r_refl    (R A: J) := ∀ x, x ∈ A → ⟨x, x⟩ ∈ R.
 Definition r_irrefl  (R A: J) := ∀ x, x ∈ A → ⟨x, x⟩ ∉ R.
 Definition r_sym     (R A: J) := ∀ x, ∀ y, x ∈ A → y ∈ A → ⟨x, y⟩ ∈ R 
@@ -23,8 +24,6 @@ Definition r_asym    (R A: J) := ∀ x, ∀ y, x ∈ A → y ∈ A → ⟨x, y�
   → ⟨y, x⟩ ∉ R.
 Definition r_trans   (R A: J) := ∀ x, ∀ y, ∀ z, x ∈ A → y ∈ A → z ∈ A 
   → ⟨x, y⟩ ∈ R → ⟨y, z⟩ ∈ R → ⟨x, z⟩ ∈ R.
-
-Definition r_over (R A: J) := (rel R) ∧ (dom(R) ⊆ A) ∧ (ran(R) ⊆ A).  
 
 (* Relation *)
 Lemma sub_rel: ∀ R, ∀ S, rel R → S ⊆ R → rel S.
@@ -235,5 +234,34 @@ Lemma fld_ir: ∀ x, ∀ A, x ∈ ran(A) → x ∈ fld(A).
 Proof.
   intros x A P1.
   apply (union2_ir _ _ _ P1).
+Qed.
+
+Lemma dom_sub_fld: ∀ R, dom(R) ⊆ fld(R).
+Proof.
+  intros P.
+  apply union2_sub_l.
+Qed.
+
+Lemma ran_sub_fld: ∀ R, ran(R) ⊆ fld(R).
+Proof.
+  intros P.
+  apply union2_sub_r.
+Qed.
+
+Lemma rel_sub_dom_ran: ∀ R, rel R → R ⊆ dom(R) ⨉ ran(R).
+Proof.
+  intros R P1 r P2.
+  destruct (P1 _ P2) as [x [y P3]].
+  apply (eq_cr (λ x, x ∈ _) P3).
+  apply cp_i.
+  + apply (dom_i2 _ _ _ (eq_cl (λ x, x ∈ R) P3 P2)).
+  + apply (ran_i2 _ _ _ (eq_cl (λ x, x ∈ R) P3 P2)).
+Qed.
+
+Lemma r_over_fld: ∀ R, rel R → r_over R (fld(R)).
+Proof.
+  intros R P1.
+  apply (sub_t _ _ _ (rel_sub_dom_ran _ P1)
+    (cp_sub _ _ _ _ (dom_sub_fld _) (ran_sub_fld _))).
 Qed.
 (*----------------------------------------------------------------------------*)
