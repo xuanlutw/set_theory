@@ -496,7 +496,7 @@ Qed.
 
 (* Add Largest Element *)
 (*Lemma trans_add_largest: ∀ R, ∀ A, ∀ a, a ∉ A → r_trans R A *)
-  (*→ r_trans (R ∪ (A ⨉ J{a})) (A ∪ J{a}).*)
+  (*→ r_trans (R ∪ (A ⨉ `{a})) (A ∪ `{a}).*)
 (*Proof.*)
   (*intros R A a P1 P2 x y z P3 P4 P5 P6 P7.*)
   (*destruct (union2_sing_e _ _ _ P3) as [P8 | P8].*)
@@ -598,7 +598,7 @@ Proof.
     apply (eq_t P5 P6).
 Qed.
 
-Lemma sub_exten: ∀R, ∀ A, ∀ t, t ∈ A → {x: A| x ≤[R] t} = {x: A| x <[R] t} ∪ J{t}.
+Lemma sub_exten: ∀R, ∀ A, ∀ t, t ∈ A → {x: A| x ≤[R] t} = {x: A| x <[R] t} ∪ `{t}.
 Proof.
   intros R A t P0.
   apply sub_a.
@@ -608,7 +608,7 @@ Proof.
     - apply union2_il.
       apply (sub_i _ _ _ P2 P3).
     - apply union2_ir.
-      apply (eq_cr (λ x, x ∈ J{t}) P3).
+      apply (eq_cr (λ x, x ∈ `{t}) P3).
       apply sing_i.
   + intros x P1.
     destruct (union2_e _ _ _ P1) as [P2 | P2].

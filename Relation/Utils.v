@@ -3,7 +3,7 @@ Require Import Relation.Relation_.
 Require Import Relation.Function.
 
 Definition id (A: J)      := {s: A ⨉ A| ∃ x, s = ⟨x, x⟩}.
-Definition const (A c: J) := A ⨉ J{c}.
+Definition const (A c: J) := A ⨉ `{c}.
 
 
 (* Empty Function *)
@@ -79,7 +79,7 @@ Proof.
   + apply empty_is_sing_rot.
 Qed.
 
-Lemma fspace_empty_dom: ∀ B, fspace ∅ B = J{∅}.
+Lemma fspace_empty_dom: ∀ B, fspace ∅ B = `{∅}.
 Proof.
   intros B.
   apply sub_a.
@@ -94,7 +94,7 @@ Proof.
       apply (empty_i p).
       apply (eq_cl _ P4).
       apply (dom_i2 _ _ _ (eq_cl (λ s, s ∈ x) P5 P2)). }
-    apply (eq_cr (λ x, x ∈ J{ ∅}) P2).
+    apply (eq_cr (λ x, x ∈ `{ ∅}) P2).
     apply sing_i.
   + intros x P1.
     apply fspace_i.
@@ -148,7 +148,7 @@ Qed.
 (*----------------------------------------------------------------------------*)
 
 (* Single Pair Function *)
-Lemma sing_pair_is_fn: ∀ x, ∀ y, fn J{⟨x, y⟩}.
+Lemma sing_pair_is_fn: ∀ x, ∀ y, fn `{⟨x, y⟩}.
 Proof.
   intros x y.
   split.
@@ -162,7 +162,7 @@ Proof.
                 (opair_eq_er _ _ _ _ (sing_e _ _ P2))).
 Qed.
 
-Lemma sing_pair_dom: ∀ x, ∀ y, dom(J{⟨x, y⟩}) = J{x}.
+Lemma sing_pair_dom: ∀ x, ∀ y, dom(`{⟨x, y⟩}) = `{x}.
 Proof. 
   intros x y.
   apply sub_a.
@@ -178,7 +178,7 @@ Proof.
     apply eq_r.
 Qed.
 
-Lemma sing_pair_ran: ∀ x, ∀ y, ran(J{⟨x, y⟩}) = J{y}.
+Lemma sing_pair_ran: ∀ x, ∀ y, ran(`{⟨x, y⟩}) = `{y}.
 Proof. 
   intros x y.
   apply sub_a.
@@ -194,7 +194,7 @@ Proof.
     apply eq_r.
 Qed.
 
-Lemma sing_pair_fval: ∀ x, ∀ y, J{⟨x, y⟩}[x] = y.
+Lemma sing_pair_fval: ∀ x, ∀ y, `{⟨x, y⟩}[x] = y.
 Proof.
   intros x y.
   apply eq_s.
@@ -203,7 +203,7 @@ Proof.
   + apply sing_i.
 Qed.
 
-Lemma sing_pair_bij: ∀ x, ∀ y, bij J{⟨x, y⟩} J{x} J{y}.
+Lemma sing_pair_bij: ∀ x, ∀ y, bij `{⟨x, y⟩} `{x} `{y}.
 Proof.
   intros x y.
   apply bij_i2.
@@ -470,14 +470,14 @@ Proof.
     apply (const_i _ _ _ P1).
 Qed.
 
-Lemma const_ran: ∀ A, ∀ c, A ≠ ∅ → ran(const A c) = J{c}.
+Lemma const_ran: ∀ A, ∀ c, A ≠ ∅ → ran(const A c) = `{c}.
   intros A c P1.
   apply sub_a.
   split.
   + intros x P2.
     destruct (ran_e _ _ P2) as [a P3].
     destruct (const_e _ _ _ P3) as [b [_ P4]].
-    apply (eq_cr (λ x, x ∈ J{c}) (opair_eq_er _ _ _ _ P4)).
+    apply (eq_cr (λ x, x ∈ `{c}) (opair_eq_er _ _ _ _ P4)).
     apply sing_i.
   + intros x P2.
     apply ran_i.

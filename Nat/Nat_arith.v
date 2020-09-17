@@ -9,15 +9,16 @@ Require Import Nat.Recursion.
 Definition nat0 := (∅).
 Definition nat1 := (S(nat0)).
 Definition nat2 := (S(nat1)).
-Notation "'〇ₙ'" := (nat0).
-Notation "'一ₙ'" := (nat1).
-Notation "'二ₙ'" := (nat2).
+Notation "𝟢"    := (nat0).
+Notation "𝟣"    := (nat1).
+Notation "𝟤"    := (nat2).
 
-Notation σ := {x: ω ⨉ ω| ∃ y, x = ⟨y, S(y)⟩}.
+Definition sigma := {x: ω ⨉ ω| ∃ y, x = ⟨y, S(y)⟩}.
+Notation   "'σ'" := (sigma).
 
 Definition add_proto (m: J) := (ex_outl (recursion_thm ω m σ)).
-Definition mul_proto (m: J) := (ex_outl (recursion_thm ω (〇ₙ) (add_proto m))).
-Definition exp_proto (m: J) := (ex_outl (recursion_thm ω (一ₙ) (mul_proto m))).
+Definition mul_proto (m: J) := (ex_outl (recursion_thm ω (𝟢) (add_proto m))).
+Definition exp_proto (m: J) := (ex_outl (recursion_thm ω (𝟣) (mul_proto m))).
 
 Notation "m +ₙ n" := ((add_proto m)[n]).
 Notation "m ×ₙ n" := ((mul_proto m)[n]).
@@ -119,17 +120,17 @@ Proof.
   apply P2.
 Qed.
  
-Lemma zero_is_nat: 〇ₙ ∈ ω.
+Lemma zero_is_nat: 𝟢 ∈ ω.
 Proof.
   apply empty_is_nat.
 Qed.
 
-Lemma one_is_nat: 一ₙ ∈ ω.
+Lemma one_is_nat: 𝟣 ∈ ω.
 Proof.
   apply (suc_is_nat _ zero_is_nat).
 Qed.
 
-Lemma add_zero: ∀ m, m ∈ ω → m +ₙ 〇ₙ = m.
+Lemma add_zero: ∀ m, m ∈ ω → m +ₙ 𝟢 = m.
 Proof.
   intros m P1.
   apply (add_proto_e1 _ P1).
@@ -154,10 +155,10 @@ Proof.
     apply P2.
 Qed.
 
-Theorem one_one_two: 一ₙ +ₙ 一ₙ = 二ₙ.
+Theorem one_one_two: 𝟣 +ₙ 𝟣 = 𝟤.
 Proof.
-  apply (eq_cr (λ x, x = 二ₙ) (add_red (一ₙ) (〇ₙ) one_is_nat zero_is_nat)).
-  apply (eq_cr (λ x, S(x) = 二ₙ) (add_zero (一ₙ) one_is_nat)).
+  apply (eq_cr (λ x, x = 𝟤) (add_red (𝟣) (𝟢) one_is_nat zero_is_nat)).
+  apply (eq_cr (λ x, S(x) = 𝟤) (add_zero (𝟣) one_is_nat)).
   apply eq_r.
 Qed.
 (*----------------------------------------------------------------------------*)
@@ -166,15 +167,15 @@ Qed.
 Lemma mul_proto_is_fn: ∀ m, m ∈ ω → fnm (mul_proto m) ω ω.
 Proof.
   intros m P1.
-  destruct (ex_outr (recursion_thm ω (〇ₙ) (add_proto m)) 
+  destruct (ex_outr (recursion_thm ω (𝟢) (add_proto m)) 
     (zero_is_nat) (add_proto_is_fn _ P1)) as [P2 _].
   apply P2.
 Qed.
 
-Lemma mul_proto_e1: ∀ m, m ∈ ω → (mul_proto m)[〇ₙ] = 〇ₙ.
+Lemma mul_proto_e1: ∀ m, m ∈ ω → (mul_proto m)[𝟢] = 𝟢.
 Proof.
   intros m P1.
-  destruct (ex_outr (recursion_thm ω (〇ₙ) (add_proto m)) 
+  destruct (ex_outr (recursion_thm ω (𝟢) (add_proto m)) 
     (zero_is_nat) (add_proto_is_fn _ P1)) as [_ [P2 _]].
   apply P2.
 Qed.
@@ -183,12 +184,12 @@ Lemma mul_proto_e2: ∀ m, ∀ n, m ∈ ω → n ∈ ω →
     (mul_proto m)[S(n)] = (add_proto m)[(mul_proto m)[n]].
 Proof.
   intros m n P1 P2.
-  destruct (ex_outr (recursion_thm ω (〇ₙ) (add_proto m)) 
+  destruct (ex_outr (recursion_thm ω (𝟢) (add_proto m)) 
     (zero_is_nat) (add_proto_is_fn _ P1)) as [_ [_ P3]].
   apply (P3 _ P2).
 Qed. 
 
-Lemma mul_zero: ∀ m, m ∈ ω → m ×ₙ 〇ₙ = 〇ₙ.
+Lemma mul_zero: ∀ m, m ∈ ω → m ×ₙ 𝟢 = 𝟢.
 Proof.
   intros m P1.
   apply (mul_proto_e1 _ P1).
@@ -200,7 +201,7 @@ Proof.
   apply (mul_proto_e2 _ _ P1 P2).
 Qed.
 
-Lemma mul_one: ∀ m, m ∈ ω → m ×ₙ 一ₙ = m.
+Lemma mul_one: ∀ m, m ∈ ω → m ×ₙ 𝟣 = m.
 Proof.
   intros m P1.
   apply (eq_cr (λ x, x = m) (mul_red _ _ P1 zero_is_nat)).
@@ -227,15 +228,15 @@ Qed.
 Lemma exp_proto_is_fn: ∀ m, m ∈ ω → fnm (exp_proto m) ω ω.
 Proof.
   intros m P1.
-  destruct (ex_outr (recursion_thm ω (一ₙ) (mul_proto m)) 
+  destruct (ex_outr (recursion_thm ω (𝟣) (mul_proto m)) 
     one_is_nat (mul_proto_is_fn _ P1)) as [P2 _].
   apply P2.
 Qed.
 
-Lemma exp_proto_e1: ∀ m, m ∈ ω → (exp_proto m)[〇ₙ] = 一ₙ.
+Lemma exp_proto_e1: ∀ m, m ∈ ω → (exp_proto m)[𝟢] = 𝟣.
 Proof.
   intros m P1.
-  destruct (ex_outr (recursion_thm ω (一ₙ) (mul_proto m)) 
+  destruct (ex_outr (recursion_thm ω (𝟣) (mul_proto m)) 
     one_is_nat (mul_proto_is_fn _ P1)) as [_ [P2 _]].
   apply P2.
 Qed.
@@ -244,12 +245,12 @@ Lemma exp_proto_e2: ∀ m, ∀ n, m ∈ ω → n ∈ ω →
     (exp_proto m)[S(n)] = (mul_proto m)[(exp_proto m)[n]].
 Proof.
   intros m n P1 P2.
-  destruct (ex_outr (recursion_thm ω (一ₙ) (mul_proto m)) 
+  destruct (ex_outr (recursion_thm ω (𝟣) (mul_proto m)) 
     one_is_nat (mul_proto_is_fn _ P1)) as [_ [_ P3]].
   apply (P3 _ P2).
 Qed.
 
-Lemma exp_zero: ∀ m, m ∈ ω → m ^ₙ 〇ₙ = 一ₙ.
+Lemma exp_zero: ∀ m, m ∈ ω → m ^ₙ 𝟢 = 𝟣.
 Proof.
   intros m P1.
   apply (exp_proto_e1 _ P1).

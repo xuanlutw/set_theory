@@ -26,7 +26,7 @@ Lemma in_nat_nat: ∀ m, ∀ n, n ∈ ω → m <ₙ n → m ∈ ω.
 Proof.
   intros m n P1 P2.
   pose (λ k, ∀ p, p ∈ k → p ∈ ω) as P.
-  assert (P 〇ₙ) as I1.
+  assert (P 𝟢) as I1.
   { intros m1 Q1.
     apply bot_e.
     apply (empty_i _ Q1). }
@@ -43,7 +43,7 @@ Lemma suc_less: ∀ m, ∀ n, m ∈ ω → n ∈ ω → m <ₙ n → S(m) <ₙ S
 Proof.
   intros m n P1 P2 P3.
   pose (λ k, ∀ p, p <ₙ k → S(p) <ₙ S(k)) as P.
-  assert (P 〇ₙ) as I1.
+  assert (P 𝟢) as I1.
   { intros m1 Q1.
     apply bot_e.
     apply (empty_i _ Q1). }
@@ -64,18 +64,18 @@ Proof.
   apply (suc_less _ _ P1 P2 P3).
 Qed.
 
-Lemma empty_in_nat: ∀ n, n ∈ ω → n ≠ 〇ₙ → 〇ₙ ∈ n.
+Lemma empty_in_nat: ∀ n, n ∈ ω → n ≠ 𝟢 → 𝟢 ∈ n.
 Proof.
   intros n P1 P2.
-  pose (λ k, k ∈ ω → k ≠ 〇ₙ → 〇ₙ ∈ k) as P.
-  assert (P 〇ₙ) as I1.
+  pose (λ k, k ∈ ω → k ≠ 𝟢 → 𝟢 ∈ k) as P.
+  assert (P 𝟢) as I1.
   { intros Q1 Q2.
     apply bot_e.
     apply (Q2 (eq_r _)). }
   assert (induction_step P) as I2.
   { intros k Q1 Q2 Q3 Q4.
-    destruct (LEM (k = 〇ₙ)) as [Q5 | Q5].
-    + apply (eq_cr (λ x, 〇ₙ ∈ S(x)) Q5).
+    destruct (LEM (k = 𝟢)) as [Q5 | Q5].
+    + apply (eq_cr (λ x, 𝟢 ∈ S(x)) Q5).
       apply suc_i1.
     + pose (nat_is_trans _ (suc_is_nat _ Q1)) as Q6.
       apply (Q6 _ _ (Q2 Q1 Q5) (suc_i1 k)). }
@@ -87,7 +87,7 @@ Proof.
   intros m p P1 P2.
   apply (eq_cr (λ x, m <ₙ x) (add_red _ _ P1 P2)).
   pose (λ k, m <ₙ S(m +ₙ k)) as P.
-  assert (P 〇ₙ) as I1.
+  assert (P 𝟢) as I1.
   { red.
     apply (eq_cr (λ x, m <ₙ S(x)) (add_zero _ P1)).
     apply suc_i1. }
@@ -104,7 +104,7 @@ Qed.
 Lemma add_less_equal: ∀ m, ∀ p, m ∈ ω → p ∈ ω → m ≤ₙ (m +ₙ p).
 Proof.
   intros m p P1 P2.
-  destruct (LEM (p = 〇ₙ)) as [P3|P3].
+  destruct (LEM (p = 𝟢)) as [P3|P3].
   + apply (eq_cr (λ x, m ≤ₙ(m +ₙ x)) P3).
     apply (eq_cr (λ x, m ≤ₙ x) (add_zero _ P1)). 
     right.
@@ -166,7 +166,7 @@ Lemma less_ex: ∀ m, ∀ n, m ∈ ω → n ∈ ω → m <ₙ n → ∃ p, p ∈
 Proof.
   intros m n P1 P2 P3.
   pose (λ k, k <ₙ m ∨ m = k ∨ ∃ p, p ∈ ω ∧ m +ₙ S(p) = k) as P.
-  assert (P 〇ₙ) as I1.
+  assert (P 𝟢) as I1.
   { destruct (LEM (m = ∅)) as [P4 | P4].
     + right. left.
       apply P4.
@@ -182,7 +182,7 @@ Proof.
         apply (eq_s Q3).
     + destruct Q2 as [Q2 | Q2].
       - right. right.
-        exists 〇ₙ.
+        exists 𝟢.
         split.
         * apply empty_is_nat.
         * apply (eq_cr (λ x, x = S(k)) (add_red _ _ P1 empty_is_nat)).
@@ -242,9 +242,9 @@ Lemma less_add_eq: ∀ m, ∀ n, ∀ p, m ∈ ω → n ∈ ω → p ∈ ω → m
 Proof.
   intros m n p P1 P2 P3 P4.
   pose (λ k, (m +ₙ k) <ₙ (n +ₙ k)) as P.
-  assert (P 〇ₙ) as I1.
+  assert (P 𝟢) as I1.
   { red.
-    apply (eq_cr (λ x, x <ₙ (n +ₙ 〇ₙ)) (add_zero _ P1)).
+    apply (eq_cr (λ x, x <ₙ (n +ₙ 𝟢)) (add_zero _ P1)).
     apply (eq_cr (λ x, m <ₙ x) (add_zero _ P2)).
     apply P4. }
   assert (induction_step P) as I2.
@@ -286,7 +286,7 @@ Qed.
 (*Proof.*)
   (*intros m n p P1 P2 P3 P4.*)
   (*pose (fun k => (m ×ₙ S(k)) <ₙ (n ×ₙ S(k))) as P.*)
-  (*assert (P 〇ₙ) as I1.*)
+  (*assert (P 𝟢) as I1.*)
   (*{ red. *)
     (*rewrite (multi_one _ P1).*)
     (*rewrite (multi_one _ P2).*)
@@ -324,9 +324,9 @@ Theorem nat_trichotomy: ∀ m, ∀ n, m ∈ ω → n ∈ ω →
 Proof.
   intros m n P1 P2.
   pose (λ k, k ∈ ω → k ∈ n ∨ k = n ∨ n ∈ k) as P.
-  assert (P (〇ₙ)) as I1.
+  assert (P (𝟢)) as I1.
   { intros Q1.
-    destruct (LEM (n = 〇ₙ)) as [Q2 | Q2].
+    destruct (LEM (n = 𝟢)) as [Q2 | Q2].
     + right. left.
       symmetry.
       apply Q2.

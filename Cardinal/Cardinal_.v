@@ -399,8 +399,9 @@ Proof.
   apply cardinality_self.
 Qed.
 
-Notation ℵ₀ := (|ω|).
-Definition card_add (A B: J) := |(A ⨉ J{〇ₙ}) ∪ (B ⨉ J{一ₙ})|.
+Definition aleph_null := (|ω|).
+Notation   "'ℵ₀'"     := aleph_null.
+Definition card_add (A B: J) := |(A ⨉ `{𝟢}) ∪ (B ⨉ `{𝟣})|.
 Notation   "A +c B"          := (card_add A B).
 Definition card_mul (A B: J) := |A ⨉ B|.
 Notation   "A ×c B"          := (card_mul A B).

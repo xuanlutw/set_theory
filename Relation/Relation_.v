@@ -55,7 +55,7 @@ Lemma dom_superset: ∀ A, ∀ x, in_dom x A → x ∈ ∪(∪(A)).
 Proof.
   intros A x [y P1].
   apply union_i.
-  exists (J{x, y}).
+  exists (`{x, y}).
   split.
   + apply union_i.
     exists (⟨x, y⟩).
@@ -140,7 +140,7 @@ Lemma ran_superset: ∀ A, ∀ y, in_ran y A → y ∈ ∪(∪(A)).
 Proof.
   intros A y [x P1].
   apply union_i.
-  exists (J{x, y}).
+  exists (`{x, y}).
   split.
   + apply union_i.
     exists (⟨x, y⟩).

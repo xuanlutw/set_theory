@@ -1529,7 +1529,7 @@ Proof.
 Qed.
 
 (* Exten One Value *)
-Lemma rel_exten: ∀ F, ∀ x, ∀ y, rel F → rel (F ∪ J{⟨x, y⟩}).
+Lemma rel_exten: ∀ F, ∀ x, ∀ y, rel F → rel (F ∪ `{⟨x, y⟩}).
 Proof.
   intros F x y P1.
   apply union2_rel.
@@ -1541,7 +1541,7 @@ Proof.
 Qed.
 
 Lemma sing_val_exten: ∀ F, ∀ x, ∀ y, sing_val F → x ∉ dom(F)
-  → sing_val (F ∪ J{⟨x, y⟩}).
+  → sing_val (F ∪ `{⟨x, y⟩}).
 Proof.
   intros F x y P1 P2 xx y1 y2 P3 P4.
   destruct (union2_e _ _ _ P3) as [P5 | P5].
@@ -1561,7 +1561,7 @@ Proof.
 Qed.
 
 Lemma sing_rot_exten: ∀ F, ∀ x, ∀ y, sing_rot F → y ∉ ran(F) 
-  → sing_rot (F ∪ J{⟨x, y⟩}).
+  → sing_rot (F ∪ `{⟨x, y⟩}).
 Proof.
   intros F x y P1 P2 x1 x2 yy P3 P4.
   destruct (union2_e _ _ _ P3) as [P5 | P5].
@@ -1580,7 +1580,7 @@ Proof.
       apply (opair_eq_el _ _ _ _ (sing_e _ _ P6)).
 Qed.
 
-Lemma dom_exten: ∀ F, ∀ x, ∀ y, dom(F ∪ J{⟨x, y⟩}) = dom(F) ∪ J{x}.
+Lemma dom_exten: ∀ F, ∀ x, ∀ y, dom(F ∪ `{⟨x, y⟩}) = dom(F) ∪ `{x}.
 Proof.
   intros F x y.
   apply sub_a.
@@ -1602,11 +1602,11 @@ Proof.
       apply P3.
     - exists y.
       apply union2_ir.
-      apply (eq_cr (λ x, ⟨xx, y⟩ ∈ J{⟨x, y⟩}) (sing_e _ _ P2)).
+      apply (eq_cr (λ x, ⟨xx, y⟩ ∈ `{⟨x, y⟩}) (sing_e _ _ P2)).
       apply sing_i.
 Qed.
 
-Lemma ran_exten: ∀ F, ∀ x, ∀ y, ran(F ∪ J{⟨x, y⟩}) = ran(F) ∪ J{y}.
+Lemma ran_exten: ∀ F, ∀ x, ∀ y, ran(F ∪ `{⟨x, y⟩}) = ran(F) ∪ `{y}.
 Proof.
   intros F x y.
   apply sub_a.
@@ -1628,11 +1628,11 @@ Proof.
       apply P3.
     - exists x.
       apply union2_ir.
-      apply (eq_cr (λ y, ⟨x, yy⟩ ∈ J{⟨x, y⟩}) (sing_e _ _ P2)).
+      apply (eq_cr (λ y, ⟨x, yy⟩ ∈ `{⟨x, y⟩}) (sing_e _ _ P2)).
       apply sing_i.
 Qed.
 
-Lemma fn_exten: ∀ F, ∀ x, ∀ y, fn F → x ∉ dom(F) → fn (F ∪ J{⟨x, y⟩}).
+Lemma fn_exten: ∀ F, ∀ x, ∀ y, fn F → x ∉ dom(F) → fn (F ∪ `{⟨x, y⟩}).
 Proof.
   intros F x y [P1 P2] P3.
   split.
@@ -1641,13 +1641,13 @@ Proof.
 Qed.
 
 Lemma fnm_exten: ∀ F, ∀ A, ∀ B, ∀ x, ∀ y, x ∉ A → fnm F A B 
-  → fnm (F ∪ J{⟨x, y⟩}) (A ∪ J{x}) (B ∪ J{y}).
+  → fnm (F ∪ `{⟨x, y⟩}) (A ∪ `{x}) (B ∪ `{y}).
 Proof.
   intros F A B x y P1 [P2 [P3 P4]].
   split.
   + apply (fn_exten _ _ _ P2 (eq_cr (λ y, x ∉ y) P3 P1)).
   + split.
-    - apply (eq_cl (λ s, dom(F ∪ J{⟨x, y⟩}) = s ∪ J{x}) P3).
+    - apply (eq_cl (λ s, dom(F ∪ `{⟨x, y⟩}) = s ∪ `{x}) P3).
       apply dom_exten.
     - intros yy P5.
       destruct (ran_e _ _ P5) as [xx P6].
@@ -1656,12 +1656,12 @@ Proof.
         apply P4.
         apply (ran_i2 _ _ _ P7).
       * apply union2_ir.
-        apply (eq_cr (λ y, yy ∈ J{y}) (opair_eq_er _ _ _ _ (sing_e _ _ P7))).
+        apply (eq_cr (λ y, yy ∈ `{y}) (opair_eq_er _ _ _ _ (sing_e _ _ P7))).
         apply sing_i.
 Qed.
 
 Lemma inj_exten: ∀ F, ∀ A, ∀ B, ∀ x, ∀ y, inj F A B → x ∉ A → y ∉ ran(F) 
-  → inj (F ∪ J{⟨x, y⟩}) (A ∪ J{x}) (B ∪ J{y}).
+  → inj (F ∪ `{⟨x, y⟩}) (A ∪ `{x}) (B ∪ `{y}).
 Proof.
   intros F A B x y [P1 P2] P3 P4.
   split.
@@ -1670,17 +1670,17 @@ Proof.
 Qed.
 
 Lemma surj_exten: ∀ F, ∀ A, ∀ B, ∀ x, ∀ y, surj F A B → x ∉ A → y ∉ B 
-  → surj (F ∪ J{⟨x, y⟩}) (A ∪ J{x}) (B ∪ J{y}).
+  → surj (F ∪ `{⟨x, y⟩}) (A ∪ `{x}) (B ∪ `{y}).
 Proof.
   intros F A B x y [P1 P2] P3 P4.
   split.
   + apply (fnm_exten _ _ _ _ _ P3 P1).
-  + apply (eq_cl (λ s, ran(F ∪ J{⟨x, y⟩}) = s ∪ J{y}) P2).
+  + apply (eq_cl (λ s, ran(F ∪ `{⟨x, y⟩}) = s ∪ `{y}) P2).
     apply ran_exten.
 Qed.
 
 Lemma bij_exten: ∀ F, ∀ A, ∀ B, ∀ x, ∀ y, bij F A B → x ∉ A → y ∉ B 
-  → bij (F ∪ J{⟨x, y⟩}) (A ∪ J{x}) (B ∪ J{y}).
+  → bij (F ∪ `{⟨x, y⟩}) (A ∪ `{x}) (B ∪ `{y}).
 Proof.
   intros F A B x y P1 P2 P3.
   destruct (bij_e _ _ _ P1) as [P4 P5].
@@ -1694,14 +1694,14 @@ Qed.
 (*----------------------------------------------------------------------------*)
 
 (* Kick One Value *)
-Lemma rel_kick: ∀ F, ∀ x, ∀ y, rel F → rel (F \ J{⟨x, y⟩}).
+Lemma rel_kick: ∀ F, ∀ x, ∀ y, rel F → rel (F \ `{⟨x, y⟩}).
 Proof.
   intros F x y P1 xx P2.
   destruct (compl_e _ _ _ P2) as [P3 _].
   apply (P1 _ P3).
 Qed.
 
-Lemma sing_val_kick: ∀ F, ∀ x, ∀ y, sing_val F → sing_val (F \ J{⟨x, y⟩}).
+Lemma sing_val_kick: ∀ F, ∀ x, ∀ y, sing_val F → sing_val (F \ `{⟨x, y⟩}).
 Proof.
   intros F x y P1 xx y1 y2 P2 P3.
   destruct (compl_e _ _ _ P2) as [P4 _].
@@ -1709,7 +1709,7 @@ Proof.
   apply (P1 _ _ _ P4 P5).
 Qed.
 
-Lemma sing_rot_kick: ∀ F, ∀ x, ∀ y, sing_rot F → sing_rot (F \ J{⟨x, y⟩}).
+Lemma sing_rot_kick: ∀ F, ∀ x, ∀ y, sing_rot F → sing_rot (F \ `{⟨x, y⟩}).
 Proof.
   intros F x y P1 xx y1 y2 P2 P3.
   destruct (compl_e _ _ _ P2) as [P4 _].
@@ -1717,7 +1717,7 @@ Proof.
   apply (P1 _ _ _ P4 P5).
 Qed.
 
-Lemma dom_kick: ∀ F, ∀ x, fn F → dom(F \ J{⟨x, F[x]⟩}) = dom(F) \ J{x}.
+Lemma dom_kick: ∀ F, ∀ x, fn F → dom(F \ `{⟨x, F[x]⟩}) = dom(F) \ `{x}.
 Proof.
   intros F x P1.
   apply sub_a.
@@ -1729,9 +1729,9 @@ Proof.
     - apply (dom_i2 _ _ _ P4).
     - intros P6.
       apply P5.
-      apply (eq_cl (λ xx, ⟨xx, yy⟩ ∈ J{⟨x, F[x]⟩}) (sing_e _ _ P6)).
+      apply (eq_cl (λ xx, ⟨xx, yy⟩ ∈ `{⟨x, F[x]⟩}) (sing_e _ _ P6)).
       pose (eq_cr (λ xx, ⟨xx, yy⟩ ∈ F) (sing_e _ _ P6) P4) as P7.
-      apply (eq_cr (λ yy, ⟨x, yy⟩ ∈ J{⟨x, F[x]⟩}) (fval_i _ _ _ P1 P7)).
+      apply (eq_cr (λ yy, ⟨x, yy⟩ ∈ `{⟨x, F[x]⟩}) (fval_i _ _ _ P1 P7)).
       apply sing_i.
   + intros xx P2.
     destruct (compl_e _ _ _ P2) as [P3 P4].
@@ -1742,12 +1742,12 @@ Proof.
     - apply P5.
     - intros P6.
       apply P4.
-      apply (eq_cr (λ x, xx ∈ J{x}) (opair_eq_el _ _ _ _ (sing_e _ _ P6))).
+      apply (eq_cr (λ x, xx ∈ `{x}) (opair_eq_el _ _ _ _ (sing_e _ _ P6))).
       apply sing_i.
 Qed.
 
 Lemma ran_kick: ∀ F, ∀ x, fn F → sing_rot F → x ∈ dom(F) 
-  → ran(F \ J{⟨x, F[x]⟩}) = ran(F) \ J{F[x]}.
+  → ran(F \ `{⟨x, F[x]⟩}) = ran(F) \ `{F[x]}.
 Proof.
   intros F x P1 P2 P3.
   apply sub_a.
@@ -1777,7 +1777,7 @@ Proof.
       apply (eq_s (opair_eq_er _ _ _ _ (sing_e _ _ Q5))).
 Qed.
 
-Lemma fn_kick: ∀ F, ∀ x, fn F → fn (F \ J{⟨x, F[x]⟩}).
+Lemma fn_kick: ∀ F, ∀ x, fn F → fn (F \ `{⟨x, F[x]⟩}).
 Proof.
   intros F x [P1 P2].
   split.
@@ -1786,13 +1786,13 @@ Proof.
 Qed.
 
 Lemma fnm_kick: ∀ F, ∀ A, ∀ B, ∀ x, fnm F A B 
-  → fnm (F \ J{⟨x, F[x]⟩}) (A \ J{x}) B.
+  → fnm (F \ `{⟨x, F[x]⟩}) (A \ `{x}) B.
 Proof.
   intros F A B x [P1 [P2 P3]].
   split.
   + apply (fn_kick _ _ P1).
   + split.
-    - apply (eq_cl (λ s, dom(F \ J{⟨x, F[x]⟩}) = s \ J{x}) P2).
+    - apply (eq_cl (λ s, dom(F \ `{⟨x, F[x]⟩}) = s \ `{x}) P2).
       apply (dom_kick _ _ P1).
     - intros yy P4.
       destruct (ran_e _ _ P4) as [xx P5].
@@ -1802,7 +1802,7 @@ Proof.
 Qed.
 
 Lemma inj_kick: ∀ F, ∀ A, ∀ B, ∀ x, inj F A B → x ∈ A
-  → inj (F \ J{⟨x, F[x]⟩}) (A \ J{x}) (B \ J{F[x]}).
+  → inj (F \ `{⟨x, F[x]⟩}) (A \ `{x}) (B \ `{F[x]}).
 Proof.
   intros F A B x [P1 P2] P3.
   split.
@@ -1832,24 +1832,24 @@ Proof.
 Qed.
               
 (*Lemma surj_kick: ∀ F, ∀ A, ∀ B, ∀ x, surj F A B → x ∉ A*)
-  (*→ surj (F \ J{⟨x, F[x]⟩}) (A \ J{x}) B.*)
+  (*→ surj (F \ `{⟨x, F[x]⟩}) (A \ `{x}) B.*)
 
 Lemma bij_kick: ∀ F, ∀ A, ∀ B, ∀ x, bij F A B → x ∈ A →
-  bij (F \ J{⟨x, F[x]⟩}) (A \ J{x}) (B \ J{F[x]}).
+  bij (F \ `{⟨x, F[x]⟩}) (A \ `{x}) (B \ `{F[x]}).
 Proof.
   intros F A B x [[P1 [P2 _]] [P3 P4]] P5.
   apply bij_i2.
   + apply (fn_kick _ _ P1).
-  + apply (eq_cl (λ s, dom(F \ J{⟨x, F[x]⟩}) = s \ J{x}) P2).
+  + apply (eq_cl (λ s, dom(F \ `{⟨x, F[x]⟩}) = s \ `{x}) P2).
     apply (dom_kick _ _ P1).
-  + apply (eq_cl (λ s, ran(F \ J{⟨x, F[x]⟩}) = s \ J{F[x]}) P3).
+  + apply (eq_cl (λ s, ran(F \ `{⟨x, F[x]⟩}) = s \ `{F[x]}) P3).
     apply (ran_kick _ _ P1 P4).
     apply (eq_cr (λ y, x ∈ y) P2).
     apply P5.
   + apply (sing_rot_kick _ _ _ P4).
 Qed.
 
-Lemma kick_fval: ∀ F, ∀ x1, ∀ x2, fn F → x2 ∈ dom(F) → x1 ≠ x2 → (F \ J{⟨x1, F[x1]⟩})[x2] = F[x2].
+Lemma kick_fval: ∀ F, ∀ x1, ∀ x2, fn F → x2 ∈ dom(F) → x1 ≠ x2 → (F \ `{⟨x1, F[x1]⟩})[x2] = F[x2].
 Proof.
   intros F x1 x2 P1 P2 P3.
   apply eq_s.
@@ -1865,7 +1865,7 @@ Qed.
 
 (* Function Swap *)
 Lemma fn_swap_ran: ∀ F, ∀ x1, ∀ x2, fn F → x1 ∈ dom(F) → x2 ∈ dom(F) → 
-  ran(F \ J{⟨x1, F[x1]⟩} \ J{⟨x2, F[x2]⟩} ∪ J{⟨x2, F[x1]⟩} ∪ J{⟨x1, F[x2]⟩})
+  ran(F \ `{⟨x1, F[x1]⟩} \ `{⟨x2, F[x2]⟩} ∪ `{⟨x2, F[x1]⟩} ∪ `{⟨x1, F[x2]⟩})
     = ran(F).
 Proof.
   intros F x1 x2 P1 P2 P3.
@@ -1916,7 +1916,7 @@ Qed.
 
 Lemma fn_swap_inj: ∀ F, ∀ A, ∀ B, ∀ x1, ∀ x2, inj F A B → x1 ∈ A → x2 ∈ A 
   → x1 ≠ x2 
-  → inj (F \ J{⟨x1, F[x1]⟩} \ J{⟨x2, F[x2]⟩} ∪ J{⟨x2, F[x1]⟩} ∪ J{⟨x1, F[x2]⟩})
+  → inj (F \ `{⟨x1, F[x1]⟩} \ `{⟨x2, F[x2]⟩} ∪ `{⟨x2, F[x1]⟩} ∪ `{⟨x1, F[x2]⟩})
     A B.
 Proof.
   intros F A B x1 x2 P1 P2 P3 P4.
@@ -1927,20 +1927,20 @@ Proof.
   assert (ran(F) ⊆ B) as P7.
   { apply P1. }
   pose (inj_kick _ _ _ _ P1 P2) as Q1.
-  assert (x2 ∈ A \ J{x1}) as Q2.
+  assert (x2 ∈ A \ `{x1}) as Q2.
   { apply compl_i.
     + apply P3.
     + intros R1.
       apply P4.
       apply (sing_e _ _ R1). }
   pose (inj_kick _ _ _ _ Q1 Q2) as Q3.
-  assert ((F \ J{⟨x1, F[x1]⟩})[x2] = F[x2]) as Q4.
+  assert ((F \ `{⟨x1, F[x1]⟩})[x2] = F[x2]) as Q4.
   { apply kick_fval.
     + apply P5.
     + apply (eq_cr (λ x, x2 ∈ x) P6 P3).
     + apply P4. }
-  pose (eq_cl (λ x, inj (F \ J{⟨x1, F[x1]⟩} \ J{⟨x2, x⟩}) (A \ J{x1} \ J{x2}) (B \ J{F[x1]} \ J{x})) Q4 Q3) as Q5.
-  assert (x2 ∉ (A \ J{x1} \ J{x2})) as Q6.
+  pose (eq_cl (λ x, inj (F \ `{⟨x1, F[x1]⟩} \ `{⟨x2, x⟩}) (A \ `{x1} \ `{x2}) (B \ `{F[x1]} \ `{x})) Q4 Q3) as Q5.
+  assert (x2 ∉ (A \ `{x1} \ `{x2})) as Q6.
   { intros R1.
     destruct (compl_e _ _ _ R1) as [_ R2].
     apply R2.
@@ -1950,14 +1950,14 @@ Proof.
     apply R2.
     destruct R1 as [[_ [_ R1]] _].
     apply (R1 _ R3). }
-  assert (F[x1] ∉ (B \ J{F[x1]} \ J{F[x2]})) as Q8.
+  assert (F[x1] ∉ (B \ `{F[x1]} \ `{F[x2]})) as Q8.
   { intros R1.
     destruct (compl_e _ _ _ R1) as [R2 _].
     destruct (compl_e _ _ _ R2) as [_ R3].
     apply R3.
     apply sing_i. }
   pose (inj_exten _ _ _ _ _ Q5 Q6 (Q7 _ _ _ _ Q5 Q8)) as Q9.
-  assert (A \ J{x1} \ J{x2} ∪ J{x2} = A \ J{x1}) as Q10.
+  assert (A \ `{x1} \ `{x2} ∪ `{x2} = A \ `{x1}) as Q10.
   { apply compl_union2_annihilate.
     intros x R1.
     pose (sing_e _ _ R1) as R2.
@@ -1966,7 +1966,7 @@ Proof.
     + intros R3.
       apply P4.
       apply (eq_t (sing_e _ _ R3) (eq_s R2)). }
-  assert (B \ J{F[x2]} \ J{F[x1]} ∪ J{F[x1]} = B \ J{F[x2]}) as Q11.
+  assert (B \ `{F[x2]} \ `{F[x1]} ∪ `{F[x1]} = B \ `{F[x2]}) as Q11.
   { apply compl_union2_annihilate.
     intros x R1.
     pose (sing_e _ _ R1) as R2.
@@ -1979,26 +1979,26 @@ Proof.
       apply P4.
       apply (fval_inj _ _ _ _ _ P1 P2 P3).
       - apply (eq_t (sing_e _ _ R1) (eq_s (sing_e _ _ R3))). }
-  pose (eq_cl (λ x, inj (F \ J{⟨x1, F[x1]⟩} \ J{⟨x2, F[x2]⟩} ∪ J{⟨x2, F[x1]⟩}) x (B \ J{F[x1]} \ J{F[x2]} ∪ J{F[x1]})) Q10 Q9) as Q12.
-  pose (eq_cl (λ x, inj (F \ J{⟨x1, F[x1]⟩} \ J{⟨x2, F[x2]⟩} ∪ J{⟨x2, F[x1]⟩}) (A \ J{x1}) (x ∪ J{F[x1]})) (compl_exchange _ _ _) Q12) as Q13.
-  pose (eq_cl (λ x, inj (F \ J{⟨x1, F[x1]⟩} \ J{⟨x2, F[x2]⟩} ∪ J{⟨x2, F[x1]⟩}) (A \ J{x1}) x) Q11 Q13) as Q14.
-  assert (x1 ∉ A \ J{x1}) as Q15.
+  pose (eq_cl (λ x, inj (F \ `{⟨x1, F[x1]⟩} \ `{⟨x2, F[x2]⟩} ∪ `{⟨x2, F[x1]⟩}) x (B \ `{F[x1]} \ `{F[x2]} ∪ `{F[x1]})) Q10 Q9) as Q12.
+  pose (eq_cl (λ x, inj (F \ `{⟨x1, F[x1]⟩} \ `{⟨x2, F[x2]⟩} ∪ `{⟨x2, F[x1]⟩}) (A \ `{x1}) (x ∪ `{F[x1]})) (compl_exchange _ _ _) Q12) as Q13.
+  pose (eq_cl (λ x, inj (F \ `{⟨x1, F[x1]⟩} \ `{⟨x2, F[x2]⟩} ∪ `{⟨x2, F[x1]⟩}) (A \ `{x1}) x) Q11 Q13) as Q14.
+  assert (x1 ∉ A \ `{x1}) as Q15.
   { intros R1.
     destruct (compl_e _ _ _ R1) as [_ R2].
     apply R2.
     apply sing_i. }
-  assert (F[x2] ∉ (B \ J{F[x2]})) as Q16.
+  assert (F[x2] ∉ (B \ `{F[x2]})) as Q16.
   { intros R1.
     destruct (compl_e _ _ _ R1) as [_ R2].
     apply R2.
     apply sing_i. }
   pose (inj_exten _ _ _ _ _ Q14 Q15 (Q7 _ _ _ _ Q14 Q16)) as Q17.
-  assert (A \ J{x1} ∪ J{x1} = A) as Q18.
+  assert (A \ `{x1} ∪ `{x1} = A) as Q18.
   { apply compl_union2_annihilate.
     intros x R1.
     pose (sing_e _ _ R1) as R2.
     apply (eq_cl (λ x, x ∈ A) R2 P2). }
-  assert (B \ J{F[x2]} ∪ J{F[x2]} = B) as Q19.
+  assert (B \ `{F[x2]} ∪ `{F[x2]} = B) as Q19.
   { apply compl_union2_annihilate.
     intros x R1.
     pose (sing_e _ _ R1) as R2.
@@ -2006,13 +2006,13 @@ Proof.
     apply P7.
     apply (fval_ran _ _ P5).
     apply (eq_cr (λ x, x2 ∈ x) P6 P3). }
-  pose (eq_cl (λ x, inj (F \ J{⟨x1, F[x1]⟩} \ J{⟨x2, F[x2]⟩} ∪ J{⟨x2, F[x1]⟩} ∪ J{⟨x1, F[x2]⟩}) x (B \ J{F[x2]} ∪ J{F[x2]})) Q18 Q17) as Q20.
-  apply (eq_cl (λ x, inj (F \ J{⟨x1, F[x1]⟩} \ J{⟨x2, F[x2]⟩} ∪ J{⟨x2, F[x1]⟩} ∪ J{⟨x1, F[x2]⟩}) A x) Q19 Q20).
+  pose (eq_cl (λ x, inj (F \ `{⟨x1, F[x1]⟩} \ `{⟨x2, F[x2]⟩} ∪ `{⟨x2, F[x1]⟩} ∪ `{⟨x1, F[x2]⟩}) x (B \ `{F[x2]} ∪ `{F[x2]})) Q18 Q17) as Q20.
+  apply (eq_cl (λ x, inj (F \ `{⟨x1, F[x1]⟩} \ `{⟨x2, F[x2]⟩} ∪ `{⟨x2, F[x1]⟩} ∪ `{⟨x1, F[x2]⟩}) A x) Q19 Q20).
 Qed.
 
 Lemma fn_swap_fval: ∀ F, ∀ A, ∀ B, ∀ x1, ∀ x2, inj F A B → x1 ∈ A → x2 ∈ A 
   → x1 ≠ x2 
-  → (F \ J{⟨x1, F[x1]⟩} \ J{⟨x2, F[x2]⟩} ∪ J{⟨x2, F[x1]⟩} ∪ J{⟨x1, F[x2]⟩})[x1] = F[x2].
+  → (F \ `{⟨x1, F[x1]⟩} \ `{⟨x2, F[x2]⟩} ∪ `{⟨x2, F[x1]⟩} ∪ `{⟨x1, F[x2]⟩})[x1] = F[x2].
 Proof.
   intros F A B x1 x2 P1 P2 P3 P4.
   apply eq_s.

@@ -332,18 +332,18 @@ Proof.
           apply (wo_nle_i _ _ _ _ P1 R2 Q3 R3). }
       destruct P2 as [R1 R2].
       destruct (R1 (∪H)) as [y R3].
-      assert (fn ((∪H) ∪ J{⟨x0, y⟩})) as Q7.
+      assert (fn ((∪H) ∪ `{⟨x0, y⟩})) as Q7.
       { split.
         + apply (rel_exten _ _ _ P5).
         + apply (sing_val_exten _ _ _ P6 Q4). }
-      assert ((∪H) ∪ J{⟨x0, y⟩} ∈ H) as R4.
-      { assert (dom(∪H ∪ J{⟨x0, y⟩}) = {x1: A | x1 ≤[R] x0}) as R4.
+      assert ((∪H) ∪ `{⟨x0, y⟩} ∈ H) as R4.
+      { assert (dom(∪H ∪ `{⟨x0, y⟩}) = {x1: A | x1 ≤[R] x0}) as R4.
         { apply (eq_cr (λ x, x = {y: A| y ≤[R] x0}) (union2_dom _ _)).
-          apply (eq_cr (λ x, dom(∪H) ∪ dom(J{⟨x0, y⟩}) = x) 
+          apply (eq_cr (λ x, dom(∪H) ∪ dom(`{⟨x0, y⟩}) = x) 
             (sub_exten _ _ _ Q3)).
-          apply (eq_cr (λ x, x ∪ dom(J{⟨x0, y⟩}) = {x1: A | x1 <[R] x0} ∪ J{x0})
+          apply (eq_cr (λ x, x ∪ dom(`{⟨x0, y⟩}) = {x1: A | x1 <[R] x0} ∪ `{x0})
               Q6).
-          apply (eq_cr (λ x, (seg R A x0) ∪ x = {x1 : A | x1 <[ R] x0} ∪ J{ x0})
+          apply (eq_cr (λ x, (seg R A x0) ∪ x = {x1 : A | x1 <[ R] x0} ∪ `{ x0})
               (sing_pair_dom _ _)).
           apply eq_r. }
         apply P4.
@@ -362,12 +362,12 @@ Proof.
           - destruct (union_dom_e _ _ S3) as [f [S4 S5]].
             destruct (P4 f) as [S6 _].
             destruct (S6 S5) as [t [_ [_ [S7 [S8 [S9 S10]]]]]].
-            assert ((∪H ∪ J{⟨x0, y⟩})[xx] = f[xx]) as S11.
+            assert ((∪H ∪ `{⟨x0, y⟩})[xx] = f[xx]) as S11.
             { pose (union2_fvall _ _ _ (and_i P5 P6) Q7 S3) as T1.
               pose (union_fval _ _ _ S5 S8 (and_i P5 P6) S4) as T2.
               apply (eq_cl (λ x, x = f[xx]) T1).
               apply (eq_s T2). }
-            assert ((∪H ∪ J{⟨x0, y⟩})↾(seg R A xx) = f↾(seg R A xx)) as S12.
+            assert ((∪H ∪ `{⟨x0, y⟩})↾(seg R A xx) = f↾(seg R A xx)) as S12.
             { apply eq_s.
               apply (sub_restr_eq _ _ _ S8 Q7).
               + apply union2_sub_weak_l.
@@ -381,18 +381,18 @@ Proof.
                 - apply T4.
                 - left.
                   apply (l_le_t _ _ _ _ _ (wo_trans _ _ P1) T4 T2 S7 T5 T3). }
-            apply (eq_cr (λ x, G x ((∪H ∪ J{⟨x0, y⟩})[xx])) S12).
+            apply (eq_cr (λ x, G x ((∪H ∪ `{⟨x0, y⟩})[xx])) S12).
             apply (eq_cr (λ x, G (f↾(seg R A xx)) x) S11).
             apply S10.
             apply S4.
           - pose (sing_e _ _ (eq_cl (λ x, xx ∈ x) (sing_pair_dom _ _) S3)) as S4.
-            assert ((∪H ∪ J{⟨x0, y⟩})[xx] = y) as S5.
+            assert ((∪H ∪ `{⟨x0, y⟩})[xx] = y) as S5.
             { pose (union2_fvalr _ _ _ (sing_pair_is_fn _ _) Q7 S3) as T1.
               apply (eq_cl (λ x, x = y) T1).
-              apply (eq_cl (λ x, J{⟨x0, y⟩}[x] = y) S4).
+              apply (eq_cl (λ x, `{⟨x0, y⟩}[x] = y) S4).
               apply (eq_cr (λ x, x = y) (sing_pair_fval _ _)).
               apply eq_r. }
-            assert ((∪H ∪ J{⟨x0, y⟩})↾(seg R A xx) = ∪H) as S6.
+            assert ((∪H ∪ `{⟨x0, y⟩})↾(seg R A xx) = ∪H) as S6.
             { apply (@eq_t _ ((∪H)↾ seg R A xx)).
               + apply eq_s.
                 apply (sub_restr_eq _ _ _ (and_i P5 P6) Q7).
@@ -411,11 +411,11 @@ Proof.
                 apply (eq_cr (λ x, x ⊆ seg R A xx) Q6).
                 apply (eq_cr (λ x, seg R A x ⊆ seg R A xx) S4).
                 apply sub_r. }
-            apply (eq_cr (λ x, G x ((∪H ∪ J{⟨x0, y⟩})[xx])) S6).
+            apply (eq_cr (λ x, G x ((∪H ∪ `{⟨x0, y⟩})[xx])) S6).
             apply (eq_cr (λ x, G (∪H) x) S5).
             apply R3. }
       apply Q4.
-      apply (union_dom_i _ (∪H ∪ J{⟨x0, y⟩})).
+      apply (union_dom_i _ (∪H ∪ `{⟨x0, y⟩})).
       * apply (eq_cr (λ x, x0 ∈ x) (union2_dom _ _)).
         apply union2_ir.
         apply (eq_cr (λ x, x0 ∈ x) (sing_pair_dom _ _)).

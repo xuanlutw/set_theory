@@ -1,7 +1,7 @@
 Require Import Init.Init.
 Require Import Relation.Relation.
 
-Definition suc (A: J) := A ∪ (J{A}).
+Definition suc (A: J) := A ∪ (`{A}).
 Notation   "S( x )"   := (suc(x)).
 
 Definition inductive (A: J) := ∅ ∈ A ∧ ∀ x, x ∈ A → S(x) ∈ A.
@@ -47,7 +47,7 @@ Proof.
   apply suc_i1.
 Qed.
 
-Lemma suc_kick_self: ∀ A, S(A) \ J{A} = A.
+Lemma suc_kick_self: ∀ A, S(A) \ `{A} = A.
 Proof.
   intros A.
   apply sub_a.
@@ -57,7 +57,7 @@ Proof.
     destruct (suc_e _ _ P2) as [P4 | P4].
     - apply bot_e.
       apply P3.
-      apply (eq_cr (λ x, x ∈ J{A}) P4).
+      apply (eq_cr (λ x, x ∈ `{A}) P4).
       apply sing_i.
     - apply P4.
   + intros x P1.

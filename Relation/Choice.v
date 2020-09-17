@@ -42,7 +42,7 @@ Proof.
         apply nn_e.
         intros Q2.
         destruct (dom_e _ _ Q1) as [y Q3].
-        pose (M ∪ J{⟨x, y⟩}) as M'.
+        pose (M ∪ `{⟨x, y⟩}) as M'.
         assert (M' ∈ A) as Q4.
         { apply sub_i.
           + apply power_i.
@@ -114,7 +114,7 @@ Qed.
 (* Axiom of Choice IV *)
 Lemma ax_iv: ∀ A, (∀ a, a ∈ A → a ≠ ∅)
   → (∀ a1, ∀ a2, a1 ∈ A → a2 ∈ A → a1 ≠ a2 → a1 ∩ a2 = ∅)
-  → (∃ C, ∀ a, a ∈ A → ∃ x, C ∩ a = J{x}).
+  → (∃ C, ∀ a, a ∈ A → ∃ x, C ∩ a = `{x}).
 Proof.
   intros A P1 P2.
   pose (id A) as H.
@@ -162,10 +162,10 @@ Qed.
 
 (* Axiom of Choice III *)
 Lemma choice_fn_ex: ∀ A, ∃ F,
-  fn F ∧ dom(F) = 𝒫(A) \ J{∅} ∧ ∀ B, B ≠ ∅ → B ⊆ A → F[B] ∈ B.
+  fn F ∧ dom(F) = 𝒫(A) \ `{∅} ∧ ∀ B, B ≠ ∅ → B ⊆ A → F[B] ∈ B.
 Proof.
   intros A.
-  pose (𝒫(A) \ J{∅}) as B.
+  pose (𝒫(A) \ `{∅}) as B.
   pose (id B) as H.
   pose (id_is_fn B) as P1.
   assert (∀ i, i ∈ dom(H) → H[i] ≠ ∅) as P2.
@@ -180,7 +180,7 @@ Proof.
   split.
   + - apply P3.
   + split.
-    - apply (eq_cr (λ x, x = 𝒫(A) \ J{∅}) P4).
+    - apply (eq_cr (λ x, x = 𝒫(A) \ `{∅}) P4).
       apply id_dom.
     - intros A' Q1 Q2.
       assert (A' ∈ B) as Q3.

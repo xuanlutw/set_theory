@@ -72,7 +72,7 @@ Proof.
 Qed.
 
 Lemma _rec_single_pair_accept: ∀ A, ∀ a, ∀ F, a ∈ A 
-  → J{⟨∅, a⟩} ∈ {x: 𝒫(ω ⨉ A)| _rec_accept F A a x}.
+  → `{⟨∅, a⟩} ∈ {x: 𝒫(ω ⨉ A)| _rec_accept F A a x}.
 Proof.
   intros A a F P1.
   pose (_rec_accept F A a) as P.
@@ -113,7 +113,7 @@ Qed.
 
 Lemma _rec_union_fn: ∀ A, ∀ a, ∀ F, ∀ f, ∀ x, ∀ y, a ∈ A → fnm F A A
   → S(x) ∉  dom(f) → ⟨x, y⟩ ∈ f → x ∈ ω → f ∈ {x: 𝒫(ω ⨉ A)| _rec_accept F A a x}
-  → fn (f ∪ J{⟨S(x), F[y]⟩}).
+  → fn (f ∪ `{⟨S(x), F[y]⟩}).
 Proof. 
   intros A a F f x y P1 P2 P3 P4 P5 P6.
   pose (_rec_accept F A a) as P.
@@ -124,7 +124,7 @@ Proof.
     apply Q1.
   + apply sing_pair_is_fn.
   + apply (eq_cr (λ x, dom(f) ∩ x = ∅) (sing_pair_dom (S(x)) (F[y]))).
-    apply (eq_cr (λ x, x = ∅) (inter2_s (dom(f)) (J{S(x)}))).
+    apply (eq_cr (λ x, x = ∅) (inter2_s (dom(f)) (`{S(x)}))).
     apply inter2_empty.
     intros s P7 P8.
     apply P3.
@@ -133,7 +133,7 @@ Qed.
 
 Lemma _rec_union_accept: ∀ A, ∀ a, ∀ F, ∀ f, ∀ x, ∀ y, a ∈ A → fnm F A A 
   → S(x) ∉  dom(f) → ⟨x, y⟩ ∈ f → x ∈ ω → f ∈ {x: 𝒫(ω ⨉ A)| _rec_accept F A a x}
-  → (f ∪ J{⟨S(x), F[y]⟩}) ∈ {x: 𝒫(ω ⨉ A)| _rec_accept F A a x}.
+  → (f ∪ `{⟨S(x), F[y]⟩}) ∈ {x: 𝒫(ω ⨉ A)| _rec_accept F A a x}.
 Proof.
   intros A a F f x y P1 P2 P3 P4 P5 P6.
   pose (_rec_accept F A a) as P.
@@ -158,7 +158,7 @@ Proof.
   split.
   { apply (_rec_union_fn _ _ _ _ _ _ P1 P2 P3 P4 P5 P6). }
   split.
-  { apply (eq_cr (λ x, x ⊆ ω) (union2_dom f J{⟨S(x), F[y]⟩})).
+  { apply (eq_cr (λ x, x ⊆ ω) (union2_dom f `{⟨S(x), F[y]⟩})).
     apply union2_sub. 
     + destruct (sub_e _ _ _ P6) as [_ [_ [Q3 _]]].
       apply Q3.
@@ -166,7 +166,7 @@ Proof.
       apply sing_sub_i.
       apply (suc_is_nat _ P5). }
   split.
-  { apply (eq_cr (λ x, x ⊆ A) (union2_ran f J{⟨S(x), F[y]⟩})).
+  { apply (eq_cr (λ x, x ⊆ A) (union2_ran f `{⟨S(x), F[y]⟩})).
     apply union2_sub. 
     + destruct (sub_e _ _ _ P6) as [_ [_ [_ [Q3 _]]]].
       apply Q3.
@@ -182,7 +182,7 @@ Proof.
         apply (ran_i2 _ _ _ P4). }
   split.
   { destruct (sub_e _ _ _ P6) as [_ [_ [_ [_ [Q1 _]]]]].
-    apply (eq_cr (λ x, ∅ ∈ x) (union2_dom f J{⟨S(x), F[y]⟩})).
+    apply (eq_cr (λ x, ∅ ∈ x) (union2_dom f `{⟨S(x), F[y]⟩})).
     apply union2_il.
     apply Q1. }
   split.
@@ -194,8 +194,8 @@ Proof.
       apply (eq_cl (λ x, ⟨∅, x⟩ ∈ f) Q3).
       apply (fval_i2 _ _ Q1 Q2). }
   { apply (eq_cr (λ s, ∀ n, n ∈ ω → S(n) ∈ s 
-      → n ∈ s ∧ (f ∪ J{⟨S(x), F [y]⟩})[S(n)] = F[(f ∪ J{⟨S(x), F[y]⟩})[n]]) 
-      (union2_dom f J{⟨S(x), F[y]⟩})). 
+      → n ∈ s ∧ (f ∪ `{⟨S(x), F [y]⟩})[S(n)] = F[(f ∪ `{⟨S(x), F[y]⟩})[n]]) 
+      (union2_dom f `{⟨S(x), F[y]⟩})). 
     intros n Q1 Q2.
     destruct (union2_e _ _ _ Q2) as [Q3 | Q3].
     + split.
@@ -205,7 +205,7 @@ Proof.
         apply Q5.
       - destruct (sub_e _ _ _ P6) as [_ [Q4 [_ [_ [_ [_ Q5]]]]]].
         destruct (Q5 _ Q1 Q3) as [Q6 Q7].
-        apply (eq_cl (λ s, s = F[(f ∪ J{⟨S(x), F[y]⟩})[n]]) 
+        apply (eq_cl (λ s, s = F[(f ∪ `{⟨S(x), F[y]⟩})[n]]) 
           (union2_fvall _ _ _ Q4 (_rec_union_fn _ _ _ _ _ _ P1 P2 P3 P4 P5 P6) Q3)).
         apply (eq_cl (λ s, f[S(n)] = F[s])
           (union2_fvall _ _ _ Q4 (_rec_union_fn _ _ _ _ _ _ P1 P2 P3 P4 P5 P6) Q6)).
@@ -217,10 +217,10 @@ Proof.
       split.
       - apply union2_il.
         apply Q6.
-      - apply (eq_cl (λ s, s = F[(f ∪ J{⟨S(x), F[y]⟩})[n]]) 
+      - apply (eq_cl (λ s, s = F[(f ∪ `{⟨S(x), F[y]⟩})[n]]) 
           (union2_fvalr _ _ _ (sing_pair_is_fn (S(x)) (F[y])) 
           (_rec_union_fn _ _ _ _ _ _ P1 P2 P3 P4 P5 P6) Q3)).
-        apply (eq_cl (λ s, J{⟨S(x), F[y]⟩}[S(n)] = F[s]) 
+        apply (eq_cl (λ s, `{⟨S(x), F[y]⟩}[S(n)] = F[s]) 
           (union2_fvall _ _ _ Q7 (_rec_union_fn _ _ _ _ _ _ P1 P2 P3 P4 P5 P6) Q6)).
         apply eq_s.
         apply fval_i.
@@ -246,7 +246,7 @@ Proof.
     + apply dom_i.
       exists a.
       apply union_i.
-      exists (J{⟨∅, a⟩}).
+      exists (`{⟨∅, a⟩}).
       split.
       - apply (_rec_single_pair_accept _ _ _ P1). 
       - apply sing_i.
@@ -262,10 +262,10 @@ Proof.
         * apply P4.
         * destruct (sub_e _ _ _ P4) as [_ [P7 _]].
           apply (fval_i2 _ _ P7 P6).
-      - pose (f ∪ J{⟨S(x), F[y]⟩}) as g.
+      - pose (f ∪ `{⟨S(x), F[y]⟩}) as g.
         exists (g[S(x)]).
         apply union_i.
-        exists (f ∪ J{⟨S(x), F[y]⟩}).
+        exists (f ∪ `{⟨S(x), F[y]⟩}).
         assert (x ∈ ω) as P7. 
         { destruct (sub_e _ _ _ P4) as [_ [_ [P7 _]]].
           apply P7.
@@ -277,7 +277,7 @@ Proof.
         * destruct (sub_e _ _ _ P4) as [_ [P8 _]].
           apply fval_i2.
           apply (_rec_union_fn _ _ _ _ _ _ P1 S1 P6 P5 P7 P4).
-          apply (eq_cr (λ s, S(x) ∈ s) (union2_dom f (J{⟨S(x), F[y]⟩}))).
+          apply (eq_cr (λ s, S(x) ∈ s) (union2_dom f (`{⟨S(x), F[y]⟩}))).
           apply union2_ir.
           apply (eq_cr (λ s, S(x) ∈ s) (sing_pair_dom (S(x)) (F[y]))).
           apply sing_i. }
@@ -321,7 +321,7 @@ Proof.
     apply fval_i.
     + apply _rec_fun.
     + apply union_i.
-      exists (J{⟨∅, a⟩}).
+      exists (`{⟨∅, a⟩}).
       split.
       - apply (_rec_single_pair_accept _ _ _ P1).
       - apply sing_i. } 

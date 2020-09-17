@@ -74,7 +74,7 @@ Lemma pigenhole: ∀ n, ∀ m, n ∈ ω → m ⊂ n → n ≉ m.
 Proof.
   intros n m P1 P2 P3.
   pose (λ x, ∀ f, inj f x x → ran(f) = x) as P.
-  assert (P 〇ₙ) as I1.
+  assert (P 𝟢) as I1.
   { intros f [[_ [_ Q1]] _].
     apply (sub_empty_empty _ Q1). }
   assert (induction_step P) as I2.
@@ -93,17 +93,17 @@ Proof.
       assert (dom(f0) = S(k)) as R4.
       { destruct R1 as [[_ [R1 _]] _].
         apply R1. }
-      pose (f0 \ J{⟨k, f0[k]⟩}) as f1.
+      pose (f0 \ `{⟨k, f0[k]⟩}) as f1.
       pose (inj_kick _ _ _ _ R1 (suc_i1 k)) as Q5.
-      pose (eq_cl (λ s, inj f1 ((S(k)) \ J{k}) ((S(k)) \ J{s})) R2 Q5) as Q6.
+      pose (eq_cl (λ s, inj f1 ((S(k)) \ `{k}) ((S(k)) \ `{s})) R2 Q5) as Q6.
       pose (eq_cl (λ s, inj f1 s s) (suc_kick_self k) Q6) as Q7.
       pose (sing_sub_i _ _
         (fval_i2 _ _ R3 (eq_cr (λ x, k ∈ x) R4 (suc_i1 k)))) as Q8.
       apply (eq_cl (λ s, ran(s) = S(k)) (compl_union2_annihilate _ _ Q8)).
       apply (eq_cr (λ s, s = S(k)) (union2_ran _ _)).
-      apply (eq_cr (λ s, s ∪ ran(J{⟨k, f0[k]⟩}) = S(k)) (Q2 _ Q7)).
+      apply (eq_cr (λ s, s ∪ ran(`{⟨k, f0[k]⟩}) = S(k)) (Q2 _ Q7)).
       apply (eq_cr (λ s, k ∪ s = S(k)) (sing_pair_ran _ _)).
-      apply (eq_cr (λ s, k ∪ J{s} = S(k)) R2).
+      apply (eq_cr (λ s, k ∪ `{s} = S(k)) R2).
       apply eq_r. }
     assert (ran(f) ⊆ S(k)) as S4.
     { destruct Q3 as [[_ [_ Q3]] _].
@@ -125,7 +125,7 @@ Proof.
             (eq_cr (λ x, p ∈ x) S2 (suc_i2 _ _ R1)))).
         apply S3.
         * apply (fn_swap_inj _ _ _ _ _ Q3 (suc_i1 k) (suc_i2 _ _ R1) R3).
-        * apply (eq_cl (λ x, (f \ J{⟨k, f[k]⟩} \ J{⟨p, f[p]⟩} ∪ J{⟨p, f[k]⟩} ∪ J{ ⟨k, f[p]⟩})[k] = x) R2).
+        * apply (eq_cl (λ x, (f \ `{⟨k, f[k]⟩} \ `{⟨p, f[p]⟩} ∪ `{⟨p, f[k]⟩} ∪ `{ ⟨k, f[p]⟩})[k] = x) R2).
           apply (fn_swap_fval _ _ _ _ _ Q3 (suc_i1 k) (suc_i2 _ _ R1) R3).
       - pose (not_ex_all_not _ Q5) as Q6.
         assert (inj (f↾k) k k) as Q7.
@@ -212,7 +212,7 @@ Qed.
 
 Lemma omega_infinite: infinite ω.
 Proof.
-  apply (eqnum_psub_infinite _ (ω \ J{〇ₙ})).
+  apply (eqnum_psub_infinite _ (ω \ `{𝟢})).
   + apply psub_i.
     - apply compl_psub.
       * apply sing_sub_i.
@@ -298,10 +298,10 @@ Proof.
     - apply (eq_s P8).
 Qed.
 
-Lemma eqnum_sing_pair: ∀ x, ∀ y, J{x} ≈ J{y}.
+Lemma eqnum_sing_pair: ∀ x, ∀ y, `{x} ≈ `{y}.
 Proof.
   intros x y.
-  exists (J{⟨x, y⟩}).
+  exists (`{⟨x, y⟩}).
   apply sing_pair_bij.
 Qed.
 
@@ -313,10 +313,10 @@ Proof.
   apply (union2_bij _ _ _ _ _ _ P1 P2 P3 P4).
 Qed.
 
-Lemma eqnum_switch: ∀ S, ∀ s, ∀ a, s ∈ S → a ∉ S → S ≈ S \ J{s} ∪ J{a}.
+Lemma eqnum_switch: ∀ S, ∀ s, ∀ a, s ∈ S → a ∉ S → S ≈ S \ `{s} ∪ `{a}.
 Proof.
   intros S s a P1 P2.
-  apply (eq_cl (λ x, x ≈ S \ J{s} ∪ J{a}) 
+  apply (eq_cl (λ x, x ≈ S \ `{s} ∪ `{a}) 
     (compl_union2_annihilate _ _ (sing_sub_i _ _ P1))).
   apply eqnum_union2.
   + apply eqnum_r.
@@ -338,7 +338,7 @@ Lemma nat_psub_eqnum_nat: ∀ m, ∀ A, m ∈ ω → A ⊂ m → ∃ n, n ∈ ω
 Proof.
   intros m A P1.
   pose (λ k, ∀ s, s ⊂ k → ∃ t, t ∈ ω ∧ t <ₙ k ∧ s ≈ t) as P.
-  assert (P 〇ₙ) as I1.
+  assert (P 𝟢) as I1.
   { intros s Q1.
     destruct (psub_e2 _ _ Q1) as [x [_ Q2]].
     apply bot_e.
@@ -355,7 +355,7 @@ Proof.
           apply (Q6 (Q5 _ Q8)).
       - destruct (not_all_ex_not _ Q5) as [x Q6].
         destruct (nimp_e Q6) as [Q7 Q8].
-        assert (s \ J{k} ∪ J{x} ⊆ k) as Q9_.
+        assert (s \ `{k} ∪ `{x} ⊆ k) as Q9_.
         { intros xx R1.
           destruct (union2_e _ _ _ R1) as [R2 | R2].
           + destruct (compl_e _ _ _ R2) as [R3 R4].
@@ -370,7 +370,7 @@ Proof.
           repeat split.
           ++apply Q10.
           ++apply (less_less_less _ _ _ Q10 Q1 (suc_is_nat _ Q1) Q11 (suc_i1 _)).
-          ++apply (eqnum_t _ (s \ J{k} ∪ J{x}) _).
+          ++apply (eqnum_t _ (s \ `{k} ∪ `{x}) _).
             --apply (eqnum_switch _ _ _ Q4 Q8).
             --apply Q12.
         * exists k.
@@ -585,7 +585,7 @@ Proof.
           --intros Q4.
             destruct (union_e _ _ Q4) as [m [Q5 Q6]].
             destruct (ran_e _ _ Q5) as [n Q7].
-            destruct (LEM (n = 〇ₙ)) as [Q8 | Q8].
+            destruct (LEM (n = 𝟢)) as [Q8 | Q8].
             **assert (G[y] ∈ ran(G)) as Q9.
               { apply fval_ran.
                 + apply P2.

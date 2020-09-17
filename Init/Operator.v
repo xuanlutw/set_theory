@@ -14,15 +14,15 @@ Definition empty_c := (ex_outl ax_empty).
 Notation   "∅"     := (empty_c).
 
 Definition pair_c (A B: J) := (ex_outl (ax_pair A B)).
-Notation   "J{ x , y }"    := (pair_c x y).
+Notation   "`{ x , y }"    := (pair_c x y).
 
 Definition singleton (A: J) := (pair_c A A).
-Notation   "J{ x }"         := (singleton x).
+Notation   "`{ x }"         := (singleton x).
 
 Definition union_c (A: J) := (ex_outl (ax_union A)).
 Notation   "∪ A "         := (union_c A).
 
-Definition union2_c (A B: J) := (∪(J{A, B})).
+Definition union2_c (A B: J) := (∪(`{A, B})).
 Notation   "A ∪ B"           := (union2_c A B).
 
 Definition power_c (A: J) := (ex_outl (ax_power A)).
@@ -40,7 +40,7 @@ Notation   "A ∩ B"           := (inter2_c A B).
 Definition complement (A B : J) := ({x: A| x ∉ B}).
 Notation   "A \ B"              := (complement A B).
 
-Definition opair (A B: J) := J{J{A}, J{A, B}}.
+Definition opair (A B: J) := `{`{A}, `{A, B}}.
 Notation  "⟨ A , B ⟩"     := (opair A B).
 
 Definition in_cp (x A B: J) := ∃ a, ∃ b, a ∈ A ∧ b ∈ B ∧ x = ⟨a, b⟩.
@@ -332,14 +332,14 @@ Qed.
 (*----------------------------------------------------------------------------*)
 
 (* Pair and Singleton *)
-Lemma pair_e: ∀ A, ∀ B, ∀ x, x ∈ J{A, B} → x = A ∨ x = B.
+Lemma pair_e: ∀ A, ∀ B, ∀ x, x ∈ `{A, B} → x = A ∨ x = B.
 Proof.
   intros A B x P1.
   destruct (ex_outr (ax_pair A B) x) as [P2 _].
   apply (P2 P1).
 Qed.
 
-Lemma pair_il: ∀ A, ∀ B, A ∈ J{A, B}.
+Lemma pair_il: ∀ A, ∀ B, A ∈ `{A, B}.
 Proof.
   intros A B.
   destruct (ex_outr (ax_pair A B) A) as [_ P2].
@@ -348,7 +348,7 @@ Proof.
   apply eq_r.
 Qed.
 
-Lemma pair_ir: ∀ A, ∀ B, B ∈ J{A, B}.
+Lemma pair_ir: ∀ A, ∀ B, B ∈ `{A, B}.
 Proof.
   intros A B.
   destruct (ex_outr (ax_pair A B) B) as [_ P2].
@@ -357,26 +357,26 @@ Proof.
   apply eq_r.
 Qed.
 
-Lemma pair_s: ∀ A, ∀ B, J{A, B} = J{B, A}.
+Lemma pair_s: ∀ A, ∀ B, `{A, B} = `{B, A}.
 Proof.
   intros A B.
   apply sub_a.
   split.
   + intros x P1.
     destruct (pair_e _ _ _ P1) as [P2 | P2].
-    - apply (eq_cr (λ y, y ∈ J{B, A}) P2).
+    - apply (eq_cr (λ y, y ∈ `{B, A}) P2).
       apply pair_ir.
-    - apply (eq_cr (λ y, y ∈ J{B, A}) P2).
+    - apply (eq_cr (λ y, y ∈ `{B, A}) P2).
       apply pair_il.
   + intros x P1.
     destruct (pair_e _ _ _ P1) as [P2 | P2].
-    - apply (eq_cr (λ y, y ∈ J{A, B}) P2).
+    - apply (eq_cr (λ y, y ∈ `{A, B}) P2).
       apply pair_ir.
-    - apply (eq_cr (λ y, y ∈ J{A, B}) P2).
+    - apply (eq_cr (λ y, y ∈ `{A, B}) P2).
       apply pair_il.
 Qed.
 
-Lemma pair_eql: ∀ A, ∀ B, ∀ C, ∀ D, J{A, B} = J{C, D} → A = C ∨ A = D.
+Lemma pair_eql: ∀ A, ∀ B, ∀ C, ∀ D, `{A, B} = `{C, D} → A = C ∨ A = D.
 Proof.
   intros A B C D P1.
   pose (pair_il A B) as P2.
@@ -384,7 +384,7 @@ Proof.
   apply (pair_e _ _ _ P3). 
 Qed.
 
-Lemma pair_eqr: ∀ A, ∀ B, ∀ C, ∀ D, J{A, B} = J{C, D} → B = C ∨ B = D.
+Lemma pair_eqr: ∀ A, ∀ B, ∀ C, ∀ D, `{A, B} = `{C, D} → B = C ∨ B = D.
 Proof.
   intros A B C D P1.
   pose (pair_ir A B) as P2.
@@ -392,7 +392,7 @@ Proof.
   apply (pair_e _ _ _ P3). 
 Qed.
 
-Lemma sing_i: ∀ A, A ∈ J{A}.
+Lemma sing_i: ∀ A, A ∈ `{A}.
 Proof.
   intros A.
   destruct (ex_outr (ax_pair A A) A) as [_ P1].
@@ -401,14 +401,14 @@ Proof.
   apply eq_r.
 Qed.
 
-Lemma sing_i2: ∀ A, ∀ B, A = B → A ∈ J{B}.
+Lemma sing_i2: ∀ A, ∀ B, A = B → A ∈ `{B}.
 Proof.
   intros A B P1.
-  apply (eq_cl (λ x, A ∈ J{x}) P1).
+  apply (eq_cl (λ x, A ∈ `{x}) P1).
   apply sing_i.
 Qed.
 
-Lemma sing_e: ∀ A, ∀ B, B ∈ J{A} → A = B.
+Lemma sing_e: ∀ A, ∀ B, B ∈ `{A} → A = B.
 Proof.
   intros A B P1.
   destruct (ex_outr (ax_pair A A) B) as [P2 _].
@@ -419,14 +419,14 @@ Proof.
     apply P3.
 Qed.
 
-Lemma nsing_i: ∀ A, ∀ B, A ≠ B → B ∉ J{A}.
+Lemma nsing_i: ∀ A, ∀ B, A ≠ B → B ∉ `{A}.
 Proof.
   intros A B.
   apply contraposition1.
   apply sing_e.
 Qed.
 
-Lemma nsing_e: ∀ A, ∀ B, B ∉ J{A} → A ≠ B.
+Lemma nsing_e: ∀ A, ∀ B, B ∉ `{A} → A ≠ B.
 Proof.
   intros A B.
   apply contraposition1.
@@ -435,21 +435,21 @@ Proof.
   apply sing_i2.
 Qed.
   
-Lemma sing_sub_i: ∀ A, ∀ B, A ∈ B → J{A} ⊆ B.
+Lemma sing_sub_i: ∀ A, ∀ B, A ∈ B → `{A} ⊆ B.
 Proof.
   intros A B P1 x P2.
   apply (eq_cl (λ x, x ∈ B) (sing_e _ _ P2)).
   apply P1.
 Qed.
 
-Lemma sing_sub_e: ∀ A, ∀ B, J{A} ⊆ B → A ∈ B.
+Lemma sing_sub_e: ∀ A, ∀ B, `{A} ⊆ B → A ∈ B.
 Proof.
   intros A B P1.
   apply P1.
   apply sing_i.
 Qed.
 
-Lemma sing_nempty: ∀ A, J{A} ≠ ∅.
+Lemma sing_nempty: ∀ A, `{A} ≠ ∅.
 Proof.
   intros A.
   apply ex_nempty.
@@ -457,7 +457,7 @@ Proof.
   apply sing_i.
 Qed.
 
-Lemma sing_pair_eq1: ∀ A, ∀ B, ∀ C, J{A} = J{B, C} → A = B.
+Lemma sing_pair_eq1: ∀ A, ∀ B, ∀ C, `{A} = `{B, C} → A = B.
 Proof.
   intros A B C P1.
   apply sing_e.
@@ -465,14 +465,14 @@ Proof.
   apply pair_il.
 Qed.
 
-Lemma sing_pair_eq2: ∀ A, ∀ B, ∀ C, J{A} = J{B, C} → A = C.
+Lemma sing_pair_eq2: ∀ A, ∀ B, ∀ C, `{A} = `{B, C} → A = C.
 Proof.
   intros A B C P1.
   pose (eq_t P1 (pair_s B C)) as P2.
   apply (sing_pair_eq1 _ _ _ P2).
 Qed.
 
-Lemma sing_pair_eq3: ∀ A, ∀ B, ∀ C, J{A} = J{B, C} → B = C.
+Lemma sing_pair_eq3: ∀ A, ∀ B, ∀ C, `{A} = `{B, C} → B = C.
 Proof.
   intros A B C P1.
   pose (eq_s (sing_pair_eq1 _ _ _ P1)) as P2.
@@ -480,7 +480,7 @@ Proof.
   apply (eq_t P2 P3).
 Qed.
 
-Lemma sing_eq: ∀ A, ∀ B, J{A} = J{B} → A = B.
+Lemma sing_eq: ∀ A, ∀ B, `{A} = `{B} → A = B.
 Proof.
   intros A B P1.
   apply sing_e.
@@ -642,7 +642,7 @@ Lemma union2_sub_preserve_r: ∀ A, ∀ B, ∀ B', B ⊆ B' → A ∪ B ⊆ A �
   + apply (union2_ir _ _ _ (P1 _ P3)).
 Qed.
 
-Lemma union2_sing_e: ∀ A, ∀ a, ∀ x, x ∈ A ∪ J{a} → x ∈ A ∨ x = a.
+Lemma union2_sing_e: ∀ A, ∀ a, ∀ x, x ∈ A ∪ `{a} → x ∈ A ∨ x = a.
 Proof.
   intros A a x P1.
   destruct (union2_e _ _ _ P1) as [P2 | P2].
@@ -652,13 +652,13 @@ Proof.
     apply (eq_s (sing_e _ _ P2)).
 Qed.
 
-Lemma union2_sing_il: ∀ A, ∀ a, ∀ x, x ∈ A → x ∈ A ∪ J{a}.
+Lemma union2_sing_il: ∀ A, ∀ a, ∀ x, x ∈ A → x ∈ A ∪ `{a}.
 Proof.
   intros A a x.
   apply union2_il.
 Qed.
 
-Lemma union2_sing_ir: ∀ A, ∀ a, a ∈ A ∪ J{a}.
+Lemma union2_sing_ir: ∀ A, ∀ a, a ∈ A ∪ `{a}.
 Proof.
   intros A a.
   apply union2_ir.
@@ -1002,7 +1002,7 @@ Qed.
 (*----------------------------------------------------------------------------*)
 
 (* Order Pairs *)
-Lemma opair_e: ∀ A, ∀ B, ∀ x, x ∈ ⟨A, B⟩ → x = J{A} ∨ x = J{A, B}.
+Lemma opair_e: ∀ A, ∀ B, ∀ x, x ∈ ⟨A, B⟩ → x = `{A} ∨ x = `{A, B}.
 Proof.
   intros A B x P1.
   apply (pair_e _ _ _ P1).
@@ -1101,11 +1101,9 @@ Proof.
     - apply (union2_ir _ _ _ P2).
   + exists x.
     exists y.
-    split.
+    repeat split.
     - apply P1.
-    - split.
-      * apply P2.
-      * apply eq_r.
+    - apply P2.
 Qed.
 
 Lemma cp_e: ∀ A, ∀ B, ∀ x, x ∈ A ⨉ B → in_cp x A B.
@@ -1171,10 +1169,10 @@ Qed.
 Lemma nin_self: ∀ A, A ∉ A.
 Proof.
   intros A P1.
-  assert (∃ x, x ∈ J{A}) as P2.
+  assert (∃ x, x ∈ `{A}) as P2.
   { exists A.
     apply sing_i. }
-  destruct (ax_regular J{A}) as [m P3].
+  destruct (ax_regular `{A}) as [m P3].
   destruct (P3 P2) as [P4 P5].
   apply P5.
   exists A.
@@ -1187,10 +1185,10 @@ Qed.
 Lemma no_mutual_in: ∀ A, ∀ B, ~(A ∈ B ∧ B ∈ A).
 Proof.
   intros A B [P1 P2].
-  assert (∃ x, x ∈ J{A, B}) as P3.
+  assert (∃ x, x ∈ `{A, B}) as P3.
   { exists A.
     apply pair_il. }
-  destruct (ax_regular J{A, B}) as [m P4].
+  destruct (ax_regular `{A, B}) as [m P4].
   destruct (P4 P3) as [P5 P6].
   apply P6.
   destruct (pair_e _ _ _ P5) as [P7 | P7].

@@ -21,7 +21,7 @@ Proof.
 Qed.
 
 Definition omega := (ex_outl omega_exists).
-Notation   ω     := omega.
+Notation   "'ω'" := omega.
 
 Definition induction_step (P: J → Prop) := (∀ k, k ∈ ω → P k → P (S(k))).
 
