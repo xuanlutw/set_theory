@@ -1,7 +1,7 @@
 Require Import Init.Init.
 Require Import Relation.Relation.
 Require Import Nat.Nat.
-Require Import Ordinal.Order.
+Require Import Structure.Structure.
 Require Import Ordinal.Transfinite.
 Require Import Ordinal.Epsilon.
 

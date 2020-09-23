@@ -263,305 +263,366 @@ Proof.
 Qed.
 (*----------------------------------------------------------------------------*)
 
-(*[> Arith Law <]*)
-(*Lemma add_zero_l: forall m, m ∈ ω -> n.0 +ₙ m = m.*)
-(*Proof.*)
-  (*intros m P1.*)
-  (*assert (n.0 +ₙ n.0 = n.0) as P2.*)
-  (*{ apply (add_zero _ empty_is_nat). }*)
-  (*assert (forall k, k ∈ ω -> n.0 +ₙ k = k -> n.0 +ₙ S(k) = S(k)) as P3.*)
-  (*{ intros k P3 P4.*)
-    (*rewrite (add_red _ _ empty_is_nat P3).*)
-    (*f_equal.*)
-    (*apply P4. }*)
-  (*apply (induction_principle _ P2 P3 _ P1).*)
-(*Qed.*)
+Ltac is_nat :=
+  repeat match goal with
+    | [       |- ?P = ?P         ] => apply eq_r
+    | [       |- 𝟢 ∈ ω           ] => apply empty_is_nat
+    | [       |- 𝟣 ∈ ω           ] => apply one_is_nat
+    | [ H: ?P |- ?P              ] => apply H
+    | [       |- ⟨_, _⟩ ∈ cp _ _ ] => apply cp_i
+    | [       |- (S(_)) ∈ ω      ] => apply suc_is_nat
+    | [       |- ?P +ₙ ?Q ∈ ω    ] => apply add_is_nat
+    | [       |- ?P ×ₙ ?Q ∈ ω    ] => apply mul_is_nat
+  end.
 
-(*Lemma add_red_l: forall m n, m ∈ ω -> n ∈ ω -> S(m) +ₙ n = S(m +ₙ n).*)
-(*Proof.*)
-  (*intros m n P1 P2.*)
-  (*assert (S(m) +ₙ n.0 = S(m +ₙ n.0)) as P3.*)
-  (*{ rewrite (add_zero _ (suc_is_nat _ P1)).*)
-    (*rewrite (add_zero _ P1).*)
-    (*reflexivity. }*)
-  (*assert (forall k, k ∈ ω -> *)
-    (*S(m) +ₙ k = S(m +ₙ k) -> S(m) +ₙ S(k) = S(m +ₙ S(k))) as P4.*)
-  (*{ intros k P4 P5.*)
-    (*rewrite (add_red _ _ (suc_is_nat _ P1) P4).*)
-    (*rewrite P5.*)
-    (*f_equal.*)
-    (*symmetry.*)
-    (*apply (add_red _ _ P1 P4). }*)
-  (*apply (induction_principle _ P3 P4 _ P2).*)
-(*Qed.*)
+(* Arith Law *)
+Lemma add_zero_l: ∀ m, m ∈ ω → 𝟢 +ₙ m = m.
+Proof.
+  intros m P1.
+  pose (λ k, 𝟢 +ₙ k = k) as P.
+  assert (P 𝟢) as I1.
+  { apply (add_zero _ empty_is_nat). }
+  assert (induction_step P) as I2.
+  { intros k Q1 Q2.
+    apply (eq_cr (λ x, x = _) (add_red _ _ empty_is_nat Q1)).
+    apply (eq_cr (λ x, S(x) = _) Q2).
+    apply eq_r. }
+  apply (induction_principle _ I1 I2 _ P1).
+Qed.
 
-(*Lemma add_commutative: forall m n, m ∈ ω -> n ∈ ω -> m +ₙ n = n +ₙ m.*)
-(*Proof. *)
-  (*intros m n P1 P2.*)
-  (*assert (m +ₙ n.0 = n.0 +ₙ m) as P3.*)
-  (*{ rewrite (add_zero _ P1).*)
-    (*rewrite (add_zero_l _ P1).*)
-    (*reflexivity. }*)
-  (*assert (forall k, k ∈ ω -> m +ₙ k = k +ₙ m -> m +ₙ S(k) = S(k) +ₙ m) as P4.*)
-  (*{ intros k P4 P5.*)
-    (*rewrite (add_red _ _ P1 P4).*)
-    (*rewrite (add_red_l _ _ P4 P1).*)
-    (*f_equal.*)
-    (*apply P5. }*)
-  (*apply (induction_principle _ P3 P4 _ P2).*)
-(*Qed.*)
+Lemma add_red_l: ∀ m, ∀ n, m ∈ ω → n ∈ ω → S(m) +ₙ n = S(m +ₙ n).
+Proof.
+  intros m n P1 P2.
+  pose (λ k, S(m) +ₙ k = S(m +ₙ k)) as P.
+  assert (P 𝟢) as I1.
+  { apply (eq_cr (λ x, x = _) (add_zero _ (suc_is_nat _ P1))).
+    apply (eq_cr (λ x, _ = S(x)) (add_zero _ P1)).
+    apply eq_r. }
+  assert (induction_step P) as I2.
+  { intros k Q1 Q2.
+    apply (eq_cr (λ x, x = _) (add_red _ _ (suc_is_nat _ P1) Q1)).
+    apply (eq_cr (λ x, S(x) = _) Q2).
+    apply (eq_cr (λ x, _ = S(x)) (add_red _ _ P1 Q1)).
+    apply eq_r. }
+  apply (induction_principle _ I1 I2 _ P2).
+Qed.
 
-(*Lemma add_associative: forall m n p, m ∈ ω -> n ∈ ω -> p ∈ ω ->*)
-  (*m +ₙ (n +ₙ p) = (m +ₙ n) +ₙ p.*)
-(*Proof.*)
-  (*intros m n p P1 P2 P3.*)
-  (*assert (m +ₙ (n +ₙ n.0) = (m +ₙ n) +ₙ n.0) as P4.*)
-  (*{ rewrite (add_zero _ P2).*)
-    (*symmetry.    *)
-    (*apply add_zero.*)
-    (*apply (add_is_nat _ _ P1 P2). }*)
-  (*assert (forall k, k ∈ ω -> m +ₙ (n +ₙ k) = (m +ₙ n) +ₙ k ->*)
-    (*m +ₙ (n +ₙ S(k)) = (m +ₙ n) +ₙ S(k)) as P5.*)
-  (*{ intros k P5 P6.*)
-    (*rewrite (add_red _ _ (add_is_nat _ _ P1 P2) P5).*)
-    (*rewrite <- P6.*)
-    (*rewrite <- (add_red _ _ P1 (add_is_nat _ _ P2 P5)).*)
-    (*rewrite <- (add_red _ _ P2 P5).*)
-    (*reflexivity. }*)
-  (*apply (induction_principle _ P4 P5 _ P3).*)
-(*Qed.*)
+Lemma add_commu: ∀ m, ∀ n, m ∈ ω → n ∈ ω → m +ₙ n = n +ₙ m.
+Proof.
+  intros m n P1 P2.
+  pose (λ k, m +ₙ k = k +ₙ m) as P.
+  assert (P 𝟢) as I1.
+  { apply (eq_cr (λ x, x = _) (add_zero _ P1)).
+    apply (eq_cr (λ x, _ = x) (add_zero_l _ P1)).
+    apply eq_r. }
+  assert (induction_step P) as I2.
+  { intros k P4 P5.
+    apply (eq_cr (λ x, x = _) (add_red _ _ P1 P4)).
+    apply (eq_cr (λ x, _ = x) (add_red_l _ _ P4 P1)).
+    apply (eq_cl (λ x, _ = S(x)) P5).
+    apply eq_r. }
+  apply (induction_principle _ I1 I2 _ P2).
+Qed.
 
-(*Lemma mul_zero_l: forall m, m ∈ ω -> n.0 ×ₙ m = n.0.*)
-(*Proof.*)
-  (*intros m P1.*)
-  (*assert (n.0 ×ₙ n.0 = n.0) as P2.*)
-  (*{ apply (mul_zero _ empty_is_nat). }*)
-  (*assert (forall k, k ∈ ω -> n.0 ×ₙ k = n.0 -> n.0 ×ₙ S(k) = n.0) as P3.*)
-  (*{ intros k P3 P4.*)
-    (*rewrite (mul_red _ _ empty_is_nat P3).*)
-    (*rewrite P4.*)
-    (*apply (add_zero _ empty_is_nat). }*)
-  (*apply (induction_principle _ P2 P3 _ P1).*)
-(*Qed.*)
+Lemma add_assoc: ∀ m, ∀ n, ∀ p, m ∈ ω → n ∈ ω → p ∈ ω
+  → m +ₙ (n +ₙ p) = (m +ₙ n) +ₙ p.
+Proof.
+  intros m n p P1 P2 P3.
+  pose (λ k, m +ₙ (n +ₙ k) = (m +ₙ n) +ₙ k) as P.
+  assert (P 𝟢) as I1.
+  { apply (eq_cr (λ x, _ +ₙ x = _) (add_zero _ P2)).
+    apply eq_s.
+    apply add_zero.
+    is_nat. }
+  assert (induction_step P) as I2.
+  { intros k P5 P6.
+    red.
+    apply (eq_cr (λ x, _ = x) (add_red (m +ₙ n) k (add_is_nat _ _ P1 P2) P5)).
+    apply (eq_cl (λ x, _ = S(x)) P6).
+    apply (eq_cr (λ x, _ +ₙ x = _) (add_red _ _ P2 P5)).
+    apply (eq_cr (λ x, x = _) (add_red _ _ P1 (add_is_nat _ _ P2 P5))).
+    apply eq_r. }
+  apply (induction_principle _ I1 I2 _ P3).
+Qed.
 
-(*Lemma mul_red_l: forall m n, m ∈ ω -> n ∈ ω -> S(m) ×ₙ n = n +ₙ (m ×ₙ n).*)
-(*Proof.*)
-  (*intros m n P1 P2.*)
-  (*assert (S(m) ×ₙ n.0 = n.0 +ₙ (m ×ₙ n.0)) as P3.*)
-  (*{ rewrite (mul_zero _ (suc_is_nat _ P1)).*)
-    (*rewrite (mul_zero _ P1).*)
-    (*rewrite (add_zero _ empty_is_nat).*)
-    (*reflexivity. }*)
-  (*assert (forall k, k ∈ ω -> *)
-    (*S(m) ×ₙ k = k +ₙ (m ×ₙ k) -> S(m) ×ₙ S(k) = S(k) +ₙ (m ×ₙ S(k))) as P4.*)
-  (*{ intros k P4 P5.*)
-    (*rewrite (mul_red _ _ (suc_is_nat _ P1) P4).*)
-    (*rewrite (mul_red _ _ P1 P4).*)
-    (*rewrite P5.*)
-    (*rewrite (add_associative _ _ _ (suc_is_nat _ P1) P4 (mul_is_nat _ _ P1 P4)).*)
-    (*rewrite (add_associative _ _ _ (suc_is_nat _ P4) P1 (mul_is_nat _ _ P1 P4)).*)
-    (*rewrite (add_commutative _ _ (suc_is_nat _ P4) P1).*)
-    (*rewrite (add_red _ _ P1 P4).*)
-    (*rewrite (add_red_l _ _ P1 P4).*)
-    (*reflexivity. }*)
-  (*apply (induction_principle _ P3 P4 _ P2).*)
-(*Qed.*)
+Lemma mul_zero_l: ∀ m, m ∈ ω → 𝟢 ×ₙ m = 𝟢.
+Proof.
+  intros m P1.
+  pose (λ k, 𝟢 ×ₙ k = 𝟢) as P.
+  assert (P 𝟢) as I1.
+  { apply (mul_zero _ empty_is_nat). }
+  assert (induction_step P) as I2.
+  { intros k Q1 Q2.
+    apply (eq_cr (λ x, x = _) (mul_red _ _ empty_is_nat Q1)).
+    apply (eq_cr (λ x, _ +ₙ x = _) Q2).
+    apply (add_zero _ empty_is_nat). }
+  apply (induction_principle _ I1 I2 _ P1).
+Qed.
 
-(*Lemma distributive_l: forall m n p, m ∈ ω -> n ∈ ω -> p ∈ ω ->*)
-  (*m ×ₙ (n +ₙ p) = m ×ₙ n +ₙ m ×ₙ p.*)
-(*Proof.*)
-  (*intros m n p P1 P2 P3.*)
-  (*assert (m ×ₙ (n +ₙ n.0) = m ×ₙ n +ₙ m ×ₙ n.0) as P4.*)
-  (*{ rewrite (add_zero _ P2).*)
-    (*rewrite (mul_zero _ P1).*)
-    (*rewrite (add_zero _ (mul_is_nat _ _ P1 P2)). *)
-    (*reflexivity. }*)
-  (*assert (forall k, k ∈ ω -> m ×ₙ (n +ₙ k) = m ×ₙ n +ₙ m ×ₙ k -> *)
-    (*m ×ₙ (n +ₙ S(k)) = m ×ₙ n +ₙ m ×ₙ S(k)) as P5.*)
-  (*{ intros k P5 P6.*)
-    (*rewrite (add_red _ _ P2 P5).*)
-    (*rewrite (mul_red _ _ P1 (add_is_nat _ _ P2 P5)).*)
-    (*rewrite P6.*)
-    (*rewrite (mul_red _ _ P1 P5).*)
-    (*rewrite (add_associative _ _ _ *)
-      (*(mul_is_nat _ _ P1 P2) P1 (mul_is_nat _ _ P1 P5)).*)
-    (*rewrite (add_commutative _ _ (mul_is_nat _ _ P1 P2) P1).*)
-    (*rewrite <- (add_associative _ _ _ *)
-      (*P1 (mul_is_nat _ _ P1 P2) (mul_is_nat _ _ P1 P5)).*)
-    (*reflexivity. }*)
-  (*apply (induction_principle _ P4 P5 _ P3).*)
-(*Qed.*)
+Lemma mul_red_l: ∀ m, ∀ n, m ∈ ω → n ∈ ω → S(m) ×ₙ n = n +ₙ (m ×ₙ n).
+Proof.
+  intros m n P1 P2.
+  pose (λ k, S(m) ×ₙ k = k +ₙ (m ×ₙ k)) as P.
+  assert (P 𝟢) as I1.
+  { apply (eq_cr (λ x, x = _) (mul_zero _ (suc_is_nat _ P1))).
+    apply (eq_cr (λ x, _ = _ +ₙ x) (mul_zero _ P1)).
+    apply (eq_cr (λ x, _ = x) (add_zero _ empty_is_nat)).
+    apply eq_r. }
+  assert (induction_step P) as I2.
+  { intros k P4 P5.
+    apply (eq_cr (λ x, x = _) (mul_red _ _ (suc_is_nat _ P1) P4)).
+    apply (eq_cr (λ x, _ = _ +ₙ x) (mul_red _ _ P1 P4)).
+    apply (eq_cr (λ x, _ +ₙ x = _) P5).
+    apply (eq_cr (λ x, x = _)
+      (add_assoc _ _ _ (suc_is_nat _ P1) P4 (mul_is_nat _ _ P1 P4))).
+    apply (eq_cr (λ x, _ = x)
+      (add_assoc _ _ _ (suc_is_nat _ P4) P1 (mul_is_nat _ _ P1 P4))).
+    apply (eq_cr (λ x, _ = x +ₙ _) (add_commu _ _ (suc_is_nat _ P4) P1)).
+    apply (eq_cr (λ x, _ = x +ₙ _) (add_red _ _ P1 P4)).
+    apply (eq_cr (λ x, x +ₙ _ = _) (add_red_l _ _ P1 P4)).
+    apply eq_r. }
+  apply (induction_principle _ I1 I2 _ P2).
+Qed.
 
-(*Lemma mul_commutative: forall m n, m ∈ ω -> n ∈ ω -> m ×ₙ n = n ×ₙ m.*)
-(*Proof.*)
-  (*intros m n P1 P2.*)
-  (*assert (m ×ₙ n.0 = n.0 ×ₙ m) as P3.*)
-  (*{ rewrite (mul_zero _ P1).*)
-    (*rewrite (mul_zero_l _ P1).*)
-    (*reflexivity. }*)
-  (*assert (forall k, k ∈ ω -> m ×ₙ k = k ×ₙ m -> m ×ₙ S(k) = S(k) ×ₙ m) as P4.*)
-  (*{ intros k P4 P5.*)
-    (*rewrite (mul_red _ _ P1 P4).*)
-    (*rewrite (mul_red_l _ _ P4 P1).*)
-    (*f_equal.*)
-    (*apply P5. }*)
-  (*apply (induction_principle _ P3 P4 _ P2).*)
-(*Qed.*)
+Lemma distr_l: ∀ m, ∀ n, ∀ p, m ∈ ω → n ∈ ω → p ∈ ω
+  → m ×ₙ (n +ₙ p) = m ×ₙ n +ₙ m ×ₙ p.
+Proof.
+  intros m n p P1 P2 P3.
+  pose (λ k, m ×ₙ (n +ₙ k) = m ×ₙ n +ₙ m ×ₙ k) as P.
+  assert (P 𝟢) as I1.
+  { apply (eq_cr (λ x, _ ×ₙ x = _) (add_zero _ P2)).
+    apply (eq_cr (λ x, _ = _ +ₙ x) (mul_zero _ P1)).
+    apply (eq_cr (λ x, _ = x) (add_zero _ (mul_is_nat _ _ P1 P2))).
+    apply eq_r. }
+  assert (induction_step P) as I2.
+  { intros k P5 P6.
+    apply (eq_cr (λ x, _ ×ₙ x = _) (add_red _ _ P2 P5)).
+    apply (eq_cr (λ x, x = _) (mul_red _ _ P1 (add_is_nat _ _ P2 P5))).
+    apply (eq_cr (λ x, _ +ₙ x = _) P6).
+    apply (eq_cr (λ x, _ = _ +ₙ x) (mul_red _ _ P1 P5)).
+    apply (eq_cr (λ x, _ = x)
+      (add_assoc _ _ _ (mul_is_nat _ _ P1 P2) P1 (mul_is_nat _ _ P1 P5))).
+    apply (eq_cr (λ x, _ = x +ₙ _) (add_commu _ _ (mul_is_nat _ _ P1 P2) P1)).
+    apply (eq_cr (λ x, x = _)
+      (add_assoc _ _ _ P1 (mul_is_nat _ _ P1 P2) (mul_is_nat _ _ P1 P5))).
+    apply eq_r. }
+  apply (induction_principle _ I1 I2 _ P3).
+Qed.
 
-(*Lemma mul_associative: forall m n p, m ∈ ω -> n ∈ ω -> p ∈ ω ->*)
-  (*m ×ₙ (n ×ₙ p) = (m ×ₙ n) ×ₙ p.*)
-(*Proof.*)
-  (*intros m n p P1 P2 P3.*)
-  (*assert (m ×ₙ (n ×ₙ n.0) = (m ×ₙ n) ×ₙ n.0) as P4.*)
-  (*{ rewrite (mul_zero _ P2).*)
-    (*rewrite (mul_zero _ P1).*)
-    (*rewrite (mul_zero _ (mul_is_nat _ _ P1 P2)).*)
-    (*reflexivity. }*)
-  (*assert (forall k, k ∈ ω -> m ×ₙ (n ×ₙ k) = (m ×ₙ n) ×ₙ k ->*)
-    (*m ×ₙ (n ×ₙ S(k)) = (m ×ₙ n) ×ₙ S(k)) as P5.*)
-  (*{ intros k P5 P6.*)
-    (*rewrite (mul_red _ _ (mul_is_nat _ _ P1 P2) P5).*)
-    (*rewrite <- P6.*)
-    (*rewrite (mul_red _ _ P2 P5). *)
-    (*rewrite (distributive_l _ _ _ P1 P2 (mul_is_nat _ _ P2 P5)).*)
-    (*reflexivity. }*)
-  (*apply (induction_principle _ P4 P5 _ P3).*)
-(*Qed.*)
+Lemma mul_commu: ∀ m, ∀ n, m ∈ ω → n ∈ ω → m ×ₙ n = n ×ₙ m.
+Proof.
+  intros m n P1 P2.
+  pose (λ k, m ×ₙ k = k ×ₙ m) as P.
+  assert (P 𝟢) as I1.
+  { apply (eq_cr (λ x, x = _) (mul_zero _ P1)).
+    apply (eq_cr (λ x, _ = x) (mul_zero_l _ P1)).
+    apply eq_r. }
+  assert (induction_step P) as I2.
+  { intros k P4 P5.
+    apply (eq_cr (λ x, x = _) (mul_red _ _ P1 P4)).
+    apply (eq_cr (λ x, _ = x) (mul_red_l _ _ P4 P1)).
+    apply (eq_cr (λ x, _ +ₙ x = _) P5).
+    apply eq_r. }
+  apply (induction_principle _ I1 I2 _ P2).
+Qed.
 
-(*Lemma mul_equal_zero: forall m n, m ∈ ω -> n ∈ ω ->*)
-  (*m ×ₙ n = n.0 -> m = n.0 \/ n = n.0.*)
-(*Proof.*)
-  (*intros m n P1 P2.*)
-  (*apply contraposition4.*)
-  (*intros P3 P4.*)
-  (*destruct (not_or_and _ _ P3) as [P5 P6].*)
-  (*destruct (nat_is_suc _ P1 P5) as [mm [P7 P8]].*)
-  (*destruct (nat_is_suc _ P2 P6) as [nn [P9 P10]].*)
-  (*rewrite P8 in P4.*)
-  (*rewrite (mul_red_l _ _ P7 P2) in P4.*)
-  (*rewrite P10 in P4.*)
-  (*rewrite (add_red_l _ _ P9 (mul_is_nat _ _ P7 (suc_is_nat _ P9))) in P4.*)
-  (*absurd (n.0 = S( nn +ₙ mm ×ₙ S( nn))).*)
-  (*+ apply empty_not_suc.*)
-  (*+ symmetry.*)
-    (*apply P4.*)
-(*Qed.*)
+Lemma mul_assoc: ∀ m, ∀ n, ∀ p, m ∈ ω → n ∈ ω → p ∈ ω
+  → m ×ₙ (n ×ₙ p) = (m ×ₙ n) ×ₙ p.
+Proof.
+  intros m n p P1 P2 P3.
+  pose (λ k, m ×ₙ (n ×ₙ k) = (m ×ₙ n) ×ₙ k) as P.
+  assert (P 𝟢) as I1.
+  { apply (eq_cr (λ x, _ ×ₙ x = _) (mul_zero _ P2)).
+    apply (eq_cr (λ x, x = _) (mul_zero _ P1)).
+    apply (eq_cr (λ x, _ = x) (mul_zero _ (mul_is_nat _ _ P1 P2))).
+    apply eq_r. }
+  assert (induction_step P) as I2.
+  { intros k P5 P6.
+    apply (eq_cr (λ x, _ = x) (mul_red _ _ (mul_is_nat _ _ P1 P2) P5)).
+    apply (eq_cl (λ x, _ = _ +ₙ x) P6).
+    apply (eq_cr (λ x, _ ×ₙ x = _) (mul_red _ _ P2 P5)).
+    apply (eq_cr (λ x, x = _) (distr_l _ _ _ P1 P2 (mul_is_nat _ _ P2 P5))).
+    apply eq_r. }
+  apply (induction_principle _ I1 I2 _ P3).
+Qed.
 
-(*Lemma distributive_r: forall m n p, m ∈ ω -> n ∈ ω -> p ∈ ω ->*)
-  (*(m +ₙ n) ×ₙ p = m ×ₙ p +ₙ n ×ₙ p.*)
-(*Proof.*)
-  (*intros m n p P1 P2 P3.*)
-  (*rewrite (mul_commutative _ _ (add_is_nat _ _ P1 P2) P3).*)
-  (*rewrite (mul_commutative _ _ P1 P3).*)
-  (*rewrite (mul_commutative _ _ P2 P3).*)
-  (*apply (distributive_l _ _ _ P3 P1 P2).*)
-(*Qed.*)
+Lemma mul_eq_zero: ∀ m, ∀ n, m ∈ ω → n ∈ ω → m ×ₙ n = 𝟢 → m = 𝟢 ∨ n = 𝟢.
+Proof.
+  intros m n P1 P2.
+  apply contraposition4.
+  intros P3 P4.
+  destruct (not_or_and P3) as [P5 P6].
+  destruct (nat_is_suc _ P1 P5) as [mm [P7 P8]].
+  destruct (nat_is_suc _ P2 P6) as [nn [P9 P10]].
+  apply (empty_not_suc (nn +ₙ mm ×ₙ S( nn))).
+  apply (eq_cl (λ x, _ = x)
+    (add_red_l _ _ P9 (mul_is_nat _ _ P7 (suc_is_nat _ P9)))).
+  apply (eq_cl (λ x, _ = x +ₙ _ ×ₙ x) P10).
+  apply (eq_cl (λ x, _ = x) (mul_red_l _ _ P7 P2)).
+  apply (eq_cl (λ x, _ = x ×ₙ _) P8).
+  apply (eq_s P4).
+Qed.
 
-(*Lemma add_equation: forall a b c d, a = b -> c = d -> a +ₙ c = b +ₙ d.*)
-(*Proof.*)
-  (*intros a b c d P1 P2.*)
-  (*rewrite P1.*)
-  (*rewrite P2.*)
-  (*reflexivity.*)
-(*Qed.*)
+Lemma distr_r: ∀ m, ∀ n, ∀ p, m ∈ ω → n ∈ ω → p ∈ ω
+  → (m +ₙ n) ×ₙ p = m ×ₙ p +ₙ n ×ₙ p.
+Proof.
+  intros m n p P1 P2 P3.
+  apply (eq_cr (λ x, x = _) (mul_commu _ _ (add_is_nat _ _ P1 P2) P3)).
+  apply (eq_cr (λ x, _ = x +ₙ _) (mul_commu _ _ P1 P3)).
+  apply (eq_cr (λ x, _ = _ +ₙ x) (mul_commu _ _ P2 P3)).
+  apply (distr_l _ _ _ P3 P1 P2).
+Qed.
 
-(*Lemma add_cancellation: forall m n l, m ∈ ω -> n ∈ ω -> l ∈ ω ->*)
-  (*m +ₙ l = n +ₙ l -> m = n.*)
-(*Proof.*)
-  (*intros m n l P1 P2 P3 P4.*)
-  (*pose (P := fun k => m +ₙ k = n +ₙ k -> m = n).*)
-  (*assert (P n.0) as I1.*)
-  (*{ intros Q1.*)
-    (*rewrite (add_zero _ P1) in Q1.*)
-    (*rewrite (add_zero _ P2) in Q1.*)
-    (*apply Q1. }*)
-  (*assert (induction_step P) as I2.*)
-  (*{ intros k Q1 Q2 Q3.*)
-    (*rewrite (add_red _ _ P1 Q1) in Q3.*)
-    (*rewrite (add_red _ _ P2 Q1) in Q3.*)
-    (*apply (Q2 (suc_unique _ _ *)
-      (*(add_is_nat _ _ P1 Q1) (add_is_nat _ _ P2 Q1) Q3)). }*)
-  (*apply (induction_principle _ I1 I2 _ P3 P4).*)
-(*Qed.*)
+Lemma add_eq: ∀ a, ∀ b, ∀ c, ∀ d, a = b → c = d → a +ₙ c = b +ₙ d.
+Proof.
+  intros a b c d P1 P2.
+  apply (eq_cr (λ x, x +ₙ _ = _) P1).
+  apply (eq_cr (λ x, _ +ₙ x = _) P2).
+  apply eq_r.
+Qed.
 
-(*Lemma add_cancellation_2: forall m n p q, p = q -> m +ₙ p = n +ₙ q -> *)
-  (*m ∈ ω -> n ∈ ω -> p ∈ ω -> q ∈ ω -> m = n.*)
-(*Proof.*)
-  (*intros m n p q P1 P2 P3 P4 P5 P6.*)
-  (*rewrite P1 in P2.*)
-  (*apply (add_cancellation _ _ _ P3 P4 P6 P2).*)
-(*Qed.*)
+Lemma add_eq_2: ∀ m, ∀ n, ∀ l, m = n → m +ₙ l = n +ₙ l.
+Proof.
+  intros m n l P1.
+  apply (add_eq _ _ _ _ P1 (eq_r _)).
+Qed.
 
-(*Lemma add_cancellation_inverse: forall m n l, m = n -> m +ₙ l = n +ₙ l.*)
-(*Proof.*)
-  (*intros m n l P1.*)
-  (*rewrite P1.*)
-  (*reflexivity.*)
-(*Qed.*)
+Lemma add_cancel: ∀ m, ∀ n, ∀ l, m ∈ ω → n ∈ ω → l ∈ ω
+  → m +ₙ l = n +ₙ l → m = n.
+Proof.
+  intros m n l P1 P2 P3 P4.
+  pose (λ k, m +ₙ k = n +ₙ k → m = n) as P.
+  assert (P 𝟢) as I1.
+  { intros Q1.
+    apply (eq_t (eq_s (add_zero _ P1)) (eq_t Q1 (add_zero _ P2))). }
+  assert (induction_step P) as I2.
+  { intros k Q1 Q2 Q3.
+    pose (add_red _ _ P1 Q1) as Q4.
+    pose (add_red _ _ P2 Q1) as Q5.
+    pose (eq_t (eq_s Q4) (eq_t Q3 Q5)) as Q6.
+    apply Q2.
+    apply suc_unique.
+    all: is_nat. }
+  apply (induction_principle _ I1 I2 _ P3 P4).
+Qed.
 
-(*Lemma mul_equation: forall a b c d, a = b -> c = d -> a ×ₙ c = b ×ₙ d.*)
-(*Proof.*)
-  (*intros a b c d P1 P2.*)
-  (*rewrite P1.*)
-  (*rewrite P2.*)
-  (*reflexivity.*)
-(*Qed.*)
+Lemma add_cancel_2: ∀ m, ∀ n, ∀ p, ∀ q, p = q → m +ₙ p = n +ₙ q
+  → m ∈ ω → n ∈ ω → p ∈ ω → q ∈ ω → m = n.
+Proof.
+  intros m n p q P1 P2 P3 P4 P5 P6.
+  pose (eq_cl (λ x, _ +ₙ x = _) P1 P2) as P7.
+  apply (add_cancel _ _ _ P3 P4 P6 P7).
+Qed.
 
-(*Lemma mul_equation_2: forall a b c, a = b -> a ×ₙ c = b ×ₙ c.*)
-(*Proof.*)
-  (*intros a b c P1.*)
-  (*rewrite P1.*)
-  (*reflexivity.*)
-(*Qed.*)
+Lemma mul_eq: ∀ a, ∀ b, ∀ c, ∀ d, a = b → c = d → a ×ₙ c = b ×ₙ d.
+Proof.
+  intros a b c d P1 P2.
+  apply (eq_cr (λ x, x ×ₙ _ = _) P1).
+  apply (eq_cr (λ x, _ ×ₙ x = _) P2).
+  apply eq_r.
+Qed.
 
-(*Lemma add_cyc: forall m n l, m ∈ ω -> n ∈ ω -> l ∈ ω -> *)
-  (*(m +ₙ n) +ₙ l = (m +ₙ l) +ₙ n.*)
-(*Proof.*)
-  (*intros m n l P1 P2 P3.*)
-  (*rewrite <- (add_associative _ _ _ P1 P3 P2).*)
-  (*rewrite (add_commutative _ _ P3 P2).*)
-  (*rewrite (add_associative _ _ _ P1 P2 P3).*)
-  (*reflexivity.*)
-(*Qed.*)
+Lemma mul_eq_2: ∀ a, ∀ b, ∀ c, a = b → a ×ₙ c = b ×ₙ c.
+Proof.
+  intros a b c P1.
+  apply (mul_eq _ _ _ _ P1 (eq_r _)).
+Qed.
 
-(*Lemma mul_cyc: forall m n l, m ∈ ω -> n ∈ ω -> l ∈ ω -> *)
-  (*(m ×ₙ n) ×ₙ l = (m ×ₙ l) ×ₙ n.*)
-(*Proof.*)
-  (*intros m n l P1 P2 P3.*)
-  (*rewrite <- (mul_associative _ _ _ P1 P3 P2).*)
-  (*rewrite (mul_commutative _ _ P3 P2).*)
-  (*rewrite (mul_associative _ _ _ P1 P2 P3).*)
-  (*reflexivity.*)
-(*Qed.*)
+Lemma add_132: ∀ m, ∀ n, ∀ l, m ∈ ω → n ∈ ω → l ∈ ω
+  → m +ₙ n +ₙ l = m +ₙ l +ₙ n.
+Proof.
+  intros m n l P1 P2 P3.
+  apply (eq_cl (λ x, _ = x) (add_assoc _ _ _ P1 P3 P2)).
+  apply (eq_cr (λ x, _ = _ +ₙ x) (add_commu _ _ P3 P2)).
+  apply (eq_cr (λ x, _ = x) (add_assoc _ _ _ P1 P2 P3)).
+  apply eq_r.
+Qed.
 
-(*Lemma mul_cyc_2: forall m n l, m ∈ ω -> n ∈ ω -> l ∈ ω -> *)
-  (*(m ×ₙ n) ×ₙ l = (l ×ₙ m) ×ₙ n.*)
-(*Proof.*)
-  (*intros m n l P1 P2 P3.*)
-  (*rewrite <- (mul_associative _ _ _ P3 P1 P2).*)
-  (*rewrite (mul_commutative _ _ P3 (mul_is_nat _ _ P1 P2)).*)
-  (*reflexivity.*)
-(*Qed.*)
+Lemma add_213: ∀ m, ∀ n, ∀ l, m ∈ ω → n ∈ ω → l ∈ ω
+  → m +ₙ n +ₙ l = n +ₙ m +ₙ l.
+Proof.
+  intros m n l P1 P2 P3.
+  apply (eq_cr (λ x, _ = x +ₙ _) (add_commu _ _ P2 P1)).
+  apply eq_r.
+Qed.
+
+Lemma add_231: ∀ m, ∀ n, ∀ l, m ∈ ω → n ∈ ω → l ∈ ω
+  → m +ₙ n +ₙ l = n +ₙ l +ₙ m.
+Proof.
+  intros m n l P1 P2 P3.
+  apply (eq_cl (λ x, _ = x) (add_assoc _ _ _ P2 P3 P1)).
+  apply (eq_cr (λ x, _ = _ +ₙ x) (add_commu _ _ P3 P1)).
+  apply (eq_cr (λ x, _ = x) (add_assoc _ _ _ P2 P1 P3)).
+  apply (add_213 _ _ _ P1 P2 P3).
+Qed.
+
+Lemma add_312: ∀ m, ∀ n, ∀ l, m ∈ ω → n ∈ ω → l ∈ ω
+  → m +ₙ n +ₙ l = l +ₙ m +ₙ n.
+Proof.
+  intros m n l P1 P2 P3.
+  apply (eq_cr (λ x, _ = x +ₙ _) (add_commu _ _ P3 P1)).
+  apply (add_132 _ _ _ P1 P2 P3).
+Qed.
+
+Lemma add_321: ∀ m, ∀ n, ∀ l, m ∈ ω → n ∈ ω → l ∈ ω
+  → m +ₙ n +ₙ l = l +ₙ n +ₙ m.
+Proof.
+  intros m n l P1 P2 P3.
+  apply (eq_cr (λ x, _ = x +ₙ _) (add_commu _ _ P3 P2)).
+  apply (add_231 _ _ _ P1 P2 P3).
+Qed.
+
+Lemma mul_132: ∀ m, ∀ n, ∀ l, m ∈ ω → n ∈ ω → l ∈ ω
+  → m ×ₙ n ×ₙ l = m ×ₙ l ×ₙ n.
+Proof.
+  intros m n l P1 P2 P3.
+  apply (eq_cl (λ x, _ = x) (mul_assoc _ _ _ P1 P3 P2)).
+  apply (eq_cr (λ x, _ = _ ×ₙ x) (mul_commu _ _ P3 P2)).
+  apply (eq_cr (λ x, _ = x) (mul_assoc _ _ _ P1 P2 P3)).
+  apply eq_r.
+Qed.
+
+Lemma mul_213: ∀ m, ∀ n, ∀ l, m ∈ ω → n ∈ ω → l ∈ ω
+  → m ×ₙ n ×ₙ l = n ×ₙ m ×ₙ l.
+Proof.
+  intros m n l P1 P2 P3.
+  apply (eq_cr (λ x, _ = x ×ₙ _) (mul_commu _ _ P2 P1)).
+  apply eq_r.
+Qed.
+
+Lemma mul_231: ∀ m, ∀ n, ∀ l, m ∈ ω → n ∈ ω → l ∈ ω
+  → m ×ₙ n ×ₙ l = n ×ₙ l ×ₙ m.
+Proof.
+  intros m n l P1 P2 P3.
+  apply (eq_cl (λ x, _ = x) (mul_assoc _ _ _ P2 P3 P1)).
+  apply (eq_cr (λ x, _ = _ ×ₙ x) (mul_commu _ _ P3 P1)).
+  apply (eq_cr (λ x, _ = x) (mul_assoc _ _ _ P2 P1 P3)).
+  apply (mul_213 _ _ _ P1 P2 P3).
+Qed.
+
+Lemma mul_312: ∀ m, ∀ n, ∀ l, m ∈ ω → n ∈ ω → l ∈ ω
+  → m ×ₙ n ×ₙ l = l ×ₙ m ×ₙ n.
+Proof.
+  intros m n l P1 P2 P3.
+  apply (eq_cr (λ x, _ = x ×ₙ _) (mul_commu _ _ P3 P1)).
+  apply (mul_132 _ _ _ P1 P2 P3).
+Qed.
+
+Lemma mul_321: ∀ m, ∀ n, ∀ l, m ∈ ω → n ∈ ω → l ∈ ω
+  → m ×ₙ n ×ₙ l = l ×ₙ n ×ₙ m.
+Proof.
+  intros m n l P1 P2 P3.
+  apply (eq_cr (λ x, _ = x ×ₙ _) (mul_commu _ _ P3 P2)).
+  apply (mul_231 _ _ _ P1 P2 P3).
+Qed.
 (*[>----------------------------------------------------------------------------<]*)
 
-(*[> Ltac <]*)
-(*[> Flow: add enough equation into the goal <]*)
-(*[>       run nat_normal_form to normalize it <]*)
-(*[>       exchange order of mulple (I don't know how to do it automaticly now) <]*)
-(*[>       run nat_rea to reduce result <]*)
-(*[>       run is_nat to clean up <]*)
-(*Ltac is_nat :=*)
-  (*repeat match goal with*)
-    (*| [       |- ?P = ?P         ] => reflexivity*)
-    (*| [       |- n.0 ∈ ω         ] => apply empty_is_nat*)
-    (*| [       |- n.1 ∈ ω         ] => apply one_is_nat*)
-    (*| [ H: ?P |- ?P              ] => apply H*)
-    (*| [       |- ⟨_, _⟩ ∈ cp _ _ ] => apply cp_intro*)
-    (*| [       |- (S(_)) ∈ ω      ] => apply suc_is_nat*)
-    (*| [       |- ?P +ₙ ?Q ∈ ω    ] => apply add_is_nat*)
-    (*| [       |- ?P ×ₙ ?Q ∈ ω    ] => apply mul_is_nat*)
-  (*end.*)
-
+(*Ltac *)
+(*Flow: add enough equation into the goal *)
+      (*run nat_normal_form to normalize it *)
+      (*exchange order of mulple (I don't know how to do it automaticly now) *)
+      (*run nat_rea to reduce result *)
+      (*run is_nat to clean up *)
 (*Ltac nat_unwrap_mul_ M :=*)
   (*repeat match M with*)
     (*| ?R ×ₙ (?P +ₙ ?Q) => rewrite (distributive_l R P Q)*)

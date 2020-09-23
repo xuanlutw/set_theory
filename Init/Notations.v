@@ -64,7 +64,9 @@ Reserved Notation "x ≮[ R ] y"  (at level 80, no associativity).
 Reserved Notation "x ≤[ R ] y"  (at level 80, no associativity).
 Reserved Notation "x ≰[ R ] y"  (at level 80, no associativity).
 Reserved Notation "m <ₙ n"      (at level 80, no associativity).
+Reserved Notation "m ≮ₙ n"      (at level 80, no associativity).
 Reserved Notation "m ≤ₙ n"      (at level 80, no associativity).
+Reserved Notation "m ≰ₙ n"      (at level 80, no associativity).
 Reserved Notation "A ≈ B"       (at level 80, no associativity).
 Reserved Notation "A ≉ B"       (at level 80, no associativity).
 Reserved Notation "A ≼ B"       (at level 80, no associativity).

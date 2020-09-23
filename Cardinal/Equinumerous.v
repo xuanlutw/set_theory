@@ -1,6 +1,7 @@
 Require Import Init.Init.
 Require Import Relation.Relation.
 Require Import Nat.Nat.
+Require Import Structure.Structure.
 Require Import Ordinal.Ordinal.
 
 Require dpdgraph.dpdgraph.
@@ -284,14 +285,14 @@ Lemma finite_eqnum_unique: ∀ A, ∀ n, ∀ m, finite A → n ∈ ω → m ∈ 
 Proof.
   intros A n m P1 P2 P3 P4 P5.
   pose (eqnum_t _ _ _ (eqnum_s _ _ P4) P5) as P6.
-  destruct (nat_trichotomy_weak _ _ P2 P3) as [P7 | [P7 | P7]].
-  + destruct (sub_e2 _ _ (trans_e2 _ (nat_is_trans _ P3) _ P7)) as [P8 | P8].
+  destruct (nat_less_tricho_weak _ _ P2 P3) as [P7 | [P7 | P7]].
+  + destruct (sub_e2 _ _ (trans_e2 _ (nat_is_trans _ P3) _ (nat_less_e _ _ P7))) as [P8 | P8].
     - apply bot_e.
       apply (pigenhole _ _ P3 P8).
       apply (eqnum_s _ _ P6).
     - apply P8.
   + apply P7.
-  + destruct (sub_e2 _ _ (trans_e2 _ (nat_is_trans _ P2) _ P7)) as [P8 | P8].
+  + destruct (sub_e2 _ _ (trans_e2 _ (nat_is_trans _ P2) _ (nat_less_e _ _ P7))) as [P8 | P8].
     - apply bot_e.
       apply (pigenhole _ _ P2 P8).
       apply P6.
@@ -369,34 +370,34 @@ Proof.
           exists t.
           repeat split.
           ++apply Q10.
-          ++apply (less_less_less _ _ _ Q10 Q1 (suc_is_nat _ Q1) Q11 (suc_i1 _)).
+          ++apply (nat_l_l_t _ _ _ Q10 Q1 (suc_is_nat _ Q1) Q11 (less_suc _ Q1)).
           ++apply (eqnum_t _ (s \ `{k} ∪ `{x}) _).
             --apply (eqnum_switch _ _ _ Q4 Q8).
             --apply Q12.
         * exists k.
           repeat split.
           ++apply Q1.
-          ++apply suc_i1.
+          ++apply (less_suc _ Q1).
           ++apply (eq_cl (λ x, s ≈ x) Q9).
             apply (eqnum_switch _ _ _ Q4 Q8).
     + assert (s ⊆ k) as Q5.
       { intros x R1.
         pose (psub_e _ _ Q3 _ R1) as R2.
-        destruct (in_suc _ _ R2) as [R3 | R3].
-        + apply R3.
+        destruct (suc_e _ _ R2) as [R3 | R3].
         + apply bot_e.
-          apply (Q4 (eq_cl (λ x, x ∈ s) R3 R1)). }
+          apply (Q4 (eq_cl (λ x, x ∈ s) R3 R1)).
+        + apply R3. }
       destruct (sub_e2 _ _ Q5) as [Q6 | Q6].
       - destruct (Q2 _ Q6) as [t [Q7 [Q8 Q9]]].
         exists t.
         repeat split.
         * apply Q7.
-        * apply (less_less_less _ _ _ Q7 Q1 (suc_is_nat _ Q1) Q8 (suc_i1 _)).
+        * apply (nat_l_l_t _ _ _ Q7 Q1 (suc_is_nat _ Q1) Q8 (less_suc _ Q1)).
         * apply Q9.
       - exists k.
         repeat split.
         * apply Q1.
-        * apply suc_i1.
+        * apply (less_suc _ Q1).
         * apply (eq_cr (λ x, x ≈ k) Q6 (eqnum_r _)). }
   apply (induction_principle _ I1 I2 _ P1).
 Qed.

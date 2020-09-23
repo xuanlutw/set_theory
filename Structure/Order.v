@@ -1,6 +1,5 @@
 Require Import Init.Init.
 Require Import Relation.Relation.
-Require Import Nat.Nat.
 
 Definition less (x y R: J) := (⟨x, y⟩ ∈ R).
 Notation " x <[ R ] y" := (less x y R).
@@ -45,6 +44,40 @@ Proof.
   + destruct P4 as [_ [_ P4]].
     right. right.
     apply P4.
+Qed.
+
+Lemma weak_to_tricho: ∀ R, ∀ A, tricho_weak R A → r_irrefl R A → r_trans R A
+  → tricho R A.
+Proof.
+  intros R A P1 P2 P3 x y P4 P5.
+  destruct (P1 _ _ P4 P5) as [Q1 | [Q1 | Q1]].
+  + left.
+    repeat split.
+    - apply Q1.
+    - intros Q2.
+      apply (P2 _ P4).
+      apply (eq_cr (λ y, x <[R] y) Q2 Q1).
+    - intros Q2.
+      apply (P2 _ P4).
+      apply (P3 _ _ _ P4 P5 P4 Q1 Q2).
+  + right. left.
+    repeat split.
+    - intros Q2.
+      apply (P2 _ P4).
+      apply (eq_cr (λ y, x <[R] y) Q1 Q2).
+    - apply Q1.
+    - intros Q2.
+      apply (P2 _ P4).
+      apply (eq_cr (λ y, y <[R] x) Q1 Q2).
+  + right. right.
+    repeat split.
+    - intros Q2.
+      apply (P2 _ P4).
+      apply (P3 _ _ _ P4 P5 P4 Q2 Q1).
+    - intros Q2.
+      apply (P2 _ P4).
+      apply (eq_cr (λ y, y <[R] x) Q2 Q1).
+    - apply Q1.
 Qed.
 
 (* Partial Order *)
@@ -342,38 +375,38 @@ Proof.
   apply (wo_is_lo _ _ P1).
 Qed.
 
-Lemma no_descend: ∀ R, ∀ A, ∀ f, wo R A → fnm f ω A → 
-  ~(∀ n, n ∈ ω → f[S(n)] <[R] f[n]).
-Proof.
-  intros R A f P1 [P2 [P3 P4]] P5.
-  assert (least_bound R (ran(f))) as P6.
-  { apply (wo_least_prop _ _ P1).
-    + apply P4.
-    + apply ex_nempty.
-      exists (f[∅]).
-      apply (fval_ran _ _ P2).
-      apply (eq_cr (λ x, ∅ ∈ x) P3).
-      apply empty_is_nat. }
-  assert (~(least_bound R (ran(f)))) as P7.
-  { intros _.
-    destruct P6 as [y [P7 P8]].
-    destruct (ran_e _ _ P7) as [x P9].
-    pose (eq_cl (λ s, x ∈ s) P3 (dom_i2 _ _ _ P9)) as P10.
-    pose (fval_ran _ _ P2 (eq_cr (λ s, S(x) ∈ s) P3 (suc_is_nat _ P10))) as P11.
-    apply (wo_nle_i _ _ (f[S(x)]) (f[x]) P1).
-    + apply P4.
-      apply P11.
-    + apply P4.
-      apply (fval_ran _ _ P2).
-      apply (eq_cr (λ s, x ∈ s) P3).
-      apply P10.
-    + apply (P5 _ P10).
-    + apply (eq_cl (λ s, s ≤[R] f[S(x)]) (fval_i _ _ _ P2 P9)).
-      apply P8.
-      apply P11. }
-  apply bot_e.
-  apply (P7 P6).
-Qed.
+(*Lemma no_descend: ∀ R, ∀ A, ∀ f, wo R A → fnm f ω A → *)
+  (*~(∀ n, n ∈ ω → f[S(n)] <[R] f[n]).*)
+(*Proof.*)
+  (*intros R A f P1 [P2 [P3 P4]] P5.*)
+  (*assert (least_bound R (ran(f))) as P6.*)
+  (*{ apply (wo_least_prop _ _ P1).*)
+    (*+ apply P4.*)
+    (*+ apply ex_nempty.*)
+      (*exists (f[∅]).*)
+      (*apply (fval_ran _ _ P2).*)
+      (*apply (eq_cr (λ x, ∅ ∈ x) P3).*)
+      (*apply empty_is_nat. }*)
+  (*assert (~(least_bound R (ran(f)))) as P7.*)
+  (*{ intros _.*)
+    (*destruct P6 as [y [P7 P8]].*)
+    (*destruct (ran_e _ _ P7) as [x P9].*)
+    (*pose (eq_cl (λ s, x ∈ s) P3 (dom_i2 _ _ _ P9)) as P10.*)
+    (*pose (fval_ran _ _ P2 (eq_cr (λ s, S(x) ∈ s) P3 (suc_is_nat _ P10))) as P11.*)
+    (*apply (wo_nle_i _ _ (f[S(x)]) (f[x]) P1).*)
+    (*+ apply P4.*)
+      (*apply P11.*)
+    (*+ apply P4.*)
+      (*apply (fval_ran _ _ P2).*)
+      (*apply (eq_cr (λ s, x ∈ s) P3).*)
+      (*apply P10.*)
+    (*+ apply (P5 _ P10).*)
+    (*+ apply (eq_cl (λ s, s ≤[R] f[S(x)]) (fval_i _ _ _ P2 P9)).*)
+      (*apply P8.*)
+      (*apply P11. }*)
+  (*apply bot_e.*)
+  (*apply (P7 P6).*)
+(*Qed.*)
 (* Skip reverse *)
 
 Lemma wo_prop_least: ∀ₚ P, ∀ R, ∀ A, ∀ x0, wo R A → x0 ∈ A → P x0

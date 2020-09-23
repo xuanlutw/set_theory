@@ -188,4 +188,23 @@ Proof.
       apply (nat_not_in_self _ P1).
       apply (nat_is_trans _ P1 _ _ P4 P5).
 Qed.
+
+Lemma empty_in_nat: ∀ n, n ∈ ω → n ≠ ∅ → ∅ ∈ n.
+Proof.
+  intros n P1 P2.
+  pose (λ k, k ∈ ω → k ≠ ∅ → ∅ ∈ k) as P.
+  assert (P ∅) as I1.
+  { intros Q1 Q2.
+    apply bot_e.
+    apply (Q2 (eq_r _)). }
+  assert (induction_step P) as I2.
+  { intros k Q1 Q2 Q3 Q4.
+    destruct (LEM (k = ∅)) as [Q5 | Q5].
+    + apply (eq_cr (λ x, ∅ ∈ S(x)) Q5).
+      apply suc_i1.
+    + pose (nat_is_trans _ (suc_is_nat _ Q1)) as Q6.
+      apply (Q6 _ _ (Q2 Q1 Q5) (suc_i1 k)). }
+  apply (induction_principle _ I1 I2 _ P1 P1 P2).
+Qed.
+
 (*----------------------------------------------------------------------------*)

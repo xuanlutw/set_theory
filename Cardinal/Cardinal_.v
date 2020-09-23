@@ -1,6 +1,7 @@
 Require Import Init.Init.
 Require Import Relation.Relation.
 Require Import Nat.Nat.
+Require Import Structure.Structure.
 Require Import Ordinal.Ordinal.
 Require Import Cardinal.Equinumerous.
 
