@@ -80,7 +80,7 @@ Proof.
   pose (seg_e2 _ _ _ _ P1 Q2) as Q4.
   exists x.
   repeat split.
-  + apply (dom_i2 _ _ _ Q1).
+  + apply (dom_i _ _ _ Q1).
   + apply Q3.
   + apply Q1.
   + apply Q4.
@@ -267,7 +267,7 @@ Proof.
     assert (dom(fQ) = {x: A |x ≤[R] tQ}) as Q9.
     { destruct Q8 as [_ [_ [Q8 _]]].
       apply Q8. }
-    pose (eq_cl (λ y, x ∈ y) Q9 (dom_i2 _ _ _ Q4)) as Q10.
+    pose (eq_cl (λ y, x ∈ y) Q9 (dom_i _ _ _ Q4)) as Q10.
     destruct (sub_e _ _ _ Q10) as [Q11 Q12].
     apply (eq_cr (λ x, x = y2) (fval_i _ _ _ Q7 Q4)).
     destruct (union_e _ _ R1) as [fR [R3 R4]].
@@ -276,7 +276,7 @@ Proof.
     assert (dom(fR) = {x: A |x ≤[R] tR}) as R9.
     { destruct R8 as [_ [_ [R8 _]]].
       apply R8. }
-    pose (eq_cl (λ y, x ∈ y) R9 (dom_i2 _ _ _ R4)) as R10.
+    pose (eq_cl (λ y, x ∈ y) R9 (dom_i _ _ _ R4)) as R10.
     destruct (sub_e _ _ _ R10) as [R11 R12].
     apply (eq_cr (λ y, fQ[x] = y) (fval_i _ _ _ R7 R4)).
     destruct (wo_tricho_weak _ _ P1 _ _ Q6 R6) as [P6 | [P6 | P6]].
@@ -296,7 +296,7 @@ Proof.
       destruct (union_e _ _ Q3) as [f [Q4 Q5]].
       destruct (P4 f) as [Q6 _].
       destruct (Q6 Q4) as [t [_ [_ [_ [_ [Q7 _]]]]]].
-      pose (eq_cl (λ y, x ∈ y) Q7 (dom_i2 _ _ _ Q5)) as Q8.
+      pose (eq_cl (λ y, x ∈ y) Q7 (dom_i _ _ _ Q5)) as Q8.
       destruct (sub_e _ _ _ Q8) as [Q9 _].
       apply Q9.
     - destruct (wo_prop_least (λ x, x ∉ dom(∪H)) _ _ _ P1 Q1 Q2) 
@@ -309,7 +309,7 @@ Proof.
           destruct (union_e _ _ R2) as [f [R4 R5]].
           destruct (P4 f) as [R6 _].
           destruct (R6 R4) as [t [S1 [_ [_ [_ [R7 _]]]]]].
-          pose (eq_cl (λ y, xx ∈ y) R7 (dom_i2 _ _ _ R5)) as R8.
+          pose (eq_cl (λ y, xx ∈ y) R7 (dom_i _ _ _ R5)) as R8.
           destruct (sub_e _ _ _ R8) as [R9 R10].
           apply seg_i.
           - apply R9.

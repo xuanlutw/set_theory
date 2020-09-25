@@ -53,7 +53,7 @@ Proof.
     + apply (eq_cr (λ y, x ∉ y) Q3 Q4).
       apply sub_i.
       * apply (eq_cl (λ y, x ∈ y) P3).
-        apply (dom_i2 _ _ _ Q2).
+        apply (dom_i _ _ _ Q2).
       * apply Q4. }
   apply P4.
   apply (eq_cr (λ y, B ∈ y) P2).
@@ -143,7 +143,7 @@ Proof.
               destruct (not_and_or (Q6 x)) as [R5 | R5].
               * apply bot_e.
                 apply (R5 R4).
-              * pose (S4 _ (ran_i2 _ _ _ R3)) as R6.
+              * pose (S4 _ (ran_i _ _ _ R3)) as R6.
                 destruct (suc_e _ _ R6) as [R7 | R7].
                 ++apply bot_e.
                   apply R5.
@@ -603,7 +603,7 @@ Proof.
             **assert (n ∈ ω) as Q9.
               { destruct P6 as [_ [P6 _]].
                 apply (eq_cl (λ x, n ∈ x) P6).
-                apply (dom_i2 _ _ _ Q7). }
+                apply (dom_i _ _ _ Q7). }
               destruct (nat_is_suc _ Q9 Q8) as [n' [Q10 Q11]].
               apply (Q3 n').
               repeat split.
@@ -643,7 +643,7 @@ Proof.
         apply (eq_cr (λ x, x ∈ F⟦m⟧) R1).
         apply image_i2.
         + apply P1.
-        + apply (dom_i2 _ _ _ Q3).
+        + apply (dom_i _ _ _ Q3).
         + apply Q6. }
       destruct (restr_e _ _ _ _ Q2) as [Q9 Q10].
       destruct (compl_e _ _ _ Q10) as [Q11 Q12].
@@ -655,12 +655,12 @@ Proof.
         apply (eq_cr (λ x, x ∈ G⟦F⟦m⟧⟧) R1).
         apply image_i2.
         + apply P2.
-        + apply (dom_i2 _ _ _ (inv_e _ _ _ Q9)).
+        + apply (dom_i _ _ _ (inv_e _ _ _ Q9)).
         + apply Q8. }
       assert (n ∈ ω) as Q14.
       { destruct P6 as [_ [P6 _]].
         apply (eq_cl (λ x, n ∈ x) P6).
-        apply (dom_i2 _ _ _ Q7). }
+        apply (dom_i _ _ _ Q7). }
       assert (x2 ∈ C) as Q15.
       { apply union_i.
         exists (G⟦F⟦m⟧⟧).

@@ -188,39 +188,39 @@ Proof.
         * intros y Q2.
           destruct (ran_e _ _ Q2) as [x Q3].
           pose (fval_i _ _ _ P8 Q3) as Q4.
-          destruct (P10 _ (eq_cl (λ y, x ∈ y) P9 (dom_i2 _ _ _ Q3)))
+          destruct (P10 _ (eq_cl (λ y, x ∈ y) P9 (dom_i _ _ _ Q3)))
             as [[_ Q5] | [Q5 Q6]].
           ++apply bot_e.
             apply Q1.
-            destruct (fval_e _ _ _ (eq_s Q5) P8 (dom_i2 _ _ _ Q3)) as [Q6 _].
-            apply (ran_i2 _ _ _ Q6).
+            destruct (fval_e _ _ _ (eq_s Q5) P8 (dom_i _ _ _ Q3)) as [Q6 _].
+            apply (ran_i _ _ _ Q6).
           ++apply (eq_cr (λ x, x ∈ A) Q4).
             apply (eq_cr (λ x, x ∈ A) Q6).
             apply (compl_sub _ _ _ (P6 _ Q5 (compl_sub _ _))).
     + intros x1 x2 y Q2 Q3.
-      pose (eq_cl (λ x, _ ∈ x) P9 (dom_i2 _ _ _ Q2)) as Q4.
-      pose (eq_cl (λ x, _ ∈ x) P9 (dom_i2 _ _ _ Q3)) as Q5.
+      pose (eq_cl (λ x, _ ∈ x) P9 (dom_i _ _ _ Q2)) as Q4.
+      pose (eq_cl (λ x, _ ∈ x) P9 (dom_i _ _ _ Q3)) as Q5.
       destruct (ord_tricho_weak _ _ (in_ord_ord _ _ P1 Q4)
         (in_ord_ord _ _ P1 Q5)) as [Q6 | [Q6 | Q6]].
       - apply bot_e.
         apply (R2 _ _ Q6 Q5).
         * intros Q7.
           apply Q1.
-          destruct (fval_e _ _ _ (eq_s Q7) P8 (dom_i2 _ _ _ Q3)) as [Q8 _].
-          apply (ran_i2 _ _ _ Q8).
+          destruct (fval_e _ _ _ (eq_s Q7) P8 (dom_i _ _ _ Q3)) as [Q8 _].
+          apply (ran_i _ _ _ Q8).
         * apply (eq_t (eq_s (fval_i _ _ _ P8 Q2)) (fval_i _ _ _ P8 Q3)).
       - apply Q6.
       - apply bot_e.
         apply (R2 _ _ Q6 Q4).
         * intros Q7.
           apply Q1.
-          destruct (fval_e _ _ _ (eq_s Q7) P8 (dom_i2 _ _ _ Q2)) as [Q8 _].
-          apply (ran_i2 _ _ _ Q8).
+          destruct (fval_e _ _ _ (eq_s Q7) P8 (dom_i _ _ _ Q2)) as [Q8 _].
+          apply (ran_i _ _ _ Q8).
         * apply (eq_t (eq_s (fval_i _ _ _ P8 Q3)) (fval_i _ _ _ P8 Q2)). }
   destruct (ran_e _ _ R3) as [xx R4].
   pose (eq_s (fval_i _ _ _ P8 R4)) as R5.
   destruct (wo_prop_seg (λ x, F[x] = e) _ _ _ (ord_wo _ P1)
-    (eq_cl (λ x, xx ∈ x) P9 (dom_i2 _ _ _ R4)) R5) as [x0 [R6 [R7 R8]]].
+    (eq_cl (λ x, xx ∈ x) P9 (dom_i _ _ _ R4)) R5) as [x0 [R6 [R7 R8]]].
   assert (bij (F↾(seg (ER(Alpha)) Alpha x0)) (seg (ER(Alpha)) Alpha x0) A) as R9.
   { apply bij_i2.
     + apply (restr_fn _ _ P8).
@@ -252,8 +252,8 @@ Proof.
     + intros x1 x2 y Q1 Q2.
       destruct (restr_e _ _ _ _ Q1) as [Q3 Q4].
       destruct (restr_e _ _ _ _ Q2) as [Q5 Q6].
-      pose (eq_cl (λ x, _ ∈ x) P9 (dom_i2 _ _ _ Q3)) as Q7.
-      pose (eq_cl (λ x, _ ∈ x) P9 (dom_i2 _ _ _ Q5)) as Q8.
+      pose (eq_cl (λ x, _ ∈ x) P9 (dom_i _ _ _ Q3)) as Q7.
+      pose (eq_cl (λ x, _ ∈ x) P9 (dom_i _ _ _ Q5)) as Q8.
       destruct (ord_tricho_weak _ _ (in_ord_ord _ _ P1 Q7)
         (in_ord_ord _ _ P1 Q8)) as [Q9 | [Q9 | Q9]].
       - apply bot_e.

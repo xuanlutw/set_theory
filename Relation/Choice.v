@@ -1,6 +1,7 @@
 Require Import Init.Init.
 Require Import Relation.Relation_.
 Require Import Relation.Function.
+Require Import Relation.Function_ctor.
 Require Import Relation.Utils.
 
 (* Axiom Choice I *)
@@ -59,7 +60,7 @@ Proof.
             apply sing_i.
           + intros S1.
             apply Q2.
-            apply (dom_i2 _ _ _ S1). }
+            apply (dom_i _ _ _ S1). }
         assert (M ⊆ M') as Q6.
         { apply union2_sub_l. }
         destruct (P4 _ Q4) as  [Q7 | Q7].
@@ -87,8 +88,7 @@ Proof.
       * apply (cp_sub_dom _ _ _ (sub_e1 _ _)).
       * intros i Q1.
         destruct (nempty_ex _ (P2 _ Q1)) as [y Q2].
-        apply dom_i.
-        exists y.
+        apply (dom_i _ _ y).
         apply sub_i.
         ++apply cp_i.
           --apply Q1.
@@ -107,7 +107,7 @@ Proof.
       pose (P4 _ Q2) as Q3.
       destruct (sub_e _ _ _ Q3) as [Q4 [i' [y' [Q5 Q6]]]].
       apply (eq_cr (λ x, F[i] ∈ H[x]) (opair_eq_el _ _ _ _ Q5)).
-      apply (eq_cl (λ x, x ∈ H[i']) (fval_i _ _ _ P3 Q2)).
+      apply (eq_cr (λ x, x ∈ H[i']) (fval_i _ _ _ P3 Q2)).
       apply (eq_cr (λ x, x ∈ H[i']) (opair_eq_er _ _ _ _ Q5) Q6).
 Qed.
 
@@ -137,15 +137,16 @@ Proof.
     destruct (ran_e _ _ Q2) as [x Q4].
     destruct (LEM (x = a)) as [Q5 | Q5].
     - apply sing_i2.
-      apply (eq_cl (λ x, y = F[x]) Q5 (fval_i _ _ _ P4 Q4)).
+      apply eq_s.
+      apply (eq_cl (λ x, F[x] = y) Q5 (fval_i _ _ _ P4 Q4)).
     - assert (x ∈ A) as Q7.
       { apply (eq_cl (λ y, x ∈ y) P8).
-        apply (dom_i2 _ _ _ Q4). }
+        apply (dom_i _ _ _ Q4). }
       assert (x ∩ a ≠ ∅) as Q6.
       { apply ex_nempty.
         exists y.
         apply inter2_i.
-        + apply (eq_cr (λ y, y ∈ x) (fval_i _ _ _ P4 Q4)).
+        + apply (eq_cl (λ y, y ∈ x) (fval_i _ _ _ P4 Q4)).
           apply (eq_cl (λ y, F[x] ∈ y) (id_fval _ _ Q7)).
           apply (P6 _ (eq_cr (λ y, x ∈ y) P8 Q7)).
         + apply Q3. }
@@ -195,4 +196,3 @@ Proof.
       apply (eq_cl (λ x, f[A'] ∈ x) (id_fval _ _ Q3)).
       apply (P5 _ Q4).
 Qed.
-

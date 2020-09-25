@@ -2,16 +2,14 @@ Require Import Init.Init.
 
 Definition rel (R: J) := ∀ r, r ∈ R → ∃ a, ∃ b, r = ⟨a, b⟩.
 
-Definition in_dom (x R: J) := ∃ y, ⟨x, y⟩ ∈ R.
-Definition dom    (A: J)   := {x: ∪(∪(A))| in_dom x A}.
-Notation   "dom( A )"      := (dom A).
+Definition dom (R: J) := {x: ∪(∪(R))| ∃ y, ⟨x, y⟩ ∈ R}.
+Notation   "dom( R )" := (dom R).
 
-Definition in_ran (y R: J) := ∃ x, ⟨x, y⟩ ∈ R.
-Definition ran (A: J)      := {x: ∪(∪(A))| in_ran x A}.
-Notation   "ran( A )"      := (ran A).
+Definition ran (R: J) := {y: ∪(∪(R))| ∃ x, ⟨x, y⟩ ∈ R}.
+Notation   "ran( R )" := (ran R).
 
 Definition filed (R: J) := (dom(R) ∪ ran(R)).
-Notation   "fld( A )"   := (filed A).
+Notation   "fld( R )"   := (filed R).
 
 Definition r_over    (R A: J) := R ⊆ A ⨉ A.
 Definition r_refl    (R A: J) := ∀ x, x ∈ A → ⟨x, x⟩ ∈ R.
@@ -51,46 +49,24 @@ Qed.
 (*----------------------------------------------------------------------------*)
 
 (* Domain *)
-Lemma dom_superset: ∀ A, ∀ x, in_dom x A → x ∈ ∪(∪(A)).
-Proof.
-  intros A x [y P1].
-  apply union_i.
-  exists (`{x, y}).
-  split.
-  + apply union_i.
-    exists (⟨x, y⟩).
-    split.
-    - apply P1.
-    - apply pair_ir.
-  + apply pair_il.
-Qed.
-
-Lemma in_dom_i: ∀ R, ∀ x, ∀ y, ⟨x, y⟩ ∈ R → in_dom x R.
+Lemma dom_i: ∀ R, ∀ x, ∀ y, ⟨x, y⟩ ∈ R → x ∈ dom(R).
 Proof.
   intros R x y P1.
-  exists y.
-  apply P1.
-Qed.
-
-Lemma dom_i: ∀ R, ∀ x, in_dom x R → x ∈ dom(R).
-Proof.
-  intros R x [y P1].
   apply sub_i.
-  + apply dom_superset.
-    exists y.
-    apply P1.
+  + apply union_i.
+    exists (`{x, y}).
+    split.
+    - apply union_i.
+      exists (⟨x, y⟩).
+      split.
+      * apply P1.
+      * apply pair_ir.
+    - apply pair_il.
   + exists y.
     apply P1.
 Qed.
 
-Lemma dom_i2: ∀ R, ∀ x, ∀ y, ⟨x, y⟩ ∈ R → x ∈ dom(R).
-Proof.
-  intros R x y P1.
-  apply dom_i.
-  apply (in_dom_i R x y P1).
-Qed.
-
-Lemma dom_e: ∀ R, ∀ x, x ∈ dom(R) → in_dom x R.
+Lemma dom_e: ∀ R, ∀ x, x ∈ dom(R) → ∃ y, ⟨x, y⟩ ∈ R.
 Proof.
   intros R x P1.
   destruct (sub_e _ _ _ P1) as [_ P2].
@@ -101,14 +77,14 @@ Lemma sub_dom: ∀ F, ∀ G, F ⊆ G → dom(F) ⊆ dom(G).
 Proof.
   intros F G P1 x P2.
   destruct (dom_e _ _ P2) as [y P3].
-  apply (dom_i2 _ _ _ (P1 _ P3)).
+  apply (dom_i _ _ _ (P1 _ P3)).
 Qed.
 
 Lemma nin_dom: ∀ F, ∀ x, x ∉ dom(F) → ∀ y, ⟨x, y⟩ ∉ F.
 Proof. 
   intros F x P1 y P2.
   apply P1.
-  apply (dom_i2 _ _ _ P2).
+  apply (dom_i _ _ _ P2).
 Qed.
 
 Lemma cp_dom: ∀ A, ∀ B, B ≠ ∅ → dom(A ⨉ B) = A.
@@ -122,7 +98,7 @@ Proof.
     apply P4.
   + intros x P2.
     destruct (nempty_ex _ P1) as [y P3].
-    apply (dom_i2 _ _ y).
+    apply (dom_i _ _ y).
     apply (cp_i _ _ _ _ P2 P3).
 Qed.
 
@@ -136,46 +112,24 @@ Qed.
 (*----------------------------------------------------------------------------*)
 
 (* Range *)
-Lemma ran_superset: ∀ A, ∀ y, in_ran y A → y ∈ ∪(∪(A)).
-Proof.
-  intros A y [x P1].
-  apply union_i.
-  exists (`{x, y}).
-  split.
-  + apply union_i.
-    exists (⟨x, y⟩).
-    split.
-    - apply P1.
-    - apply pair_ir.
-  + apply pair_ir.
-Qed.
-
-Lemma in_ran_i: ∀ R, ∀ x, ∀ y, ⟨x, y⟩ ∈ R → in_ran y R.
+Lemma ran_i: ∀ R, ∀ x, ∀ y, ⟨x, y⟩ ∈ R → y ∈ ran(R).
 Proof.
   intros R x y P1.
-  exists x.
-  apply P1.
-Qed.
-
-Lemma ran_i: ∀ R, ∀ y, in_ran y R → y ∈ ran(R).
-Proof.
-  intros R y [x P1].
   apply sub_i.
-  + apply ran_superset.
-    exists x.
-    apply P1.
+  + apply union_i.
+    exists(`{x, y}).
+    split.
+    - apply union_i.
+      exists (⟨x, y⟩).
+      split.
+      * apply P1.
+      * apply pair_ir.
+    - apply pair_ir.
   + exists x.
     apply P1.
 Qed.
 
-Lemma ran_i2: ∀ R, ∀ x, ∀ y, ⟨x, y⟩ ∈ R → y ∈ ran(R).
-Proof.
-  intros R x y P1.
-  apply ran_i.
-  apply (in_ran_i _ _ _ P1).
-Qed.
-
-Lemma ran_e: ∀ R, ∀ y, y ∈ ran(R) → in_ran y R.
+Lemma ran_e: ∀ R, ∀ y, y ∈ ran(R) → ∃ x, ⟨x, y⟩ ∈ R.
 Proof.
   intros R y P1.
   destruct (sub_e _ _ _ P1) as [_ P2].
@@ -186,7 +140,7 @@ Lemma sub_ran: ∀ F, ∀ G, F ⊆ G → ran(F) ⊆ ran(G).
 Proof.
   intros F G P1 y P2.
   destruct (ran_e _ _ P2) as [x P3].
-  apply (ran_i2 _ _ _ (P1 _ P3)). 
+  apply (ran_i _ _ _ (P1 _ P3)). 
 Qed.
 
 Lemma cp_ran: ∀ A, ∀ B, A ≠ ∅ → ran(A ⨉ B) = B.
@@ -200,7 +154,7 @@ Proof.
     apply P4.
   + intros y P2.
     destruct (nempty_ex _ P1) as [x P3].
-    apply (ran_i2 _ x _).
+    apply (ran_i _ x _).
     apply (cp_i _ _ _ _ P3 P2).
 Qed.
 
@@ -254,8 +208,8 @@ Proof.
   destruct (P1 _ P2) as [x [y P3]].
   apply (eq_cr (λ x, x ∈ _) P3).
   apply cp_i.
-  + apply (dom_i2 _ _ _ (eq_cl (λ x, x ∈ R) P3 P2)).
-  + apply (ran_i2 _ _ _ (eq_cl (λ x, x ∈ R) P3 P2)).
+  + apply (dom_i _ _ _ (eq_cl (λ x, x ∈ R) P3 P2)).
+  + apply (ran_i _ _ _ (eq_cl (λ x, x ∈ R) P3 P2)).
 Qed.
 
 Lemma r_over_fld: ∀ R, rel R → r_over R (fld(R)).

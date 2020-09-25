@@ -39,12 +39,12 @@ Proof.
     { intros k P2 P3 b1 b2 P4 P5.
       destruct (union_e _ _ P4) as [H1 [Q1 Q2]].
       destruct (sub_e _ _ _ Q1) as [_ [Q3 [_ [_ [_ [_ Q4]]]]]].
-      destruct (Q4 _ P2 (dom_i2 _ _ _  Q2)) as [Q5 Q6].
+      destruct (Q4 _ P2 (dom_i _ _ _  Q2)) as [Q5 Q6].
       apply (eq_cr (λ x, x = b2) (fval_i _ _ _ Q3 Q2)).
       apply (eq_cr (λ x, x = b2) Q6).
       destruct (union_e _ _ P5) as [H2 [R1 R2]].
       destruct (sub_e _ _ _ R1) as [_ [R3 [_ [_ [_ [_ R4]]]]]].
-      destruct (R4 _ P2 (dom_i2 _ _ _ R2)) as [R5 R6].
+      destruct (R4 _ P2 (dom_i _ _ _ R2)) as [R5 R6].
       apply (eq_cr (λ x, F[H1[k]] = x) (fval_i _ _ _ R3 R2)).
       apply (eq_cr (λ x, F[H1[k]] = x) R6).
       assert (H1[k] = H2[k]) as P6.
@@ -68,7 +68,7 @@ Proof.
       apply P3.
       destruct (union_e _ _ P4) as [Hi [P5 P6]].
       destruct (sub_e _ _ _ P5) as [_ [_ [P7 _]]].
-      apply (P7 _ (dom_i2 _ _ _ P6)).
+      apply (P7 _ (dom_i _ _ _ P6)).
 Qed.
 
 Lemma _rec_single_pair_accept: ∀ A, ∀ a, ∀ F, a ∈ A 
@@ -154,7 +154,7 @@ Proof.
         * apply Q3.
         * destruct (sub_e _ _ _ P6) as [_ [_ [_ [Q6 _]]]].
           apply (eq_cr (λ x, y ∈ x) Q4).
-          apply (Q6 _ (ran_i2 _ _ _ P4)). }
+          apply (Q6 _ (ran_i _ _ _ P4)). }
   split.
   { apply (_rec_union_fn _ _ _ _ _ _ P1 P2 P3 P4 P5 P6). }
   split.
@@ -179,7 +179,7 @@ Proof.
       - apply Q1.
       - apply (eq_cr (λ x, y ∈ x) Q2).
         apply Q4.
-        apply (ran_i2 _ _ _ P4). }
+        apply (ran_i _ _ _ P4). }
   split.
   { destruct (sub_e _ _ _ P6) as [_ [_ [_ [_ [Q1 _]]]]].
     apply (eq_cr (λ x, ∅ ∈ x) (union2_dom f `{⟨S(x), F[y]⟩})).
@@ -212,7 +212,7 @@ Proof.
         apply Q7.
     + pose (eq_cl (λ x, S(n) ∈ x) (sing_pair_dom (S(x)) (F[y])) Q3) as Q4.
       pose (suc_unique _ _ P5 Q1 (sing_e _ _ Q4)) as Q5.
-      pose (eq_cl (λ x, x ∈ dom(f)) Q5 (dom_i2 _ _ _ P4)) as Q6.
+      pose (eq_cl (λ x, x ∈ dom(f)) Q5 (dom_i _ _ _ P4)) as Q6.
       destruct (sub_e _ _ _ P6) as [_ [Q7 [_ [_ [_ [_ _]]]]]].
       split.
       - apply union2_il.
@@ -286,7 +286,7 @@ Proof.
     destruct (dom_e _ _ P3) as [y P4].
     destruct (union_e _ _ P4) as [f [P5 P6]].
     destruct (sub_e _ _ _ P5) as [_ [_ [P7 _]]].
-    apply (P7 _ (dom_i2 _ _ _ P6)). }
+    apply (P7 _ (dom_i _ _ _ P6)). }
   apply (inductive_subset_omega_coincident _ P3 P2).
 Qed.
 
@@ -297,7 +297,7 @@ Proof.
   destruct (ran_e _ _ P2) as [x P3].
   destruct (union_e _ _ P3) as [f [P4 P5]].
   destruct (sub_e _ _ _ P4) as [_ [_ [_ [P6 _]]]].
-  apply (P6 _ (ran_i2 _ _ _ P5)). 
+  apply (P6 _ (ran_i _ _ _ P5)). 
 Qed.
 
 Theorem recursion_thm: ∀ A, ∀ a, ∀ F, ∃ h, a ∈ A → fnm F A A 
@@ -330,9 +330,9 @@ Proof.
     destruct (dom_e _ _ P4) as [y P5].
     destruct (union_e _ _ P5) as [f [P6 P7]].
     destruct (sub_e _ _ _ P6) as [_ [P8 [_ [_ [_ [_ P9]]]]]].
-    destruct (P9 n P3 (dom_i2 _ _ _ P7)) as [P10 P11].
+    destruct (P9 n P3 (dom_i _ _ _ P7)) as [P10 P11].
     apply (eq_cl (λ x, x = F[h[n]]) 
-      (union_fval _ _ _ P6 P8 (_rec_fun A a F) (dom_i2 _ _ _ P7))).
+      (union_fval _ _ _ P6 P8 (_rec_fun A a F) (dom_i _ _ _ P7))).
     apply (eq_cl (λ x, f[S(n)] = F[x]) (union_fval _ _ _ P6 P8 (_rec_fun A a F) P10)).
     apply P11. }
 Qed.

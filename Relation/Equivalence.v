@@ -15,10 +15,10 @@ Proof.
   + intros x P4.
     destruct (fld_e _ _ P4) as [P5 | P5].
     * destruct (dom_e _ _ P5) as [y P6].
-      pose (fld_ir _ _ (ran_i2 _ _ _ P6)) as P7.
+      pose (fld_ir _ _ (ran_i _ _ _ P6)) as P7.
       apply (P3 _ _ _ P4 P7 P4 P6 (P2 _ _ P4 P7 P6)).
     * destruct (ran_e _ _ P5) as [y P6].
-      pose (fld_id _ _ (dom_i2 _ _ _ P6)) as P7.
+      pose (fld_id _ _ (dom_i _ _ _ P6)) as P7.
       apply (P3 _ _ _ P4 P7 P4 (P2 _ _ P7 P4 P6) P6).
   + apply P2.
   + apply P3.

@@ -21,6 +21,7 @@ Reserved Notation "dom( A )" (at level 10, no associativity).
 Reserved Notation "ran( A )" (at level 10, no associativity).
 Reserved Notation "fld( A )" (at level 10, no associativity).
 Reserved Notation "| A |"    (at level 10, no associativity).
+Reserved Notation "A ⁻¹"     (at level 10, no associativity).
 
 (* No Associative: 20 ~ 24 *)
 Reserved Notation "F [ x ]"        (at level 20, no associativity).
@@ -41,6 +42,10 @@ Reserved Notation "A ⨉ B" (at level 28, left associativity).
 
 (* Function Operator: 30 ~ 34 *)
 Reserved Notation "A ∘ B" (at level 30, right associativity).
+Reserved Notation "A ↦ B" (at level 34, no associativity).
+Reserved Notation "A ↦ˢ B" (at level 34, no associativity).
+Reserved Notation "A ↦ᵇ B" (at level 34, no associativity).
+Reserved Notation "A ↦ⁱ B" (at level 34, no associativity).
 
 (* Nature Number: 35 ~ 39 *)
 Reserved Notation "m ^ₙ n" (at level 35, left associativity).

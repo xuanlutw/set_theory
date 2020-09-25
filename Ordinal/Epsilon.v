@@ -128,8 +128,8 @@ Qed.
 Lemma eps_sing_rot: ∀ R, ∀ A, wo R A → sing_rot (E(R, A)).
 Proof.
   intros R A P1 a1 a2 b P2 P3.
-  pose (eq_cl (λ x, a1 ∈ x) (eps_dom _ _ P1) (dom_i2 _ _ _ P2)) as P4.
-  pose (eq_cl (λ x, a2 ∈ x) (eps_dom _ _ P1) (dom_i2 _ _ _ P3)) as P5.
+  pose (eq_cl (λ x, a1 ∈ x) (eps_dom _ _ P1) (dom_i _ _ _ P2)) as P4.
+  pose (eq_cl (λ x, a2 ∈ x) (eps_dom _ _ P1) (dom_i _ _ _ P3)) as P5.
   destruct (wo_tricho_weak _ _ P1 _ _ P4 P5) as [Q1 | [Q1 | Q1]].
   - pose (eps_in_i _ _ _ _ P1 P4 P5 Q1) as Q2.
     apply bot_e.
@@ -243,7 +243,7 @@ Proof.
   exists s.
   split.
   + apply (eq_cl (λ x, s ∈ x) (eps_dom _ _ P1)).
-    apply (dom_i2 _ _ _ P3).
+    apply (dom_i _ _ _ P3).
   + apply (fval_i _ _ _ (eps_fn _ _ P1) P3).
 Qed.
 

@@ -61,25 +61,25 @@ Proof.
     apply (empty_i _ P1).
 Qed.
 
-Lemma empty_fnm: ∀ B, fnm ∅ ∅ B.
+Lemma empty_fmap: ∀ B, ∅ ∈ ∅ ↦ B.
 Proof.
   intros B.
-  split.
+  apply fmap_i.
   + apply empty_is_fn.
-  + split.
-    - apply empty_dom.
-    - apply (eq_cr (λ y, y ⊆ B) empty_ran).
-      apply empty_i1.
+  + apply empty_dom.
+  + apply (eq_cr (λ y, y ⊆ B) empty_ran).
+    apply empty_i1.
 Qed.
 
-Lemma empty_is_inj: ∀ B, inj ∅ ∅ B.
+Lemma empty_is_inj: ∀ B, ∅ ∈ ∅ ↦ⁱ B.
 Proof.
-  split.
-  + apply empty_fnm.
+  intros B.
+  apply inj_i2.
+  + apply empty_fmap.
   + apply empty_is_sing_rot.
 Qed.
 
-Lemma fspace_empty_dom: ∀ B, fspace ∅ B = `{∅}.
+Lemma fspace_empty_dom: ∀ B, ∅ ↦ B = `{∅}.
 Proof.
   intros B.
   apply sub_a.
@@ -88,38 +88,35 @@ Proof.
     assert (x = ∅) as P2.
     { apply empty_unique.
       intros s P2.
-      destruct (fspace_e _ _ _ P1) as [[P3 _] [P4 _]].
-      destruct (P3 _ P2) as [p [q P5]].
+      destruct (fmap_fn _ _ _ P1) as [P3 _].
+      destruct (P3 _ P2) as [p [q P4]].
       apply bot_e.
       apply (empty_i p).
-      apply (eq_cl _ P4).
-      apply (dom_i2 _ _ _ (eq_cl (λ s, s ∈ x) P5 P2)). }
+      apply (eq_cl _ (fmap_dom _ _ _ P1)).
+      apply (dom_i _ _ _ (eq_cl (λ s, s ∈ x) P4 P2)). }
     apply (eq_cr (λ x, x ∈ `{ ∅}) P2).
     apply sing_i.
   + intros x P1.
-    apply fspace_i.
-    apply (eq_cl (λ x, fnm x ∅ B) (sing_e _ _ P1)).
-    split.
+    apply (eq_cl (λ x, x ∈ _) (sing_e _ _ P1)).
+    apply fmap_i.
     - apply empty_is_fn.
-    - split.
-      * apply empty_dom.
-      * apply (eq_cr (λ x, x ⊆ B) empty_ran).
-        apply empty_i1.
+    - apply empty_dom.
+    - apply (eq_cr (λ x, x ⊆ B) empty_ran).
+      apply empty_i1.
 Qed.
 
-Lemma fspace_empty_ran: ∀ A, A ≠ ∅ → fspace A ∅ = ∅.
+Lemma fspace_empty_ran: ∀ A, A ≠ ∅ → A ↦ ∅ = ∅.
 Proof.
   intros A P1.
   apply sub_a.
   split.
   + intros x P2.
-    destruct (fspace_e _ _ _ P2) as [_ [P3 P4]].
-    destruct (nempty_ex _ P1) as [a P5].
-    destruct (dom_e _ _ (eq_cr _ P3 P5)) as [b P7].
+    destruct (nempty_ex _ P1) as [a Q1].
+    destruct (dom_e _ _ (eq_cr _ (fmap_dom _ _ _ P2) Q1)) as [b Q2].
     apply bot_e.
     apply (empty_i b).
-    apply P4.
-    apply (ran_i2 _ _ _ P7).
+    apply (fmap_ran _ _ _ P2).
+    apply (ran_i _ _ _ Q2).
   + intros x P2.
     apply bot_e.
     apply (empty_i x).
@@ -129,10 +126,9 @@ Qed.
 Lemma empty_dom_empty_ran: ∀ F, fn F → dom(F) = ∅ → ran(F) = ∅.
 Proof. 
   intros F P1 P2.
-  pose (eq_cl (λ x, fnm F x (ran(F))) P2 (fnm_i _ P1)) as P3.
-  pose (fspace_i _ _ _ P3) as P4.
-  pose (eq_cl (λ x, F ∈ x) (fspace_empty_dom (ran(F))) P4) as P5.
-  apply (eq_cl (λ x, ran(x) = ∅) (sing_e _ _ P5)).
+  pose (eq_cl (λ x, F ∈ x ↦ ran(F)) P2 (fmap_r _ P1)) as P3.
+  pose (eq_cl (λ x, F ∈ x) (fspace_empty_dom _) P3) as P4.
+  apply (eq_cl (λ x, ran(x) = ∅) (sing_e _ _ P4)).
   apply empty_ran.
 Qed.
 
@@ -143,7 +139,7 @@ Proof.
   destruct (dom_e _ _ P3) as [y P4].
   apply ex_nempty.
   exists y.
-  apply (ran_i2 _ _ _ P4).
+  apply (ran_i _ _ _ P4).
 Qed.
 (*----------------------------------------------------------------------------*)
 
@@ -171,8 +167,7 @@ Proof.
     destruct (dom_e _ _ P1) as [t P2].
     apply (sing_i2 _ _ (eq_s (opair_eq_el _ _ _ _ (sing_e _ _ P2)))).
   + intros s P1.
-    apply dom_i.
-    exists y.
+    apply (dom_i _ _ y).
     apply sing_i2.
     apply (eq_cr (λ x, ⟨s, y⟩ = ⟨x, y⟩) (sing_e _ _ P1)).
     apply eq_r.
@@ -187,8 +182,7 @@ Proof.
     destruct (ran_e _ _ P1) as [t P2].
     apply (sing_i2 _ _ (eq_s (opair_eq_er _ _ _ _ (sing_e _ _ P2)))).
   + intros s P1.
-    apply ran_i.
-    exists x.
+    apply (ran_i _ x).
     apply (sing_i2).
     apply (eq_cr (λ y, ⟨x, s⟩ = ⟨x, y⟩) (sing_e _ _ P1)).
     apply eq_r.
@@ -197,16 +191,15 @@ Qed.
 Lemma sing_pair_fval: ∀ x, ∀ y, `{⟨x, y⟩}[x] = y.
 Proof.
   intros x y.
-  apply eq_s.
   apply fval_i.
   + apply sing_pair_is_fn.
   + apply sing_i.
 Qed.
 
-Lemma sing_pair_bij: ∀ x, ∀ y, bij `{⟨x, y⟩} `{x} `{y}.
+Lemma sing_pair_bij: ∀ x, ∀ y, `{⟨x, y⟩} ∈ `{x} ↦ᵇ `{y}.
 Proof.
   intros x y.
-  apply bij_i2.
+  apply bij_i.
   + apply sing_pair_is_fn.
   + apply sing_pair_dom.
   + apply sing_pair_ran.
@@ -300,7 +293,7 @@ Proof.
     apply (eq_cr (λ x, x ∈ A) (opair_eq_el _ _ _ _ P4)).
     apply P3.
   + intros x P1. 
-    apply (dom_i2 _ _ _ (id_i A x P1)).
+    apply (dom_i _ _ _ (id_i A x P1)).
 Qed.
 
 Lemma id_ran: ∀ A, ran(id A) = A.
@@ -314,29 +307,28 @@ Proof.
     apply (eq_cr (λ y, y ∈ A) (opair_eq_er _ _ _ _ P4)).
     apply P3.
   + intros y P1.
-    apply (ran_i2 _ _ _ (id_i A y P1)).
+    apply (ran_i _ _ _ (id_i A y P1)).
 Qed.
 
-Lemma id_fnm: ∀ A, fnm (id A) A A.
+Lemma id_fmap: ∀ A, (id A) ∈ A ↦ A.
 Proof.
   intros A.
-  split.
+  apply fmap_i.
   + apply id_is_fn.
-  + split.
-    - apply id_dom.
-    - apply (eq_cr (λ x, x ⊆ A) (id_ran A)).
-      apply sub_r.
+  + apply id_dom.
+  + apply (eq_cr (λ x, x ⊆ A) (id_ran A)).
+    apply sub_r.
 Qed.
 
-Lemma id_is_inj: ∀ A, inj (id A) A A.
+Lemma id_is_inj: ∀ A, (id A) ∈ A ↦ⁱ A.
 Proof.
   intros A.
-  split.
-  + apply id_fnm.
+  apply inj_i2.
+  + apply id_fmap.
   + apply id_is_sing_rot.
 Qed.
 
-Lemma id_inj_exten: ∀ A, ∀ B, A ⊆ B → inj (id A) A B.
+Lemma id_inj_exten: ∀ A, ∀ B, A ⊆ B → (id A) ∈ A ↦ⁱ B.
 Proof.
   intros A B P1.
   apply (inj_ran_exten _ _ A).
@@ -347,30 +339,28 @@ Qed.
 Lemma id_fval: ∀ A, ∀ x, x ∈ A → (id A)[x] = x.
 Proof.
   intros A x P1.
-  apply eq_s.
   apply fval_i.
   + apply (id_is_fn A).
   + apply (id_i _ _ P1).
 Qed.
 
-Lemma id_is_surj: ∀ A, surj (id A) A A.
+Lemma id_is_surj: ∀ A, (id A) ∈ A ↦ˢ A.
 Proof.
   intros A.
-  split.
-  + apply id_fnm.
-  + apply (eq_cr (λ x, x = A) (id_ran A)).
-    apply eq_r.
+  apply surj_i2.
+  + apply id_fmap.
+  + apply (eq_cr (λ x, x = A) (id_ran _) (eq_r _)).
 Qed.
 
-Lemma id_is_bij: ∀ A, bij(id A) A A.
+Lemma id_is_bij: ∀ A, (id A) ∈ A ↦ᵇ A.
 Proof.
   intros A.
-  apply bij_i.
+  apply bij_i3.
   + apply id_is_surj.
   + apply id_is_inj.
 Qed.
 
-Lemma id_inv: ∀ A, id A = inv (id A).
+Lemma id_inv: ∀ A, id A = (id A)⁻¹.
 Proof.
   intros A.
   apply sub_a.
@@ -465,8 +455,7 @@ Proof.
     apply (eq_cr (λ x, x ∈ A) (opair_eq_el _ _ _ _ P4)).
     apply P3.
   + intros x P1.
-    apply dom_i.
-    exists c.
+    apply (dom_i _ _ c).
     apply (const_i _ _ _ P1).
 Qed.
 
@@ -480,9 +469,8 @@ Lemma const_ran: ∀ A, ∀ c, A ≠ ∅ → ran(const A c) = `{c}.
     apply (eq_cr (λ x, x ∈ `{c}) (opair_eq_er _ _ _ _ P4)).
     apply sing_i.
   + intros x P2.
-    apply ran_i.
     destruct (nempty_ex _ P1) as [a P3].
-    exists a.
+    apply (ran_i _ a).
     apply (eq_cl (λ x, ⟨a, x⟩ ∈ const A c) (sing_e _ _ P2)).
     apply (const_i _ _ _ P3).
 Qed.
@@ -490,7 +478,6 @@ Qed.
 Lemma const_fval: ∀ A, ∀ c, ∀ x, x ∈ A → (const A c)[x] = c.
 Proof. 
   intros A c x P1.
-  apply eq_s.
   apply fval_i.
   + apply const_is_fn.
   + apply (const_i _ _ _ P1).
