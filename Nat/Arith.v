@@ -773,17 +773,17 @@ Qed.
 (*----------------------------------------------------------------------------*)
 
 (*Ltac *)
-(*Ltac is_nat :=*)
-  (*repeat match goal with*)
-    (*| [       |- ?P = ?P         ] => apply eq_r*)
-    (*| [       |- 𝟢 ∈ ω           ] => apply empty_is_nat*)
-    (*| [       |- 𝟣 ∈ ω           ] => apply one_is_nat*)
-    (*| [ H: ?P |- ?P              ] => apply H*)
-    (*| [       |- ⟨_, _⟩ ∈ cp _ _ ] => apply cp_i*)
-    (*| [       |- (S(_)) ∈ ω      ] => apply suc_is_nat*)
-    (*| [       |- ?P +ₙ ?Q ∈ ω    ] => apply nat_add_close*)
-    (*| [       |- ?P ×ₙ ?Q ∈ ω    ] => apply nat_mul_close*)
-  (*end.*)
+Ltac is_nat :=
+  repeat match goal with
+    | [       |- ?P = ?P         ] => apply eq_r
+    | [       |- 𝟢 ∈ ω           ] => apply empty_is_nat
+    | [       |- 𝟣 ∈ ω           ] => apply one_is_nat
+    | [ H: ?P |- ?P              ] => apply H
+    | [       |- ⟨_, _⟩ ∈ cp _ _ ] => apply cp_i
+    | [       |- (S(_)) ∈ ω      ] => apply suc_is_nat
+    | [       |- ?P +ₙ ?Q ∈ ω    ] => apply nat_add_close
+    | [       |- ?P ×ₙ ?Q ∈ ω    ] => apply nat_mul_close
+  end.
 
 (*Flow: nat_add enough equation into the goal *)
       (*run nat_normal_form to normalize it *)

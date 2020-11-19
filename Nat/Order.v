@@ -4,7 +4,7 @@ Require Import Structure.Structure.
 Require Import Nat.Inductive.
 Require Import Nat.Nature.
 Require Import Nat.Recursion.
-Require Import Nat.Nat_arith.
+Require Import Nat.Arith.
 
 (* Order *)
 Definition nat_order := {x: ω ⨉ ω| ∃ m, ∃ n, x = ⟨m, n⟩ ∧ m ∈ n}.
@@ -252,47 +252,48 @@ Qed.
 (*----------------------------------------------------------------------------*)
 
 (* Arith *)
-Lemma add_less: ∀ m, ∀ p, m ∈ ω → p ∈ ω → m <ₙ m +ₙ S(p).
+Lemma nat_add_l: ∀ m, ∀ p, m ∈ ω → p ∈ ω → m <ₙ m +ₙ S(p).
 Proof.
   intros m p P1 P2.
-  apply (eq_cr (λ x, m <ₙ x) (add_red _ _ P1 P2)).
+  apply (eq_cr (λ x, m <ₙ x) (nat_add_redr _ _ P1 P2)).
   pose (λ k, m <ₙ S(m +ₙ k)) as P.
   assert (P 𝟢) as I1.
-  { red.
-    apply (eq_cr (λ x, m <ₙ S(x)) (add_zero _ P1)).
+  { apply (eq_cr (λ x, m <ₙ S(x)) (nat_add_zeror _ P1)).
     apply (less_suc _ P1). }
   assert (induction_step P) as I2.
   { intros k Q1 Q2.
-    pose (suc_is_nat _ (add_is_nat _ _ P1 Q1)) as Q3.
-    apply (eq_cr (λ x, m <ₙ S(x)) (add_red _ _ P1 Q1)).
+    pose (suc_is_nat _ (nat_add_close _ _ P1 Q1)) as Q3.
+    apply (eq_cr (λ x, m <ₙ S(x)) (nat_add_redr _ _ P1 Q1)).
     apply (l_l_t _ _ _ _ _ nat_less_trans P1 Q3 (suc_is_nat _ Q3)).
     + apply Q2.
     + apply (less_suc _ Q3). }
   apply (induction_principle _ I1 I2 _ P2).
 Qed.
 
-Lemma add_le: ∀ m, ∀ p, m ∈ ω → p ∈ ω → m ≤ₙ m +ₙ p.
+Lemma nat_add_le: ∀ m, ∀ p, m ∈ ω → p ∈ ω → m ≤ₙ m +ₙ p.
 Proof.
   intros m p P1 P2.
-  destruct (LEM (p = 𝟢)) as [P3|P3].
+  destruct (LEM (p = 𝟢)) as [P3 | P3].
   + apply (eq_cr (λ x, m ≤ₙ(m +ₙ x)) P3).
-    apply (eq_cr (λ x, m ≤ₙ x) (add_zero _ P1)). 
+    apply (eq_cr (λ x, m ≤ₙ x) (nat_add_zeror _ P1)).
     right.
     apply eq_r.
   + destruct (nat_is_suc _ P2 P3) as [x [P4 P5]].
     apply (eq_cr (λ x, m ≤ₙ (m +ₙ x)) P5).
     left.
-    apply (add_less _ _ P1 P4).
+    apply (nat_add_l _ _ P1 P4).
 Qed.
 
-Lemma ex_less: ∀ m, ∀ n, ∀ p, m ∈ ω → n ∈ ω → p ∈ ω → m +ₙ S(p) = n → m <ₙ n.
+Lemma nat_add_ex_l: ∀ m, ∀ n, ∀ p, m ∈ ω → n ∈ ω → p ∈ ω → m +ₙ S(p) = n
+  → m <ₙ n.
 Proof.
   intros m n p P1 P2 P3 P4.
   apply (eq_cl (λ x, m <ₙ x) P4).
-  apply (add_less _ _ P1 P3).
+  apply (nat_add_l _ _ P1 P3).
 Qed.
 
-Lemma less_ex: ∀ m, ∀ n, m ∈ ω → n ∈ ω → m <ₙ n → ∃ p, p ∈ ω ∧ m +ₙ S(p) = n.
+Lemma nat_add_l_ex: ∀ m, ∀ n, m ∈ ω → n ∈ ω → m <ₙ n
+  → ∃ p, p ∈ ω ∧ m +ₙ S(p) = n.
 Proof.
   intros m n P1 P2 P3.
   pose (λ k, k <ₙ m ∨ m = k ∨ ∃ p, p ∈ ω ∧ m +ₙ S(p) = k) as P.
@@ -313,8 +314,8 @@ Proof.
       exists 𝟢.
       split.
       - apply empty_is_nat.
-      - apply (eq_cr (λ x, x = _) (add_red _ _ P1 empty_is_nat)).
-        apply (eq_cr (λ x, S(x) = _) (add_zero _ P1)).
+      - apply (eq_cr (λ x, x = _) (nat_add_redr _ _ P1 empty_is_nat)).
+        apply (eq_cr (λ x, S(x) = _) (nat_add_zeror _ P1)).
         apply (eq_cr (λ x, S(x) = _) Q2).
         apply eq_r.
     + destruct Q2 as [p [Q3 Q4]].
@@ -322,7 +323,7 @@ Proof.
       exists (S(p)).
       split.
       - apply (suc_is_nat _ Q3).
-      - apply (eq_cr (λ x, x = S(k)) (add_red _ _ P1 (suc_is_nat _ Q3))).
+      - apply (eq_cr (λ x, x = S(k)) (nat_add_redr _ _ P1 (suc_is_nat _ Q3))).
         apply (eq_cr (λ x, S(x) = S(k)) Q4).
         apply eq_r. }
   destruct (induction_principle _ I1 I2 _ P2) as [P4 | [P4 | P4]].
@@ -333,58 +334,58 @@ Proof.
   + apply P4.
 Qed.
 
-Lemma less_add_cancel: ∀ m, ∀ n, ∀ p, m ∈ ω → n ∈ ω → p ∈ ω
+Lemma nat_add_l_cancel: ∀ m, ∀ n, ∀ p, m ∈ ω → n ∈ ω → p ∈ ω
   → m +ₙ p <ₙ n +ₙ p → m <ₙ n.
 Proof.
   intros m n p P1 P2 P3 P4.
-  destruct (less_ex _ _ (add_is_nat _ _ P1 P3) (add_is_nat _ _ P2 P3) P4) 
-    as [r [P5 P6]].
-  apply (ex_less _ _ r P1 P2 P5).
-  apply (add_cancel _ _ _ 
-    (add_is_nat _ _ P1 (suc_is_nat _ P5)) P2 P3).
-  apply (eq_t (add_132 _ _ _ P1 (suc_is_nat _ P5) P3) P6).
+  destruct (nat_add_l_ex _ _ 
+    (nat_add_close _ _ P1 P3) (nat_add_close _ _ P2 P3) P4) as [r [P5 P6]].
+  apply (nat_add_ex_l _ _ r P1 P2 P5).
+  apply (nat_add_cancel _ _ _ 
+    (nat_add_close _ _ P1 (suc_is_nat _ P5)) P2 P3).
+  apply (eq_t (nat_add_132 _ _ _ P1 (suc_is_nat _ P5) P3) P6).
 Qed.
 
-Lemma less_add_eq_r: ∀ m, ∀ n, ∀ p, m ∈ ω → n ∈ ω → p ∈ ω → m <ₙ n
+Lemma nat_add_l_eqr: ∀ m, ∀ n, ∀ p, m ∈ ω → n ∈ ω → p ∈ ω → m <ₙ n
   → m +ₙ p <ₙ n +ₙ p.
 Proof.
   intros m n p P1 P2 P3 P4.
   pose (λ k, (m +ₙ k) <ₙ (n +ₙ k)) as P.
   assert (P 𝟢) as I1.
   { red.
-    apply (eq_cr (λ x, x <ₙ (n +ₙ 𝟢)) (add_zero _ P1)).
-    apply (eq_cr (λ x, m <ₙ x) (add_zero _ P2)).
+    apply (eq_cr (λ x, x <ₙ _) (nat_add_zeror _ P1)).
+    apply (eq_cr (λ x, _ <ₙ x) (nat_add_zeror _ P2)).
     apply P4. }
   assert (induction_step P) as I2.
   { intros k Q1 Q2.
     red.
-    apply (eq_cr (λ x, x <ₙ (n +ₙ S(k))) (add_red _ _ P1 Q1)).
-    apply (eq_cr (λ x, S(m +ₙ k) <ₙ x) (add_red _ _ P2 Q1)).
-    apply (suc_less_i _ _ (add_is_nat _ _ P1 Q1) (add_is_nat _ _ P2 Q1)).
+    apply (eq_cr (λ x, x <ₙ _) (nat_add_redr _ _ P1 Q1)).
+    apply (eq_cr (λ x, _ <ₙ x) (nat_add_redr _ _ P2 Q1)).
+    apply (suc_less_i _ _ (nat_add_close _ _ P1 Q1) (nat_add_close _ _ P2 Q1)).
     apply Q2. }
   apply (induction_principle _ I1 I2 _ P3).
 Qed.
 
-Lemma less_add_eq_l: ∀ m, ∀ n, ∀ p, m ∈ ω → n ∈ ω → p ∈ ω → m <ₙ n
+Lemma nat_add_l_eql: ∀ m, ∀ n, ∀ p, m ∈ ω → n ∈ ω → p ∈ ω → m <ₙ n
   → p +ₙ m <ₙ p +ₙ n.
 Proof.
   intros m n p P1 P2 P3 P4.
-  apply (eq_cr (λ x, x <ₙ _) (add_commu _ _ P3 P1)).
-  apply (eq_cr (λ x, _ <ₙ x) (add_commu _ _ P3 P2)).
-  apply (less_add_eq_r _ _ _ P1 P2 P3 P4).
+  apply (eq_cr (λ x, x <ₙ _) (nat_add_commu _ _ P3 P1)).
+  apply (eq_cr (λ x, _ <ₙ x) (nat_add_commu _ _ P3 P2)).
+  apply (nat_add_l_eqr _ _ _ P1 P2 P3 P4).
 Qed.
 
-Lemma less_add_preserve: ∀ m, ∀ n, ∀ p, ∀ q, m ∈ ω → n ∈ ω → p ∈ ω → q ∈ ω
+Lemma nat_add_l_preserve: ∀ m, ∀ n, ∀ p, ∀ q, m ∈ ω → n ∈ ω → p ∈ ω → q ∈ ω
   → m <ₙ n → p <ₙ q → m +ₙ p <ₙ n +ₙ q.
 Proof.
   intros m n p q P1 P2 P3 P4 P5 P6.
-  pose (less_add_eq_r _ _ _ P1 P2 P3 P5) as P7.
-  pose (less_add_eq_l _ _ _ P3 P4 P2 P6) as P8.
+  pose (nat_add_l_eqr _ _ _ P1 P2 P3 P5) as P7.
+  pose (nat_add_l_eql _ _ _ P3 P4 P2 P6) as P8.
   apply (nat_l_l_t _ (n +ₙ p)).
   all: is_nat.
 Qed.
 
-Lemma mul_less: ∀ m, ∀ n, ∀ p, m ∈ ω → n ∈ ω → p ∈ ω → m <ₙ n → 𝟢 <ₙ p
+Lemma nat_mul_l: ∀ m, ∀ n, ∀ p, m ∈ ω → n ∈ ω → p ∈ ω → m <ₙ n → 𝟢 <ₙ p
   → m ×ₙ p <ₙ n ×ₙ p.
 Proof.
   intros m n p P1 P2 P3 P4 P5.
@@ -396,13 +397,13 @@ Proof.
   { intros k Q1 [Q2 | Q2].
     + right.
       apply (eq_cr (λ k, _ ×ₙ S(k) <ₙ _ ×ₙ S(k)) Q2).
-      apply (eq_cr (λ x, x <ₙ _) (mul_one _ P1)).
-      apply (eq_cr (λ x, _ <ₙ x) (mul_one _ P2)).
+      apply (eq_cr (λ x, x <ₙ _) (nat_mul_oner _ P1)).
+      apply (eq_cr (λ x, _ <ₙ x) (nat_mul_oner _ P2)).
       apply P4.
     + right.
-      apply (eq_cr (λ x, x <ₙ _) (mul_red _ _ P1 Q1)).
-      apply (eq_cr (λ x, _ <ₙ x) (mul_red _ _ P2 Q1)).
-      apply less_add_preserve.
+      apply (eq_cr (λ x, x <ₙ _) (nat_mul_redr _ _ P1 Q1)).
+      apply (eq_cr (λ x, _ <ₙ x) (nat_mul_redr _ _ P2 Q1)).
+      apply nat_add_l_preserve.
       all: is_nat. }
   destruct (induction_principle _ I1 I2 _ P3) as [P6 | P6].
   + apply bot_e.
