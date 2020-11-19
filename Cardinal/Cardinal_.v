@@ -60,7 +60,7 @@ Proof.
     apply (comp_inj _ _ _ S).
     + apply bij_e.
       apply inv_bij.
-      apply (eq_cr (λ x, bij (E(R, S)) S x) Q4).
+      apply (eq_cr (λ x, (E(R, S)) ∈ S ↦ᵇ x) Q4).
       apply (eps_bij _ _ Q3).
     + apply (id_inj_exten _ _ Q2). }
   assert (∀ b, Ord b → b ≼ A → b ∈ B) as P6.
@@ -71,12 +71,12 @@ Proof.
     exists (⟨S, ran(f)⟩).
     split.
     + apply sub_i.
-      destruct Q2 as [[_ [_ Q2]] _].
       - apply cp_i.
-          apply power_i.
-          apply (sub_t _ _ _ Q3 (cp_sub _ _ _ _ Q2 Q2)).
         * apply power_i.
-          apply Q2.
+          apply (sub_t _ _ _ Q3
+            (cp_sub _ _ _ _ (inj_ran _ _ _ Q2) (inj_ran _ _ _ Q2))).
+        * apply power_i.
+          apply (inj_ran _ _ _ Q2).
       - exists S.
         exists (ran(f)).
         split.
@@ -165,9 +165,8 @@ Proof.
           destruct (compl_e _ _ _ S5) as [_ S7].
           pose (ord_trans _ P1 _ _ S3 Q2) as S8.
           apply S7.
-          apply (eq_cr (λ x, x ∈ _) S4).
-          apply ran_i.
-          exists a'.
+          apply (eq_cl (λ x, x ∈ _) S4).
+          apply (ran_i _ a').
           apply restr_i.
           + apply (fval_i2 _ _ P8 (eq_cr (λ x, a' ∈ x) P9 S8)).
           + apply seg_i.
@@ -180,23 +179,21 @@ Proof.
     intros Q1.
     apply P2.
     exists F.
-    split.
-    + split.
-      - apply P8.
-      - split.
-        * apply P9.
-        * intros y Q2.
-          destruct (ran_e _ _ Q2) as [x Q3].
-          pose (fval_i _ _ _ P8 Q3) as Q4.
-          destruct (P10 _ (eq_cl (λ y, x ∈ y) P9 (dom_i _ _ _ Q3)))
-            as [[_ Q5] | [Q5 Q6]].
-          ++apply bot_e.
-            apply Q1.
-            destruct (fval_e _ _ _ (eq_s Q5) P8 (dom_i _ _ _ Q3)) as [Q6 _].
-            apply (ran_i _ _ _ Q6).
-          ++apply (eq_cr (λ x, x ∈ A) Q4).
-            apply (eq_cr (λ x, x ∈ A) Q6).
-            apply (compl_sub _ _ _ (P6 _ Q5 (compl_sub _ _))).
+    apply (inj_i).
+    + apply P8.
+    + apply P9.
+    + intros y Q2.
+      destruct (ran_e _ _ Q2) as [x Q3].
+      pose (fval_i _ _ _ P8 Q3) as Q4.
+      destruct (P10 _ (eq_cl (λ y, x ∈ y) P9 (dom_i _ _ _ Q3)))
+        as [[_ Q5] | [Q5 Q6]].
+      - apply bot_e.
+        apply Q1.
+        destruct (fval_e _ _ _ Q5 P8 (dom_i _ _ _ Q3)) as [Q6 _].
+        apply (ran_i _ _ _ Q6).
+      - apply (eq_cl (λ x, x ∈ A) Q4).
+        apply (eq_cr (λ x, x ∈ A) Q6).
+        apply (compl_sub _ _ _ (P6 _ Q5 (compl_sub _ _))).
     + intros x1 x2 y Q2 Q3.
       pose (eq_cl (λ x, _ ∈ x) P9 (dom_i _ _ _ Q2)) as Q4.
       pose (eq_cl (λ x, _ ∈ x) P9 (dom_i _ _ _ Q3)) as Q5.
@@ -206,23 +203,23 @@ Proof.
         apply (R2 _ _ Q6 Q5).
         * intros Q7.
           apply Q1.
-          destruct (fval_e _ _ _ (eq_s Q7) P8 (dom_i _ _ _ Q3)) as [Q8 _].
+          destruct (fval_e _ _ _ Q7 P8 (dom_i _ _ _ Q3)) as [Q8 _].
           apply (ran_i _ _ _ Q8).
-        * apply (eq_t (eq_s (fval_i _ _ _ P8 Q2)) (fval_i _ _ _ P8 Q3)).
+        * apply (eq_t (fval_i _ _ _ P8 Q2) (eq_s (fval_i _ _ _ P8 Q3))).
       - apply Q6.
       - apply bot_e.
         apply (R2 _ _ Q6 Q4).
         * intros Q7.
           apply Q1.
-          destruct (fval_e _ _ _ (eq_s Q7) P8 (dom_i _ _ _ Q2)) as [Q8 _].
+          destruct (fval_e _ _ _ Q7 P8 (dom_i _ _ _ Q2)) as [Q8 _].
           apply (ran_i _ _ _ Q8).
-        * apply (eq_t (eq_s (fval_i _ _ _ P8 Q3)) (fval_i _ _ _ P8 Q2)). }
+        * apply (eq_t (fval_i _ _ _ P8 Q3) (eq_s (fval_i _ _ _ P8 Q2))). }
   destruct (ran_e _ _ R3) as [xx R4].
   pose (eq_s (fval_i _ _ _ P8 R4)) as R5.
   destruct (wo_prop_seg (λ x, F[x] = e) _ _ _ (ord_wo _ P1)
-    (eq_cl (λ x, xx ∈ x) P9 (dom_i _ _ _ R4)) R5) as [x0 [R6 [R7 R8]]].
-  assert (bij (F↾(seg (ER(Alpha)) Alpha x0)) (seg (ER(Alpha)) Alpha x0) A) as R9.
-  { apply bij_i2.
+    (eq_cl (λ x, xx ∈ x) P9 (dom_i _ _ _ R4)) (eq_s R5)) as [x0 [R6 [R7 R8]]].
+  assert ((F↾(seg (ER(Alpha)) Alpha x0)) ∈ (seg (ER(Alpha)) Alpha x0) ↦ᵇ A) as R9.
+  { apply bij_i.
     + apply (restr_fn _ _ P8).
     + apply (eq_cr (λ x, x = _) (restr_dom _ _)).
       apply (eq_cr (λ x, x ∩ _ = _) P9).
@@ -238,7 +235,7 @@ Proof.
         * apply bot_e.
           apply (R8 _ Q4 Q6).
         * destruct (compl_e _ _ _ (P6 _ Q6 (compl_sub _ _))) as [Q8 _].
-          apply (eq_cr (λ y, y ∈ A) (fval_i _ _ _ P8 Q3)).
+          apply (eq_cl (λ y, y ∈ A) (fval_i _ _ _ P8 Q3)).
           apply (eq_cr (λ y, y ∈ A) Q7).
           apply Q8.
       - intros y Q1.
@@ -258,11 +255,11 @@ Proof.
         (in_ord_ord _ _ P1 Q8)) as [Q9 | [Q9 | Q9]].
       - apply bot_e.
         apply (R2 _ _ Q9 Q8 (R8 _ Q6)).
-        apply (eq_t (eq_s (fval_i _ _ _ P8 Q3)) (fval_i _ _ _ P8 Q5)).
+        apply (eq_t (fval_i _ _ _ P8 Q3) (eq_s (fval_i _ _ _ P8 Q5))).
       - apply Q9.
       - apply bot_e.
         apply (R2 _ _ Q9 Q7 (R8 _ Q4)).
-        apply (eq_t (eq_s (fval_i _ _ _ P8 Q5)) (fval_i _ _ _ P8 Q3)). }
+        apply (eq_t (fval_i _ _ _ P8 Q5) (eq_s (fval_i _ _ _ P8 Q3))). }
   destruct (isom_bij_ex_rel (ER(seg (ER(Alpha)) Alpha x0)) _ _ _ R9)
     as [R [R10 R11]].
   exists R.
@@ -406,5 +403,5 @@ Definition card_add (A B: J) := |(A ⨉ `{𝟢}) ∪ (B ⨉ `{𝟣})|.
 Notation   "A +c B"          := (card_add A B).
 Definition card_mul (A B: J) := |A ⨉ B|.
 Notation   "A ×c B"          := (card_mul A B).
-Definition card_exp (A B: J) := |fspace A B|.
+Definition card_exp (A B: J) := |A ↦ B|.
 Notation   "A ^c B"          := (card_exp A B).

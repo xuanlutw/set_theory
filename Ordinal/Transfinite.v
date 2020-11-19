@@ -181,7 +181,7 @@ Proof.
       - apply (eq_cr (λ s, s ∈ f2↾(seg R A x0)) S3).
         apply restr_i.
         * apply fval_e.
-          ++apply (eq_cl (λ x, sy = x) (nn_e S8)).
+          ++apply (eq_cl (λ x, x = sy) (nn_e S8)).
             apply (fval_i _ _ _ P4 S2).
           ++apply P8.
           ++apply (eq_cr (λ x, sx ∈ x) P9).
@@ -204,7 +204,7 @@ Proof.
       - apply (eq_cr (λ s, s ∈ f1↾(seg R A x0)) S3).
         apply restr_i.
         * apply fval_e.
-          ++apply (eq_cr (λ x, sy = x) (nn_e S8)).
+          ++apply (eq_cr (λ x, x = sy) (nn_e S8)).
             apply (fval_i _ _ _ P8 S2).
           ++apply P4.
           ++apply (eq_cr (λ x, sx ∈ x) P5).
@@ -269,7 +269,7 @@ Proof.
       apply Q8. }
     pose (eq_cl (λ y, x ∈ y) Q9 (dom_i _ _ _ Q4)) as Q10.
     destruct (sub_e _ _ _ Q10) as [Q11 Q12].
-    apply (eq_cr (λ x, x = y2) (fval_i _ _ _ Q7 Q4)).
+    apply (eq_cl (λ x, x = y2) (fval_i _ _ _ Q7 Q4)).
     destruct (union_e _ _ R1) as [fR [R3 R4]].
     destruct (P4 fR) as [R5 _].
     destruct (R5 R3) as [tR [R6 [R7 R8]]].
@@ -278,7 +278,7 @@ Proof.
       apply R8. }
     pose (eq_cl (λ y, x ∈ y) R9 (dom_i _ _ _ R4)) as R10.
     destruct (sub_e _ _ _ R10) as [R11 R12].
-    apply (eq_cr (λ y, fQ[x] = y) (fval_i _ _ _ R7 R4)).
+    apply (eq_cl (λ y, fQ[x] = y) (fval_i _ _ _ R7 R4)).
     destruct (wo_tricho_weak _ _ P1 _ _ Q6 R6) as [P6 | [P6 | P6]].
     - apply (_G_constr_consist _ _ _ _ _ _ _ P1 P2 Q8 R8 
         (or_il _ P6) _ Q11 Q12).

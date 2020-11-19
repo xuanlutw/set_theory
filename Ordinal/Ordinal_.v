@@ -145,12 +145,19 @@ Proof.
   destruct (wo_prop_least (λ x, x ∉ A) _ _ _ P4 P8 P7)
     as [x0 [P9 [P10 P11]]].
   pose (psub_e _ _ P3) as P12.
-  apply ran_i.
-  exists x0.
+  apply (ran_i _ x0).
   apply (fval_e).
   + apply sub_a.
     split.
     - intros x Q1.
+      pose (eq_cl (λ y, x ∈ y) (eps_self _ _ P5 P4 P9) Q1) as Q2.
+      pose (P5 _ _ Q2 P9) as Q3.
+      apply (contraposition2 (P11 _ Q3)).
+      apply (wo_nle_i _ _ _ _ P4 Q3 P9).
+      apply (eps_rel_i _ _ _ Q3 P9 Q2). 
+    - intros x Q1.
+      pose (eps_self _ _ P5 P4 P9).
+      pose (eps_self _ _ P5 P4 P9).
       apply (eq_cr (λ y, x ∈ y) (eps_self _ _ P5 P4 P9)).
       pose (P12 _ Q1) as Q2.
       destruct (wo_tricho_weak _ _ P4 _ _ (P12 _ Q1) P9) as [Q3 | [Q3 | Q3]].
@@ -165,12 +172,6 @@ Proof.
         apply bot_e.
         apply P10.
         apply (seg_e1 _ _ _ _ Q1 Q6).
-    - intros x Q1.
-      pose (eq_cl (λ y, x ∈ y) (eps_self _ _ P5 P4 P9) Q1) as Q2.
-      pose (P5 _ _ Q2 P9) as Q3.
-      apply (contraposition2 (P11 _ Q3)).
-      apply (wo_nle_i _ _ _ _ P4 Q3 P9).
-      apply (eps_rel_i _ _ _ Q3 P9 Q2). 
   + apply (eps_fn _ _ (ord_wo _ P2)).
   + apply (eq_cr (λ y, x0 ∈ y) (eps_dom _ _ (ord_wo _ P2))).
     apply P9.

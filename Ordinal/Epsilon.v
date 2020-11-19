@@ -55,14 +55,13 @@ Proof.
   apply P4.
 Qed.
 
-Lemma eps_fnm: ∀ R, ∀ A, wo R A → fnm (E(R, A)) A (EI(R, A)).
+Lemma eps_fmap: ∀ R, ∀ A, wo R A → (E(R, A)) ∈ A ↦ (EI(R, A)).
 Proof.
   intros R A P1.
-  split.
+  apply fmap_i.
   + apply (eps_fn _ _ P1).
-  + split.
-    - apply (eps_dom _ _ P1).
-    - apply sub_r.
+  + apply (eps_dom _ _ P1).
+  + apply sub_r.
 Qed.
 
 Lemma eps_e1: ∀ R, ∀ A, ∀ t, wo R A → t ∈ A → E(R, A)[t] = E(R, A)⟦seg R A t⟧.
@@ -80,7 +79,8 @@ Proof.
     as [y [P4 P5]].
   exists y.
   split.
-  + apply (fval_i).
+  + apply eq_s.
+    apply (fval_i).
     - apply (eps_fn _ _ P1).
     - apply P4.
   + split.
@@ -121,7 +121,7 @@ Proof.
     apply (Q2 y).
     apply sub_i.
     - apply Q8.
-    - apply (eq_cl (λ x, x ∈ x) (fval_i _ _ _ (eps_fn _ _ P1) Q6)).
+    - apply (eq_cr (λ x, x ∈ x) (fval_i _ _ _ (eps_fn _ _ P1) Q6)).
       apply Q4.
 Qed.
 
@@ -134,37 +134,37 @@ Proof.
   - pose (eps_in_i _ _ _ _ P1 P4 P5 Q1) as Q2.
     apply bot_e.
     apply (eps_a _ _ _ P1 P5).
-    pose (eq_cr (λ x, x ∈ E(R, A)[a2]) (fval_i _ _ _ (eps_fn _ _ P1) P2) Q2)
+    pose (eq_cl (λ x, x ∈ E(R, A)[a2]) (fval_i _ _ _ (eps_fn _ _ P1) P2) Q2)
       as Q3.
-    apply (eq_cl (λ x, x ∈ E(R, A)[a2]) (fval_i _ _ _ (eps_fn _ _ P1) P3) Q3).
+    apply (eq_cr (λ x, x ∈ E(R, A)[a2]) (fval_i _ _ _ (eps_fn _ _ P1) P3) Q3).
   - apply Q1.
   - pose (eps_in_i _ _ _ _ P1 P5 P4 Q1) as Q2.
     apply bot_e.
     apply (eps_a _ _ _ P1 P5).
-    pose (eq_cr (λ x, E(R, A)[a2] ∈ x) (fval_i _ _ _ (eps_fn _ _ P1) P2) Q2)
+    pose (eq_cl (λ x, E(R, A)[a2] ∈ x) (fval_i _ _ _ (eps_fn _ _ P1) P2) Q2)
       as Q3.
-    apply (eq_cl (λ x, E(R, A)[a2] ∈ x) (fval_i _ _ _ (eps_fn _ _ P1) P3) Q3).
+    apply (eq_cr (λ x, E(R, A)[a2] ∈ x) (fval_i _ _ _ (eps_fn _ _ P1) P3) Q3).
 Qed.
 
-Lemma eps_inj: ∀ R, ∀ A, wo R A → inj (E(R, A)) A (EI(R, A)).
+Lemma eps_inj: ∀ R, ∀ A, wo R A → E(R, A) ∈ A ↦ⁱ EI(R, A).
 Proof.
   intros R A P1.
-  split. 
-  + apply (eps_fnm _ _ P1).
+  apply inj_i2.
+  + apply (eps_fmap _ _ P1).
   + apply (eps_sing_rot _ _ P1).
 Qed.
 
-Lemma eps_surj: ∀ R, ∀ A, wo R A → surj (E(R, A)) A (EI(R, A)).
+Lemma eps_surj: ∀ R, ∀ A, wo R A → E(R, A) ∈ A ↦ˢ EI(R, A).
   intros R A P1.
-  split. 
-  + apply (eps_fnm _ _ P1).
+  apply surj_i2.
+  + apply (eps_fmap _ _ P1).
   + apply eq_r. 
 Qed.
 
-Lemma eps_bij: ∀ R, ∀ A, wo R A → bij (E(R, A)) A (EI(R, A)).
+Lemma eps_bij: ∀ R, ∀ A, wo R A → E(R, A) ∈ A ↦ᵇ EI(R, A).
 Proof.
   intros R A P1.
-  apply bij_i.
+  apply bij_i3.
   + apply (eps_surj _ _ P1).
   + apply (eps_inj _ _ P1).
 Qed.
@@ -217,8 +217,7 @@ Qed.
 Lemma eps_image_i1: ∀ R, ∀ A, ∀ t, wo R A → t ∈ A → E(R, A)[t] ∈ EI(R, A).
 Proof.
   intros R A x P1 P2.
-  apply ran_i.
-  exists x.
+  apply (ran_i _ x).
   apply fval_e.
   + apply eq_r.
   + apply (eps_fn _ _ P1).
@@ -244,7 +243,8 @@ Proof.
   split.
   + apply (eq_cl (λ x, s ∈ x) (eps_dom _ _ P1)).
     apply (dom_i _ _ _ P3).
-  + apply (fval_i _ _ _ (eps_fn _ _ P1) P3).
+  + apply eq_s.
+    apply (fval_i _ _ _ (eps_fn _ _ P1) P3).
 Qed.
 
 (*Lemma eps_image_seg: ∀ R, ∀ A, ∀ t, wo R A → t ∈ A*)
@@ -399,15 +399,15 @@ Lemma eps_self_id: ∀ A, trans A → wo (ER(A)) A → E(ER(A), A) = id A.
           destruct (image_e _ _ _ Q3) as [x [Q4 Q5]].
           pose (fval_i _ _ _ (eps_fn _ _ P2) Q4) as Q6.
           destruct (sub_e _ _ _ (Q2 _ Q5)) as [_ Q7].
-          apply (eq_cr (λ y, y ∈ seg (ER(A)) A t) (eq_t Q6 Q7)).
+          apply (eq_cr (λ y, y ∈ _) (eq_t (eq_s Q6) Q7)).
           apply Q5.
         * intros y Q3.
           apply image_i.
           exists y.
           split.
           ++destruct (sub_e _ _ _ (Q2 _ Q3)) as [Q4 Q5].
-            destruct (fval_e _ _ _ (eq_s Q5) (eps_fn _ _ P2)
-              (eq_cr (λ x, y ∈ x) (eps_dom _ _ P2) Q4)) as [Q6 _].
+            destruct (fval_e _ _ _ Q5 (eps_fn _ _ P2)
+              (eq_cr (λ x, _ ∈ x) (eps_dom _ _ P2) Q4)) as [Q6 _].
             apply Q6.
           ++apply Q3. }
   assert (E(ER(A), A) = id A) as P4.
@@ -462,42 +462,37 @@ Proof.
     apply sub_i.
     + apply Q1.
     + assert (f[s] ∈ B) as Q3.
-      { destruct P3 as [[P6 [P7 _]] [P8 _]].
-        apply (eq_cl (λ x, f[s] ∈ x) P8).
-        apply (fval_ran _ _ P6).
-        apply (eq_cr (λ x, s ∈ x) P7).
+      { apply (eq_cl (λ x, _ ∈ x) (bij_ran _ _ _ P3)).
+        apply (fval_ran _ _ (bij_fn _ _ _ P3)).
+        apply (eq_cr (λ x, s ∈ x) (bij_dom _ _ _ P3)).
         apply Q1. }
       apply (eq_cr (λ x, x = E(S, B)[f[s]]) (eps_e1 _ _ _ P1 Q1)).
       apply (eq_cr (λ x, E(R, A)⟦seg R A s⟧ = x) (eps_e1 _ _ _ P2 Q3)).
       apply sub_a.
       split.
       - intros y R1.
-        destruct P3 as [[S1 [S2 _]] [S3 _]].
         destruct (seg_image_e _ _ _ _ _ Q1 R1) as [x [R2 [R3 [R4 R5]]]].
         apply (seg_image_i _ _ _ _ (f[x]) ).
-        * apply (eq_cl (λ y, f[x] ∈ y) S3).
-          apply (fval_ran _ _ S1).
-          apply (eq_cr (λ y, x ∈ y) S2 R3).
-        * apply (eq_cr (λ y, ⟨f[x] ,y⟩ ∈ E(S, B))
+        * apply (eq_cl (λ y, _ ∈ y) (bij_ran _ _ _ P3)).
+          apply (fval_ran _ _ (bij_fn _ _ _ P3)).
+          apply (eq_cr (λ y, x ∈ y) (bij_dom _ _ _ P3) R3).
+        * apply (eq_cl (λ y, ⟨f[x] ,y⟩ ∈ E(S, B))
             (fval_i _ _ _ (eps_fn _ _ P1) R4)).
           destruct (sub_e _ _ _ (Q2 _ (seg_i _ _ _ _ R3 R5))) as [_ R6].
           apply (eq_cr (λ y, ⟨f[x] ,y⟩ ∈ E(S, B)) R6).
           apply fval_i2.
           ++apply (eps_fn _ _ P2).
           ++apply (eq_cr (λ y, f[x] ∈ y) (eps_dom _ _ P2)).
-            apply (eq_cl (λ y, f[x] ∈ y) S3).
-            apply (fval_ran _ _ S1).
-            apply (eq_cr (λ y, x ∈ y) S2 R3).
+            apply (eq_cl (λ y, f[x] ∈ y) (bij_ran _ _ _ P3)).
+            apply (fval_ran _ _ (bij_fn _ _ _ P3)).
+            apply (eq_cr (λ y, x ∈ y) (bij_dom _ _ _ P3) R3).
         * apply (P4 _ _ R3 Q1 R5).
       - intros x R1.
-        assert (inj f A B) as S0.
-        { apply (bij_e _ _ _ P3). }
-        destruct P3 as [[S1 [S2 _]] [S3 S4]].
-        destruct (inv_fn f) as [S5 _].
-        pose (S5 S4) as S11.
-        pose (eq_cr (λ x, x = B) (inv_dom _) S3) as S12.
-        pose (eq_cr (λ x, x = A) (inv_ran _) S2) as S13.
-        pose (inv_sing_val f (and_er S1)) as S14.
+        destruct (bij_e _ _ _ P3) as [_ S1].
+        pose (inv_fn _ (inj_sing_rot _ _ _ S1)) as S11.
+        pose (eq_cr (λ x, x = B) (inv_dom _) (bij_ran _ _ _ P3)) as S12.
+        pose (eq_cr (λ x, x = A) (inv_ran _) (bij_dom _ _ _ P3)) as S13.
+        pose (inv_sing_val _ (and_er (bij_fn _ _ _ P3))) as S14.
         destruct (seg_image_e _ _ _ _ _ Q3 R1) as [y [R2 [R3 [R4 R5]]]].
         assert ((inv f)[y] <[R] s) as R15.
         { apply P5.
@@ -505,24 +500,23 @@ Proof.
             apply (fval_ran _ _ S11).
             apply (eq_cr (λ x, y ∈ x) S12 R3).
           + apply Q1.
-          + apply (eq_cr (λ y, y <[S] f[s])
-              (inv_fn_ex2 _ _ _ _ S0 (eq_cr (λ x, y ∈ x) S3 R3))).
+          + apply (eq_cr (λ y, y <[S] _) (inv_fval_cancel2 _ _ _ _
+            S1 (eq_cr (λ x, y ∈ x) (bij_ran _ _ _ P3) R3))).
             apply R5. }
         assert ((inv f)[y] ∈ A) as R13.
         { apply (eq_cl (λ x, (inv f)[y] ∈ x) S13).
           apply (fval_ran _ _ S11).
           apply (eq_cr (λ x, y ∈ x) S12 R3). }
         apply (seg_image_i _ _ _ _ ((inv f)[y])).
-        * apply (eq_cl (λ x, (inv f)[y] ∈ x) S2).
+        * apply (eq_cl (λ x, (inv f)[y] ∈ x) (bij_dom _ _ _ P3)).
           apply (eq_cl (λ x, (inv f)[y] ∈ x) (inv_ran _)).
           apply (fval_ran _ _ S11).
           apply (eq_cr (λ x, y ∈ x) S12 R3).
-        * apply (eq_cr (λ x, ⟨(inv f)[y] ,x⟩ ∈ E(R, A))
-            (fval_i _ _ _ (eps_fn _ _ P2) R4)).
+        * apply (eq_cl (λ x, ⟨_ ,x⟩ ∈ _) (fval_i _ _ _ (eps_fn _ _ P2) R4)).
           destruct (sub_e _ _ _ (Q2 _ (seg_i _ _ _ _ R13 R15))) as [_ R6].
-          apply (eq_cl (λ s, ⟨(inv f)[y], E(S, B)[s]⟩ ∈ E(R, A))
-            (inv_fn_ex2 _ _ _ _ S0 (eq_cr (λ x, y ∈ x) S3 R3))).
-          apply (eq_cl (λ x, ⟨(inv f)[y] ,x⟩ ∈ E(R, A)) R6).
+          apply (eq_cl (λ s, ⟨f⁻¹[y], _[s]⟩ ∈ _) (inv_fval_cancel2 _ _ _ _
+            S1 (eq_cr (λ x, y ∈ x) (bij_ran _ _ _ P3) R3))).
+          apply (eq_cl (λ x, ⟨_ ,x⟩ ∈ _) R6).
           apply fval_i2.
           ++apply (eps_fn _ _ P1).
           ++apply (eq_cr (λ x, (inv f)[y] ∈ x) (eps_dom _ _ P1)).
@@ -539,29 +533,25 @@ Proof.
     destruct (sub_e _ _ _ (eq_cl (λ y, s ∈ y) I3 Q2)) as [_ Q4].
     apply (eq_cr (λ x, x ∈ EI(S, B)) Q4).
     apply (eps_image_i1 _ _ _ P2).
-    destruct P3 as [[S1 [S2 _]] [S3 _]].
-    apply (eq_cl (λ x, f[s] ∈ x) S3).
-    apply (fval_ran _ _ S1).
-    apply (eq_cr (λ x, s ∈ x) S2).
+    apply (eq_cl (λ x, f[s] ∈ x) (bij_ran _ _ _ P3)).
+    apply (fval_ran _ _ (bij_fn _ _ _ P3)).
+    apply (eq_cr (λ x, s ∈ x) (bij_dom _ _ _ P3)).
     apply (I1 _ (eq_cl (λ y, s ∈ y) I3 Q2)).
   + intros x Q1.
     destruct (eps_image_e _ _ _ P2 Q1) as [s [Q2 Q3]].
     assert ((inv f)[s] ∈ A) as Q4.
-    { destruct P3 as [[S1 [S2 _]] [S3 S4]].
-      apply (eq_cl (λ x, (inv f)[s] ∈ x) S2).
+    { apply (eq_cl (λ x, (inv f)[s] ∈ x) (bij_dom _ _ _ P3)).
       apply (eq_cl (λ x, (inv f)[s] ∈ x) (inv_ran _)).
       apply fval_ran.
       * apply inv_fn.
-        apply S4.
+        apply (bij_sing_rot _ _ _ P3).
       * apply (eq_cr (λ x, s ∈ x) (inv_dom _)).
-        apply (eq_cr (λ x, s ∈ x) S3).
+        apply (eq_cr (λ x, s ∈ x) (bij_ran _ _ _ P3)).
         apply Q2. }
-    assert (inj f A B) as S0.
-    { apply (bij_e _ _ _ P3). }
-    destruct P3 as [[S1 [S2 _]] [S3 S4]].
-    pose (eq_cr _ S3 Q2) as Q22.
+    destruct (bij_e _ _ _ P3) as [_ S1].
+    pose (eq_cr _ (bij_ran _ _ _ P3) Q2) as Q22.
     (*rewrite <- P6 in Q2.*)
-    pose (eq_cr (λ s, x = E(S, B)[s]) (inv_fn_ex2 _ _ _ _ S0 Q22) Q3) as Q33.
+    pose (eq_cr (λ s, _ = _[s]) (inv_fval_cancel2 _ _ _ _ S1 Q22) Q3) as Q33.
     (*rewrite <- (inv_function_exist_2 _ P3 _ Q2) in Q3.*)
     pose (eq_cl _ I3 Q4) as Q44.
     (*rewrite I3 in Q4.*)
