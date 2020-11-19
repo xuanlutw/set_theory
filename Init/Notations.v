@@ -57,6 +57,11 @@ Reserved Notation "m ^c n" (at level 40, left associativity).
 Reserved Notation "m ×c n" (at level 41, left associativity).
 Reserved Notation "m +c n" (at level 42, left associativity).
 
+(* Binary Operator: 45 ~ 49 *)
+Reserved Notation "x +[ r ] y" (at level 45, left associativity).
+Reserved Notation "x ⋅ y"      (at level 46, left associativity).
+Reserved Notation "x + y"      (at level 47, left associativity).
+
 (* Set to Proposition: 80 ~ 89 *)
 Reserved Notation "x = y"       (at level 80, no associativity).
 Reserved Notation "x ≠ y"       (at level 80, no associativity).

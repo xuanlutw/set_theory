@@ -415,10 +415,6 @@ Qed.
 Definition fval (F x: J) := (ex_outl (fval_exist F x)).
 Notation   "F [ x ]"     := (fval F x).
 
-(* Need Better Notation *)
-(*[> Binary Function <]*)
-(*Notation " x +[ r ] y" := (r[⟨x, y⟩]) (at level 63, left associativity).*)
-
 Lemma fval_e: ∀ F, ∀ x, ∀y, F[x] = y → fn F → x ∈ dom(F) →
   ⟨x, y⟩ ∈ F ∧ (∀ y2, ⟨x, y2⟩ ∈ F → y = y2).
 Proof.

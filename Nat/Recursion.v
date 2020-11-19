@@ -28,11 +28,11 @@ Proof.
     { intros b1 b2 P2 P3.
       destruct (union_e _ _ P2) as [H1 [Q1 Q2]].
       destruct (sub_e _ _ _ Q1) as [_ [Q3 [_ [_ [Q4 [Q5 _]]]]]].
-      destruct (fval_e _ _ _ (eq_s Q5) Q3 Q4) as [_ Q6].
+      destruct (fval_e _ _ _ Q5 Q3 Q4) as [_ Q6].
       apply (eq_cl (λ x, x = b2) (Q6 _ Q2)).
       destruct (union_e _ _ P3) as [H2 [R1 R2]].
       destruct (sub_e _ _ _ R1) as [_ [R3 [_ [_ [R4 [R5 _]]]]]].
-      destruct (fval_e _ _ _ (eq_s R5) R3 R4) as [_ R6].
+      destruct (fval_e _ _ _ R5 R3 R4) as [_ R6].
       apply (R6 _ R2). }
     (* induction step *)
     assert (induction_step PI) as P2.
@@ -40,12 +40,12 @@ Proof.
       destruct (union_e _ _ P4) as [H1 [Q1 Q2]].
       destruct (sub_e _ _ _ Q1) as [_ [Q3 [_ [_ [_ [_ Q4]]]]]].
       destruct (Q4 _ P2 (dom_i _ _ _  Q2)) as [Q5 Q6].
-      apply (eq_cr (λ x, x = b2) (fval_i _ _ _ Q3 Q2)).
+      apply (eq_cl (λ x, x = b2) (fval_i _ _ _ Q3 Q2)).
       apply (eq_cr (λ x, x = b2) Q6).
       destruct (union_e _ _ P5) as [H2 [R1 R2]].
       destruct (sub_e _ _ _ R1) as [_ [R3 [_ [_ [_ [_ R4]]]]]].
       destruct (R4 _ P2 (dom_i _ _ _ R2)) as [R5 R6].
-      apply (eq_cr (λ x, F[H1[k]] = x) (fval_i _ _ _ R3 R2)).
+      apply (eq_cl (λ x, F[H1[k]] = x) (fval_i _ _ _ R3 R2)).
       apply (eq_cr (λ x, F[H1[k]] = x) R6).
       assert (H1[k] = H2[k]) as P6.
       { apply P3.
@@ -101,8 +101,7 @@ Proof.
   { apply (eq_cr (λ x, ∅ ∈ x) (sing_pair_dom ∅ a)).
     apply sing_i. }
   split.
-  { apply eq_s. 
-    apply fval_i.
+  { apply fval_i.
     + apply sing_pair_is_fn. 
     + apply sing_i. }
   { intros n P3 P4.
@@ -111,7 +110,7 @@ Proof.
     apply (sing_e _ _ (eq_cl (λ x, S(n) ∈ x) (sing_pair_dom ∅ a) P4)). }
 Qed.
 
-Lemma _rec_union_fn: ∀ A, ∀ a, ∀ F, ∀ f, ∀ x, ∀ y, a ∈ A → fnm F A A
+Lemma _rec_union_fn: ∀ A, ∀ a, ∀ F, ∀ f, ∀ x, ∀ y, a ∈ A → F ∈ A ↦ A
   → S(x) ∉  dom(f) → ⟨x, y⟩ ∈ f → x ∈ ω → f ∈ {x: 𝒫(ω ⨉ A)| _rec_accept F A a x}
   → fn (f ∪ `{⟨S(x), F[y]⟩}).
 Proof. 
@@ -131,7 +130,7 @@ Proof.
     apply (eq_cr (λ s, s ∈ dom(f)) (sing_e _ _ P7) P8).
 Qed.
 
-Lemma _rec_union_accept: ∀ A, ∀ a, ∀ F, ∀ f, ∀ x, ∀ y, a ∈ A → fnm F A A 
+Lemma _rec_union_accept: ∀ A, ∀ a, ∀ F, ∀ f, ∀ x, ∀ y, a ∈ A → F ∈ A ↦ A 
   → S(x) ∉  dom(f) → ⟨x, y⟩ ∈ f → x ∈ ω → f ∈ {x: 𝒫(ω ⨉ A)| _rec_accept F A a x}
   → (f ∪ `{⟨S(x), F[y]⟩}) ∈ {x: 𝒫(ω ⨉ A)| _rec_accept F A a x}.
 Proof.
@@ -148,12 +147,12 @@ Proof.
     + apply (eq_cl (λ z, z ∈ ω ⨉ A) (sing_e _ _ Q2)).
       apply cp_i.
       - apply (suc_is_nat _ P5).
-      - destruct P2 as [Q3 [Q4 Q5]]. 
-        apply Q5.
+      (*- destruct P2 as [Q3 [Q4 Q5]]. *)
+      - apply (fmap_ran _ _ _ P2).
         apply fval_ran.
-        * apply Q3.
+        * apply (fmap_fn _ _ _ P2).
         * destruct (sub_e _ _ _ P6) as [_ [_ [_ [Q6 _]]]].
-          apply (eq_cr (λ x, y ∈ x) Q4).
+          apply (eq_cr (λ x, y ∈ x) (fmap_dom _ _ _ P2)).
           apply (Q6 _ (ran_i _ _ _ P4)). }
   split.
   { apply (_rec_union_fn _ _ _ _ _ _ P1 P2 P3 P4 P5 P6). }
@@ -170,14 +169,13 @@ Proof.
     apply union2_sub. 
     + destruct (sub_e _ _ _ P6) as [_ [_ [_ [Q3 _]]]].
       apply Q3.
-    + destruct P2 as [Q1 [Q2 Q3]].
-      destruct (sub_e _ _ _ P6) as [_ [_ [_ [Q4 _]]]].
+    + destruct (sub_e _ _ _ P6) as [_ [_ [_ [Q4 _]]]].
       apply (eq_cr (λ x, x ⊆ A) (sing_pair_ran (S(x)) (F[y]))).
       apply sing_sub_i.
-      apply Q3.
+      apply (fmap_ran _ _ _ P2).
       apply fval_ran.
-      - apply Q1.
-      - apply (eq_cr (λ x, y ∈ x) Q2).
+      - apply (fmap_fn _ _ _ P2).
+      - apply (eq_cr (λ x, y ∈ x) (fmap_dom _ _ _ P2)).
         apply Q4.
         apply (ran_i _ _ _ P4). }
   split.
@@ -186,8 +184,7 @@ Proof.
     apply union2_il.
     apply Q1. }
   split.
-  { apply eq_s.
-    apply fval_i.
+  { apply fval_i.
     + apply (_rec_union_fn _ _ _ _ _ _ P1 P2 P3 P4 P5 P6).
     + destruct (sub_e _ _ _ P6) as [_ [Q1 [_ [_ [Q2 [Q3 _]]]]]].
       apply union2_il.
@@ -195,7 +192,7 @@ Proof.
       apply (fval_i2 _ _ Q1 Q2). }
   { apply (eq_cr (λ s, ∀ n, n ∈ ω → S(n) ∈ s 
       → n ∈ s ∧ (f ∪ `{⟨S(x), F [y]⟩})[S(n)] = F[(f ∪ `{⟨S(x), F[y]⟩})[n]]) 
-      (union2_dom f `{⟨S(x), F[y]⟩})). 
+      (union2_dom f `{⟨S(x), F[y]⟩})).
     intros n Q1 Q2.
     destruct (union2_e _ _ _ Q2) as [Q3 | Q3].
     + split.
@@ -206,9 +203,11 @@ Proof.
       - destruct (sub_e _ _ _ P6) as [_ [Q4 [_ [_ [_ [_ Q5]]]]]].
         destruct (Q5 _ Q1 Q3) as [Q6 Q7].
         apply (eq_cl (λ s, s = F[(f ∪ `{⟨S(x), F[y]⟩})[n]]) 
-          (union2_fvall _ _ _ Q4 (_rec_union_fn _ _ _ _ _ _ P1 P2 P3 P4 P5 P6) Q3)).
+          (union2_fvall _ _ _ Q4
+          (_rec_union_fn _ _ _ _ _ _ P1 P2 P3 P4 P5 P6) Q3)).
         apply (eq_cl (λ s, f[S(n)] = F[s])
-          (union2_fvall _ _ _ Q4 (_rec_union_fn _ _ _ _ _ _ P1 P2 P3 P4 P5 P6) Q6)).
+          (union2_fvall _ _ _ Q4
+          (_rec_union_fn _ _ _ _ _ _ P1 P2 P3 P4 P5 P6) Q6)).
         apply Q7.
     + pose (eq_cl (λ x, S(n) ∈ x) (sing_pair_dom (S(x)) (F[y])) Q3) as Q4.
       pose (suc_unique _ _ P5 Q1 (sing_e _ _ Q4)) as Q5.
@@ -221,8 +220,8 @@ Proof.
           (union2_fvalr _ _ _ (sing_pair_is_fn (S(x)) (F[y])) 
           (_rec_union_fn _ _ _ _ _ _ P1 P2 P3 P4 P5 P6) Q3)).
         apply (eq_cl (λ s, `{⟨S(x), F[y]⟩}[S(n)] = F[s]) 
-          (union2_fvall _ _ _ Q7 (_rec_union_fn _ _ _ _ _ _ P1 P2 P3 P4 P5 P6) Q6)).
-        apply eq_s.
+          (union2_fvall _ _ _ Q7
+          (_rec_union_fn _ _ _ _ _ _ P1 P2 P3 P4 P5 P6) Q6)).
         apply fval_i.
         * apply sing_pair_is_fn.
         * apply sing_i2.
@@ -230,12 +229,12 @@ Proof.
           ++apply (eq_cr (λ x, S(n) = S(x)) Q5).
             apply eq_r.
           ++apply (eq_cl (λ x, F[f[x]] = F[y]) Q5).
-            apply (eq_cl (λ x, F[x] = F[y]) (fval_i _ _ _ Q7 P4)).
+            apply (eq_cr (λ x, F[x] = F[y]) (fval_i _ _ _ Q7 P4)).
             apply eq_r. }
 Qed.
 
-Lemma _rec_dom: ∀ A, ∀ a, ∀ F, a ∈ A → fnm F A A →
-  dom(∪{x: 𝒫(ω ⨉ A)| _rec_accept F A a x}) = ω.
+Lemma _rec_dom: ∀ A, ∀ a, ∀ F, a ∈ A → F ∈ A ↦ A
+  → dom(∪{x: 𝒫(ω ⨉ A)| _rec_accept F A a x}) = ω.
 Proof.
   intros A a F P1 S1.
   pose (_rec_accept F A a) as P.
@@ -243,8 +242,7 @@ Proof.
   pose (∪H) as h.
   assert (inductive (dom(h))) as P2.
   { split.
-    + apply dom_i.
-      exists a.
+    + apply (dom_i _ _ a).
       apply union_i.
       exists (`{⟨∅, a⟩}).
       split.
@@ -253,9 +251,8 @@ Proof.
     + intros x P2.
       destruct (dom_e _ _ P2) as [y P3].
       destruct (union_e _ _ P3) as [f [P4 P5]].
-      apply dom_i.
       destruct (LEM (S(x) ∈ dom(f))) as [P6 | P6].
-      - exists (f[S(x)]).
+      - apply (dom_i _ _ (f[S(x)])).
         apply union_i.
         exists f.
         split.
@@ -263,14 +260,13 @@ Proof.
         * destruct (sub_e _ _ _ P4) as [_ [P7 _]].
           apply (fval_i2 _ _ P7 P6).
       - pose (f ∪ `{⟨S(x), F[y]⟩}) as g.
-        exists (g[S(x)]).
+        apply (dom_i _ _ (g[S(x)])).
         apply union_i.
         exists (f ∪ `{⟨S(x), F[y]⟩}).
         assert (x ∈ ω) as P7. 
         { destruct (sub_e _ _ _ P4) as [_ [_ [P7 _]]].
           apply P7.
-          apply dom_i.
-          exists y.
+          apply (dom_i _ _ y).
           apply P5. }
         split.
         * apply (_rec_union_accept _ _ _ _ _ _ P1 S1 P6 P5 P7 P4).
@@ -300,8 +296,8 @@ Proof.
   apply (P6 _ (ran_i _ _ _ P5)). 
 Qed.
 
-Theorem recursion_thm: ∀ A, ∀ a, ∀ F, ∃ h, a ∈ A → fnm F A A 
-  → fnm h ω A ∧ h[∅] = a ∧ (∀ n, n ∈ ω → h[S(n)] = F[h[n]]).
+Theorem recursion_thm: ∀ A, ∀ a, ∀ F, ∃ h, a ∈ A → F ∈ A ↦ A 
+  → h ∈ ω ↦ A ∧ h[∅] = a ∧ (∀ n, n ∈ ω → h[S(n)] = F[h[n]]).
 Proof.
   intros A a F.
   pose (_rec_accept F A a) as P.
@@ -311,14 +307,12 @@ Proof.
   intros P1 P2.
   split.
   (* fover h ω A *)
-  { split.
+  { apply fmap_i.
     + apply _rec_fun.
-    + split.
-      - apply (_rec_dom _ _ _ P1 P2).
-      - apply (_rec_ran _ _ _ P1). }
+    + apply (_rec_dom _ _ _ P1 P2).
+    + apply (_rec_ran _ _ _ P1). }
   split.
-  { apply eq_s.
-    apply fval_i.
+  { apply fval_i.
     + apply _rec_fun.
     + apply union_i.
       exists (`{⟨∅, a⟩}).
@@ -333,7 +327,8 @@ Proof.
     destruct (P9 n P3 (dom_i _ _ _ P7)) as [P10 P11].
     apply (eq_cl (λ x, x = F[h[n]]) 
       (union_fval _ _ _ P6 P8 (_rec_fun A a F) (dom_i _ _ _ P7))).
-    apply (eq_cl (λ x, f[S(n)] = F[x]) (union_fval _ _ _ P6 P8 (_rec_fun A a F) P10)).
+    apply (eq_cl (λ x, f[S(n)] = F[x])
+      (union_fval _ _ _ P6 P8 (_rec_fun A a F) P10)).
     apply P11. }
 Qed.
 (*----------------------------------------------------------------------------*)
